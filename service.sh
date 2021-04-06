@@ -12,7 +12,6 @@ export DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phen
 export GBOARD_PREF=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
 export GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
 export FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
-export TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
 
 bool_patch() {
 file=$2
@@ -65,14 +64,18 @@ bool_patch generation $GBOARD_PREF
 bool_patch multiword $GBOARD_PREF
 bool_patch core_typing $GBOARD_PREF
 bool_patch promo $GBOARD_PREF
+bool_patch enable_email_provider_completion $GBOARD_PREF
+bool_patch multilang $GBOARD_PREF
+bool_patch _v2 $GBOARD_PREF
+bool_patch spacebar $GBOAD_PREF
+string_patch 'app_completions"' '*' $GBOARD_PREF
+
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
-bool_patch enable_email_provider_completion $GOBARD_PREF
+
 # Google
-if [ -f $GOOGLE_PREF ]; then
 string_patch flag.13477 redfin $GOOGLE_PREF
 string_patch flag.14205 "*=nga_pop" $GOOGLE_PREF
 chmod 0660 /data/data/com.google.android.googlequicksearchbox/shared_prefs
-fi
 
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
@@ -81,8 +84,7 @@ bool_patch Sync__sync_after_promo_shown $FIT
 bool_patch Sync__use_experiment_flag_from_promo $FIT
 bool_patch Promotions $FIT
 
-bool_patch AdaptiveCharging__v1_enabled $TURBO
-bool_patch AdaptiveBattery $TURBO
+#sleep 120
 
 # DevicePersonalization
 device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true

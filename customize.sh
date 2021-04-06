@@ -137,25 +137,22 @@ IFS=$OIFS
 
 DIALER=com.google.android.dialer
 
-print "- Installing Pixelify..."
+print "- Installing Pixelify Module"
 ui_print ""
 
 GPATCH=1
 DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
-print " - Installing Call Screening -"
+print "- Installing Call Screening -"
 if [ -d /data/data/$DIALER ]; then
-  ui_print "----"
-  print "Google Dialer Already installed !!"
+  ui_print ""
+  print "Google Dialer Already installed"
   print "Call Screening other than US needs GoogleDialer version less 41"
   ui_print ""
   print "Do you want to install GoogleDialer 40.0.275948326??"
   print "Vol Up = Yes, Vol Down = No"
-  ui_print "----"
-  ui_print ""
   if $VKSEL; then
     if [ -d /data/app/*/$DIALER* ] || [ -d /data/app/$DIALER* ]; then
       ui_print ""
-      print "Unistalling GoogleDialer Update"
       rm -rf /data/app/*/$DIALER*
       rm -rf $DIALER_PREF
       cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
@@ -163,11 +160,10 @@ if [ -d /data/data/$DIALER ]; then
       rm -rf /data/app/$DIALER*
     fi
     ui_print ""
-    print "Installing GoogleDialer"
     REMOVE="$REMOVE $DIALER1"
   else
     rm -rf $MODPATH/system/product/priv-app/GoogleDialer
-    print "Enabling CallScreening features..."
+    print "- Enabling Call Screening"
     bool_patch atlas $DIALER_PREF
     bool_patch speak_easy $DIALER_PREF
     bool_patch speakeasy $DIALER_PREF
@@ -177,17 +173,14 @@ if [ -d /data/data/$DIALER ]; then
     bool_patch transcript $DIALER_PREF
   fi
 else
-  print "Google Dialer not installed."
-  ui_print ""
   mkdir /data/data/$DIALER
   mkdir /data/data/$DIALER/shared_prefs
   chmod 0771 /data/data/$DIALER/shared_prefs
   cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
   chmod 0660 $DIALER_PREF
-  print "Installing GoogleDialer"
   REMOVE="$REMOVE $DIALER1"
 fi
-ui_print ""
+ui_print "- Note"
 print "Please Don't Update GoogleDialer (Other than US region),"
 print "It will remove Call Screening."
 ui_print ""
@@ -215,7 +208,8 @@ if [ -f $GBOARD ]; then
 ui_print ""
 print "GBoard is installed."
 print "- Enabling Redesigned Ui"
-print "- Enabling Smart Compose (Beta)"
+print "- Enabling Lens for Gboard"
+print "- Enabling Smart Compose ( Beta | English-US langauge only )"
 print "- Enabling NGA Voice typing (If Nga is installed)"
 ui_print ""
 bool_patch nga $GBOARD
@@ -229,18 +223,23 @@ fi
 if [ $API -eq 30 ]; then
 print "Installing DevicePersonalisationService"
 print "- Enabling Adaptive Sound & Live Captions ..."
+if [ -d /data/data/com.google.as ]; then
+device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true
+device_config put device_personalization_services AdaptiveAudio__show_promo_notificatio true
+device_config put device_personalization_services Autofill__enable true
+device_config put device_personalization_services NotificationAssistant__enable_service true
+device_config put device_personalization_services Captions__surface_sound_events true
+device_config put device_personalization_services Captions__enable_augmented_music true
+device_config put device_personalization_services Captions__enable_caption_call true
+fi
+ui_print ""
 if [ -d /data/app/*/com.google.android.as* ] || [ -d /data/app/com.google.android.as* ]; then
 rm -rf /data/app/*/com.google.android.as*
 rm -rf /data/app/com.google.android.as*
 fi
 fi
 
-TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
-if [ -f $TURBO ]; then
-bool_patch AdaptiveCharging__v1_enabled $TURBO
-bool_patch AdaptiveBattery $TURBO
-fi
-
 REPLACE="$REMOVE"
 
-print "- Done -"
+print "- Done"
+ui_print ""
