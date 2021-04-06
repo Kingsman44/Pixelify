@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- These are GoogleCamera specific configurations for Google's Pixel
+devices with 6GB or more of RAM. -->
+<config>
+
+    <!-- Allow GoogleCamera app in power save (background service to keep Camera
+    process alive). -->
+    <allow-in-power-save package="com.google.android.GoogleCamera" />
+</config>

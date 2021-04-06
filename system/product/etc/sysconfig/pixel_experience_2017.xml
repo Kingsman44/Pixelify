@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- These are configurations that should exist on Google's 2017 and newer Nexus devices. -->
+<config>
+    <!-- This is meant to be the canonical feature identifying 2017 and newer Nexus devices. -->
+    <feature name="com.google.android.feature.PIXEL_2017_EXPERIENCE" />
+
+    <!-- Allow SCONE JobIntentService & Services to run in background -->
+    <allow-in-power-save package="com.google.android.apps.scone" />
+
+    <!-- Allow Flipendo in power save. Will be present on pre-2020 devices for dogfooding. -->
+    <allow-in-power-save-except-idle package="com.google.android.flipendo" />
+
+    <!-- Allow Better Bug to take bug report. -->
+    <bugreport-whitelisted package="com.google.android.apps.betterbug" />
+    <bugreport-whitelisted package="com.google.android.apps.internal.betterbug" />
+
+    <!-- Allow Pixel modem service to run in background -->
+    <allow-in-power-save package="com.google.modemservice" />
+
+    <!-- Allow MDS ExperimentService to run in background -->
+    <allow-in-power-save package="com.google.mds" />
+
+    <!-- Hide DocumentsUi Launcher/Downloads intent handling. DocumentsUi
+         PrebootReceiver does not properly hide the launcher in work profile,
+         so we need to include this as well. -->
+    <component-override package="com.google.android.documentsui" >
+        <component class="com.android.documentsui.LauncherActivity" enabled="false" />
+        <component class="com.android.documentsui.ViewDownloadsActivity" enabled="false" />
+    </component-override>
+
+    <!-- ACTION_MANAGE_STORAGE handled by Files by Google -->
+    <component-override package="com.google.android.storagemanager" >
+        <component class="com.android.storagemanager.deletionhelper.DeletionHelperActivity" enabled="false" />
+    </component-override>
+
+    <!-- Make sure photos/video previews are handled by Photos. -->
+    <component-override package="com.google.android.apps.nbu.files" >
+        <component class="com.google.android.apps.nbu.files.gateway.preview.PreviewActivity" enabled="false" />
+    </component-override>
+
+    <component-override package="com.android.settings" >
+        <!-- Display regulatory info in settings. -->
+        <component class=".RegulatoryInfoDisplayActivity" enabled="true" />
+    </component-override>
+
+    <!-- Stub for Fi to request bug reports, disabled until a Fi SIM is added.
+         Included for all in-market devices receiving the R OTA as well as
+         devices launching with R. -->
+    <disabled-until-used-preinstalled-carrier-associated-app
+        package="com.google.android.apps.nova.bugreportwrapper"
+        carrierAppPackage="com.google.android.apps.tycho"
+        addedInSdk="30" />
+    <!-- Allow access to BugreportManager. -->
+    <bugreport-whitelisted package="com.google.android.apps.nova.bugreportwrapper" />
+
+    <!-- Feature flag on RVC builds for AER requirements, b/159247801 -->
+    <feature name="com.google.android.feature.AER_OPTIMIZED" />
+
+</config>

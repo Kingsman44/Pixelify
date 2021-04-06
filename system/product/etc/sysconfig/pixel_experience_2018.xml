@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- These are configurations that should exist on Google's 2018 and newer Pixel devices. -->
+<config>
+    <!-- Allow Pixel modem service in background -->
+    <allow-in-power-save package="com.google.modemservice" />
+
+    <!-- Allow PixelLogger LoggingService to run in background -->
+    <allow-in-power-save package="com.android.pixellogger" />
+
+    <!-- Allow Flipendo in power save. Will be present on pre-2020 devices for dogfooding. -->
+    <allow-in-power-save-except-idle package="com.google.android.flipendo" />
+
+    <!-- This is meant to be the canonical feature identifying 2018 and newer Pixel devices. -->
+    <feature name="com.google.android.feature.PIXEL_2018_EXPERIENCE" />
+</config>
