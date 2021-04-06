@@ -10,7 +10,7 @@ print " Detected Arch: $ARCH"
 print " Detected SDK : $API"
 RAM=$( grep MemTotal /proc/meminfo | tr -dc '0-9')
 print " Detected Ram: $RAM"
-ui_ui_print ""
+ui_print ""
 if [ $RAM -le "6291456" ]; then
 rm -rf $MODPATH/system/product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
 fi

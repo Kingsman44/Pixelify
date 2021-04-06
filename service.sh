@@ -26,6 +26,18 @@ for i in $line; do
 done
 }
 
+bool_patch_false() {
+file=$2
+line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
+for i in $line; do
+  val_false='value="true"'
+  val_true='value="false"'
+  write="${i} $val_true"
+  find="${i} $val_false"
+  sed -i -e "s/${find}/${write}/g" $file
+done
+}
+
 string_patch() {
 file=$3
 str=$(grep $1 $3 | grep string | cut -c 14- | cut -d'<' -f1)
@@ -48,11 +60,13 @@ bool_patch transript $DIALER_PREF
 # GBoard
 bool_patch nga $GBOARD_PREF
 bool_patch redesign $GBOARD_PREF
-bool_patch lens $GBOARD
-bool_patch generation $GBOARD
-bool_patch multiword $GBOARD
-bool_patch core_typing $GBOARD
-
+bool_patch lens $GBOARD_PREF
+bool_patch generation $GBOARD_PREF
+bool_patch multiword $GBOARD_PREF
+bool_patch core_typing $GBOARD_PREF
+bool_patch promo $GBOARD_PREF
+bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
+bool_patch enable_email_provider_completion $GOBARD_PREF
 # Google
 if [ -f $GOOGLE_PREF ]; then
 string_patch flag.13477 redfin $GOOGLE_PREF
