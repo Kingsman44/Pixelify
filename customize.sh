@@ -1,4 +1,5 @@
 chmod -R 0755 $MODPATH/addon
+chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
 
 print() {
@@ -23,7 +24,7 @@ DIALER1="
 /system/priv-app/GoogleDialer
 /system/app/Dialer
 /system/product/app/Dialer
-/system/product/priv-app/GoogleDialer
+/system/product/priv-app/Dialer
 "
 
 if [ $API -eq "30" ]; then
@@ -137,7 +138,9 @@ IFS=$OIFS
 DIALER=com.google.android.dialer
 
 print "- Installing Pixelify Module"
-tar -xf $MODPATH/usr.tar.xz -C $MODPATH/system/product
+print "- Extracting Files...."
+tar -xf $MODPATH/files/usr.tar.xz -C $MODPATH/system/product
+tar -xf $MODPATH/files/gsf.tar.xz -C $MODPATH/system/system_ext/priv-app
 ui_print ""
 
 GPATCH=1
@@ -160,8 +163,11 @@ if [ -d /data/data/$DIALER ]; then
       chmod 0660 $DIALER_PREF
       rm -rf /data/app/$DIALER*
     fi
+    print "Extracting GoogleDialer"
     ui_print ""
-    tar -xf $MODPATH/gd.tar.xz -C $MODPATH/system/product/priv-app
+    tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
+    chmod 0644 $MODPATH/system/product/priv-app/GoogleDialer/GoogleDialer.apk
+    chmod 0755 $MODPATH/system/product/priv-app/GoogleDialer
     REMOVE="$REMOVE $DIALER1"
   else
     rm -rf $MODPATH/system/product/priv-app/GoogleDialer
@@ -180,7 +186,10 @@ else
   chmod 0771 /data/data/$DIALER/shared_prefs
   cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
   chmod 0660 $DIALER_PREF
-  tar -xf $MODPATH/gd.tar.xz -C $MODPATH/system/product/priv-app
+  print "Extracting GoogleDialer"
+  tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
+  chmod 0644 $MODPATH/system/product/priv-app/GoogleDialer/GoogleDialer.apk
+  chmod 0755 $MODPATH/system/product/priv-app/GoogleDialer
   REMOVE="$REMOVE $DIALER1"
 fi
 ui_print "- Note"
@@ -225,7 +234,9 @@ fi
 if [ $API -eq 30 ]; then
 print "Installing DevicePersonalisationService"
 print "- Enabling Adaptive Sound & Live Captions ..."
-tar -xf $MODPATH/dp.tar.xz -C $MODPATH/system/product/priv-app
+tar -xf $MODPATH/files/dp.tar.xz -C $MODPATH/system/product/priv-app
+chmod 0644 $MODPATH/system/product/priv-app/DevicePersonalizationPrebuilt2020/DevicePersonalizationPrebuilt2020.apk
+chmod 0755 $MODPATH/system/product/priv-app/DevicePersonalizationPrebuilt2020
 if [ -d /data/data/com.google.as ]; then
 device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true
 device_config put device_personalization_services AdaptiveAudio__show_promo_notificatio true
@@ -243,6 +254,7 @@ fi
 fi
 
 print "Do you want to Spoof your device to Pixel 5 (redfin)?"
+print "Needed for some features but can break CTS"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 if $VKSEL; then
@@ -251,6 +263,10 @@ fi
 
 REPLACE="$REMOVE"
 
+chmod 0644 $MODPATH/system/product/overlay/*.apk
+chmod 0644 $MODPATH/usr/share/ime/google/d3_lms/*
+chmod 0644 $MODPATH/srec/en-US/*
+
 #Clean Up
 rm -rf $MODPATH/spoof.prop
 rm -rf $MODPATH/*.xz
@@ -258,3 +274,4 @@ rm -rf $MODPATH/*.xz
 ui_print ""
 print "- Done"
 ui_print ""
+
