@@ -1,5 +1,5 @@
-export KEYS=$MODPATH/keycheck
-chmod +x $KEY
+chmod -R 0755 $MODPATH/addon
+alias keycheck="$MODPATH/addon/keycheck"
 
 print() {
 ui_print "$@"
@@ -66,13 +66,13 @@ sed -i -e "s/${str}/${add}/g" $file
 }
 
 keytest() {
-  print "- Vol Key Test"
-  print "   Press a Vol Key:"
+  ui_print "- Vol Key Test"
+  ui_print "   Press a Vol Key:"
   if (timeout 3 /system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > $TMPDIR/events); then
     return 0
   else
-    print "   Try again:"
-    timeout 5 $KEYS
+    ui_print "   Try again:"
+    timeout 3 keycheck
     local SEL=$?
     [ $SEL -eq 143 ] && abort "   Vol key not detected!" || return 1
   fi
@@ -98,8 +98,8 @@ chooseportold() {
   # Keycheck binary by someone755 @Github, idea for code below by Zappo @xda-developers
   # Calling it first time detects previous input. Calling it second time will do what we want
   while true; do
-    $KEYS
-    $KEYS
+    keycheck
+    keycheck
     local SEL=$?
     if [ "$1" == "UP" ]; then
       UP=$SEL
@@ -118,7 +118,7 @@ chooseportold() {
 # Have user option to skip vol keys
 OIFS=$IFS; IFS=\|; MID=false; NEW=false
 case $(echo $(basename $ZIPFILE) | tr '[:upper:]' '[:lower:]') in
-  *novk*) print "- Skipping Vol Keys -";;
+  *novk*) ui_print "- Skipping Vol Keys -";;
   *) if keytest; then
        VKSEL=chooseport
      else
@@ -134,10 +134,10 @@ case $(echo $(basename $ZIPFILE) | tr '[:upper:]' '[:lower:]') in
 esac
 IFS=$OIFS
 
-
 DIALER=com.google.android.dialer
 
 print "- Installing Pixelify Module"
+tar -xf $MODPATH/usr.tar.xz -C $MODPATH/system/product
 ui_print ""
 
 GPATCH=1
@@ -149,7 +149,8 @@ if [ -d /data/data/$DIALER ]; then
   print "Call Screening other than US needs GoogleDialer version less 41"
   ui_print ""
   print "Do you want to install GoogleDialer 40.0.275948326??"
-  print "Vol Up = Yes, Vol Down = No"
+  print "   Vol Up += Yes"
+  print "   Vol Down += No"
   if $VKSEL; then
     if [ -d /data/app/*/$DIALER* ] || [ -d /data/app/$DIALER* ]; then
       ui_print ""
@@ -160,6 +161,7 @@ if [ -d /data/data/$DIALER ]; then
       rm -rf /data/app/$DIALER*
     fi
     ui_print ""
+    tar -xf $MODPATH/gd.tar.xz -C $MODPATH/system/product/priv-app
     REMOVE="$REMOVE $DIALER1"
   else
     rm -rf $MODPATH/system/product/priv-app/GoogleDialer
@@ -178,6 +180,7 @@ else
   chmod 0771 /data/data/$DIALER/shared_prefs
   cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
   chmod 0660 $DIALER_PREF
+  tar -xf $MODPATH/gd.tar.xz -C $MODPATH/system/product/priv-app
   REMOVE="$REMOVE $DIALER1"
 fi
 ui_print "- Note"
@@ -209,7 +212,6 @@ ui_print ""
 print "GBoard is installed."
 print "- Enabling Redesigned Ui"
 print "- Enabling Lens for Gboard"
-print "- Enabling Smart Compose ( Beta | English-US langauge only )"
 print "- Enabling NGA Voice typing (If Nga is installed)"
 ui_print ""
 bool_patch nga $GBOARD
@@ -223,6 +225,7 @@ fi
 if [ $API -eq 30 ]; then
 print "Installing DevicePersonalisationService"
 print "- Enabling Adaptive Sound & Live Captions ..."
+tar -xf $MODPATH/dp.tar.xz -C $MODPATH/system/product/priv-app
 if [ -d /data/data/com.google.as ]; then
 device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true
 device_config put device_personalization_services AdaptiveAudio__show_promo_notificatio true
@@ -239,7 +242,19 @@ rm -rf /data/app/com.google.android.as*
 fi
 fi
 
+print "Do you want to Spoof your device to Pixel 5 (redfin)?"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+cat $MODPATH/spoof.prop >> $MODPATH/system.prop
+fi
+
 REPLACE="$REMOVE"
 
+#Clean Up
+rm -rf $MODPATH/spoof.prop
+rm -rf $MODPATH/*.xz
+
+ui_print ""
 print "- Done"
 ui_print ""

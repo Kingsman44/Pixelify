@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<!-- These are configurations that must exist on all GMS devices. -->
+<config>
+    <!-- These are the standard packages that are white-listed to always have internet
+         access while in power save mode, even if they aren't in the foreground. -->
+
+    <!-- GmsCore must always have network access for GCM and other things. -->
+    <allow-in-power-save package="com.google.android.gms" />
+    <allow-in-data-usage-save package="com.google.android.gms" />
+    <allow-unthrottled-location package="com.google.android.gms" />
+    <allow-ignore-location-settings package="com.google.android.gms" />
+
+    <!-- OobConfig must always have network access to fetch enterprise and carrier lock config. -->
+    <allow-in-power-save-except-idle package="com.google.android.apps.work.oobconfig" />
+    <allow-in-data-usage-save package="com.google.android.apps.work.oobconfig" />
+
+    <!-- Turbo must not have App Standby restrictions in order to push new
+         App Standby buckets to the platform periodically -->
+    <allow-in-power-save-except-idle package="com.google.android.apps.turbo" />
+
+    <!-- Certain broadcasts must still go to legacy implicit receivers -->
+    <allow-implicit-broadcast action="com.google.android.checkin.CHECKIN_COMPLETE" />
+    <allow-implicit-broadcast action="com.google.gservices.intent.action.GSERVICES_CHANGED" />
+    <allow-implicit-broadcast action="com.google.gservices.intent.action.GSERVICES_OVERRIDE" />
+    <allow-implicit-broadcast action="com.google.android.c2dm.intent.RECEIVE" />
+    <!-- TODO: This is a temporary workaround for allowing GmsCore to receive this broadcast.
+         This can be removed once OneTimeInitializer functionality is moved to GmsCore. -->
+    <allow-implicit-broadcast action="com.google.android.onetimeinitializer.ONE_TIME_INITIALIZED" />
+
+    <!-- Play Store likewise must have network access to support other applications. -->
+    <allow-in-power-save-except-idle package="com.android.vending" />
+
+    <!-- If the volta app is pre-installed (for monitoring power use), let it do checkins. -->
+    <allow-in-power-save package="com.google.android.volta" />
+
+    <!-- If GoogleCellBroadcastServiceModule is installed, let it run in the background -->
+    <allow-in-power-save package="com.google.android.cellbroadcastreceiver" />
+
+    <!-- If CarrierServices is installed, it must always have network access to
+         reliably receive IMS messages. -->
+    <allow-in-power-save package="com.google.android.ims" />
+    <allow-in-data-usage-save package="com.google.android.ims" />
+
+    <!-- These Google applications all handle URLs to their websites by default -->
+
+    <!-- Apps below are required on all GMS devices -->
+    <app-link package="com.android.vending" />
+    <app-link package="com.google.android.apps.maps" />
+    <app-link package="com.google.android.youtube" />
+    <app-link package="com.google.android.apps.docs" />
+    <app-link package="com.google.android.talk" />
+    <app-link package="com.google.android.apps.photos" />
+    <app-link package="com.google.android.apps.youtube.music" />
+
+    <!-- Apps below are optional on GMS devices -->
+    <app-link package="com.google.android.apps.tycho" />
+    <app-link package="com.google.android.apps.plus" />
+    <app-link package="com.google.android.apps.docs.editors.sheets" />
+    <app-link package="com.google.android.apps.docs.editors.slides" />
+    <app-link package="com.google.android.apps.docs.editors.docs" />
+    <app-link package="com.google.android.talk" />
+    <app-link package="com.google.android.videos" />
+    <app-link package="com.google.android.calendar" />
+    <app-link package="com.google.android.apps.wallpaper" />
+
+    <!-- These are the packages that are white-listed to be able to run as system user -->
+    <system-user-whitelisted-app package="com.android.vending" />
+    <system-user-whitelisted-app package="com.google.android.gms" />
+    <system-user-whitelisted-app package="com.google.android.gms.policy_auth" />
+    <system-user-whitelisted-app package="com.google.android.play.games" />
+    <system-user-whitelisted-app package="com.google.android.tts" />
+
+    <!-- These are the packages that are uninstalled for system user -->
+    <!-- Apps below are required on all GMS devices -->
+    <system-user-blacklisted-app package="com.google.android.googlequicksearchbox" />
+    <!-- Apps below are optional on GMS devices -->
+    <system-user-blacklisted-app package="com.google.android.launcher" />
+
+    <!-- Whitelist of what components are permitted as backup data transports.  The
+         'service' attribute here is a flattened ComponentName string. -->
+    <backup-transport-whitelisted-service
+        service="com.google.android.gms/.backup.BackupTransportService" />
+    <backup-transport-whitelisted-service
+        service="com.google.android.gms/.backup.component.D2dTransportService" />
+
+    <!-- Specify the explicit set of other applications that AI services are allowed to
+         interact with, including the providers that back the implementation of the APIs
+         provided by the package. -->
+    <allow-association target="com.google.android.as" allowed="com.android.bluetooth" />
+    <allow-association target="com.google.android.as" allowed="com.android.providers.contacts" />
+    <allow-association target="com.google.android.as" allowed="com.android.providers.media" />
+    <allow-association target="com.google.android.as" allowed="com.android.providers.telephony" />
+    <allow-association target="com.google.android.as" allowed="com.android.systemui" />
+    <allow-association target="com.google.android.as" allowed="com.google.android.providers.media.module" />
+
+    <!-- Specify the explicit set of other applications whose app data directories are
+        accessible by other applications. -->
+    <app-data-isolation-whitelisted-app package="com.google.android.gms" />
+
+    <!-- Whitelist of packages that eligible for rollback -->
+    <rollback-whitelisted-app package="com.android.vending" />
+</config>

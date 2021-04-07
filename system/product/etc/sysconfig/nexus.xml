@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- These are configurations that should exist on Google's 2016 and newer Nexus devices. -->
+<config>
+    <!-- This is meant to be the canonical feature identifying 2016 and newer Nexus devices. -->
+    <feature name="com.google.android.feature.PIXEL_EXPERIENCE" />
+
+    <!-- The feature identifying devices which are able to use the Turbo app -->
+    <feature name="com.google.android.feature.TURBO_PRELOAD" />
+
+    <!-- The feature identifying devices which are able to use the Android Wellbeing app. -->
+    <feature name="com.google.android.feature.WELLBEING" />
+
+    <!-- The feature identifying devices which are able to use the device-to-device migration
+        over cable provided by the Pixelmigrate app. -->
+    <feature name="com.google.android.feature.D2D_CABLE_MIGRATION_FEATURE" />
+
+    <!-- Enable Zero Touch Provisioning support for 2016 and newer Nexus devices. -->
+    <feature name="com.google.android.feature.ZERO_TOUCH" />
+
+    <!-- Allow WfcActivation app scheduled jobs to run when app in background. -->
+    <allow-in-power-save-except-idle package="com.google.android.wfcactivation" />
+
+    <!-- Allow ssr detector service in background -->
+    <allow-in-power-save package="com.google.SSRestartDetector" />
+
+    <!-- Allow connectivitymonitor service in background -->
+    <allow-in-power-save package="com.google.android.connectivitymonitor" />
+
+    <!-- Allow connectivitythermalpowermanager service in background -->
+    <allow-in-power-save package="com.google.android.connectivitythermalpowermanager" />
+
+    <!-- Allow ramdump uploader service in background -->
+    <allow-in-power-save package="com.android.ramdump" />
+
+    <!-- Whitelist log pkg so JobIntentService can work. b/71630894 -->
+    <allow-in-power-save-except-idle package="com.google.android.apps.carrier.log" />
+
+    <!-- Whitelist so headless app JobIntentService can work. b/73250911 -->
+    <allow-in-power-save-except-idle package="com.google.android.carrier" />
+
+    <!-- Whitelist so headless app JobService can work. b/135126855 -->
+    <allow-in-power-save-except-idle package="com.google.android.apps.carrier.carrierwifi" />
+
+    <!-- These are telephony components that need to run in the background -->
+    <allow-in-power-save package="com.qualcomm.atfwd" />
+    <allow-in-power-save package="com.qualcomm.embms" />
+    <allow-in-power-save package="com.qualcomm.qti.telephonyservice" />
+    <allow-in-power-save package="com.qulacomm.qcrilmsgtunnel" />
+    <allow-in-power-save package="com.qualcomm.qti.ims" />
+    <allow-in-power-save package="com.qualcomm.qti.radioconfiginterface" />
+
+    <!-- Pre-installed carrier apps which should be disabled until a matching SIM is inserted. -->
+    <disabled-until-used-preinstalled-carrier-app package="com.google.android.apps.tycho" />
+
+    <!-- Whitelist so the app can run JobIntentService in background. b/77932342 -->
+    <allow-in-power-save-except-idle package="com.google.android.tetheringentitlement" />
+    <!-- Tethering entitlement check app should have Internet access while in data saving mode,
+         even if they're in background. -->
+    <allow-in-data-usage-save package="com.google.android.tetheringentitlement" />
+
+    <!-- Allow eMBMS middleware services to run in the background -->
+    <allow-in-power-save package="com.qualcomm.ltebc_vzw" />
+    <allow-in-power-save package="com.qualcomm.ltebc" />
+</config>

@@ -62,14 +62,8 @@ bool_patch redesign $GBOARD_PREF
 bool_patch lens $GBOARD_PREF
 bool_patch generation $GBOARD_PREF
 bool_patch multiword $GBOARD_PREF
-bool_patch core_typing $GBOARD_PREF
 bool_patch promo $GBOARD_PREF
 bool_patch enable_email_provider_completion $GBOARD_PREF
-bool_patch multilang $GBOARD_PREF
-bool_patch _v2 $GBOARD_PREF
-bool_patch spacebar $GBOAD_PREF
-string_patch 'app_completions"' '*' $GBOARD_PREF
-
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
 
 # Google
@@ -84,7 +78,7 @@ bool_patch Sync__sync_after_promo_shown $FIT
 bool_patch Sync__use_experiment_flag_from_promo $FIT
 bool_patch Promotions $FIT
 
-#sleep 120
+sleep 120
 
 # DevicePersonalization
 device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true
@@ -93,7 +87,6 @@ device_config put device_personalization_services Autofill__enable true
 device_config put device_personalization_services NotificationAssistant__enable_service true
 device_config put device_personalization_services Captions__surface_sound_events true
 device_config put device_personalization_services Captions__enable_augmented_music true
-device_config put device_personalization_services Captions__enable_caption_call true
 
 # AdaptiveCharging
 device_config put adaptive_charging adaptive_charging_enabled true

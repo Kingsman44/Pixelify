@@ -1,0 +1,12 @@
+<fonts-modification version="1">
+    <family customizationType="new-named-family" name="google-sans">
+        <font weight="400" style="normal">GoogleSans-Regular.ttf</font>
+        <font weight="400" style="italic">GoogleSans-Italic.ttf</font>
+        <font weight="500" style="normal">GoogleSans-Medium.ttf</font>
+        <font weight="500" style="italic">GoogleSans-MediumItalic.ttf</font>
+        <font weight="700" style="normal">GoogleSans-Bold.ttf</font>
+        <font weight="700" style="italic">GoogleSans-BoldItalic.ttf</font>
+    </family>
+
+    <alias name="google-sans-medium" to="google-sans" weight="500" />
+</fonts-modification>
