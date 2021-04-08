@@ -7,17 +7,18 @@ ui_print "$@"
 sleep 0.3
 }
 
-print " Detected Arch: $ARCH"
-print " Detected SDK : $API"
+ui_print ""
+print "  Detected Arch: $ARCH"
+print "  Detected SDK : $API"
 RAM=$( grep MemTotal /proc/meminfo | tr -dc '0-9')
-print " Detected Ram: $RAM"
+print "  Detected Ram: $RAM"
 ui_print ""
 if [ $RAM -le "6291456" ]; then
 rm -rf $MODPATH/system/product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
 fi
 
 if [ $ARCH != "arm64" ]; then
- abort "Only support arm64 devices"
+ abort "  Only support arm64 devices"
 fi
 
 DIALER1="
@@ -68,7 +69,7 @@ sed -i -e "s/${str}/${add}/g" $file
 
 keytest() {
   ui_print "- Vol Key Test"
-  ui_print "   Press a Vol Key:"
+  ui_print "    Press a Vol Key:"
   if (timeout 3 /system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > $TMPDIR/events); then
     return 0
   else
@@ -148,12 +149,12 @@ DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_f
 print "- Installing Call Screening -"
 if [ -d /data/data/$DIALER ]; then
   ui_print ""
-  print "Google Dialer Already installed"
-  print "Call Screening other than US needs GoogleDialer version less 41"
+  print "  Google Dialer Already installed"
+  print "  Call Screening other than US needs GoogleDialer version less 41"
   ui_print ""
-  print "Do you want to install GoogleDialer 40.0.275948326??"
-  print "   Vol Up += Yes"
-  print "   Vol Down += No"
+  print "  Do you want to install GoogleDialer 40.0.275948326??"
+  print "    Vol Up += Yes"
+  print "    Vol Down += No"
   if $VKSEL; then
     if [ -d /data/app/*/$DIALER* ] || [ -d /data/app/$DIALER* ]; then
       ui_print ""
@@ -163,7 +164,7 @@ if [ -d /data/data/$DIALER ]; then
       chmod 0660 $DIALER_PREF
       rm -rf /data/app/$DIALER*
     fi
-    print "Extracting GoogleDialer"
+    print "  Extracting GoogleDialer"
     ui_print ""
     tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
     chmod 0644 $MODPATH/system/product/priv-app/GoogleDialer/GoogleDialer.apk
@@ -186,24 +187,43 @@ else
   chmod 0771 /data/data/$DIALER/shared_prefs
   cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
   chmod 0660 $DIALER_PREF
-  print "Extracting GoogleDialer"
+  print "  Extracting GoogleDialer"
   tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
   chmod 0644 $MODPATH/system/product/priv-app/GoogleDialer/GoogleDialer.apk
   chmod 0755 $MODPATH/system/product/priv-app/GoogleDialer
   REMOVE="$REMOVE $DIALER1"
 fi
-ui_print "- Note"
-print "Please Don't Update GoogleDialer (Other than US region),"
-print "It will remove Call Screening."
+ui_print "- Note -"
+print "  Please Don't Update GoogleDialer (Other than US region),"
+print "  It will remove Call Screening."
 ui_print ""
-print "To get it back.."
-print "Just unistall update and reboot your phone !!"
+print "  To get it back.."
+print "  Just unistall update and reboot your phone !!"
+ui_print "- Note End  -"
 ui_print ""
+
+print "  Do you want to Spoof your device to Pixel 5 (redfin)?"
+print "  Needed for some features but can break CTS"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+cat $MODPATH/spoof.prop >> $MODPATH/system.prop
+fi
+
+print "  Do you want to install PixelBootanimation?"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+print ""
+else
+rm -rf $MODPATH/system/product/media/boot*.zip
+print ""
+fi
 
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
 if [ -f $FIT ]; then
 ui_print ""
-print "Google Fit is installed."
+print " Google Fit is installed."
 print "- Enabling Heart rate Measurement "
 print "- Enabling Respiratory rate."
 ui_print ""
@@ -218,7 +238,7 @@ fi
 GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
 if [ -f $GBOARD ]; then
 ui_print ""
-print "GBoard is installed."
+print " GBoard is installed."
 print "- Enabling Redesigned Ui"
 print "- Enabling Lens for Gboard"
 print "- Enabling NGA Voice typing (If Nga is installed)"
@@ -232,7 +252,7 @@ bool_patch core_typing $GBOARD
 fi
 
 if [ $API -eq 30 ]; then
-print "Installing DevicePersonalisationService"
+print " Installing DevicePersonalisationService"
 print "- Enabling Adaptive Sound & Live Captions ..."
 tar -xf $MODPATH/files/dp.tar.xz -C $MODPATH/system/product/priv-app
 chmod 0644 $MODPATH/system/product/priv-app/DevicePersonalizationPrebuilt2020/DevicePersonalizationPrebuilt2020.apk
@@ -251,14 +271,6 @@ if [ -d /data/app/*/com.google.android.as* ] || [ -d /data/app/com.google.androi
 rm -rf /data/app/*/com.google.android.as*
 rm -rf /data/app/com.google.android.as*
 fi
-fi
-
-print "Do you want to Spoof your device to Pixel 5 (redfin)?"
-print "Needed for some features but can break CTS"
-print "   Vol Up += Yes"
-print "   Vol Down += No"
-if $VKSEL; then
-cat $MODPATH/spoof.prop >> $MODPATH/system.prop
 fi
 
 REPLACE="$REMOVE"

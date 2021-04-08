@@ -4,3 +4,6 @@ ro.com.google.ime.theme_id=5
 ro.com.google.ime.bs_theme=true
 ro.com.google.ime.system_lm_dir=/product/usr/share/ime/google/d3_lms
 ro.product.locale=en-US
+ro.url.legal.android_privacy=http://www.google.com/intl/%s/mobile/android/basic/privacy.html
+ro.url.legal=http://www.google.com/intl/%s/mobile/android/basic/phone-legal.html
+
