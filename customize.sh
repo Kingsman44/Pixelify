@@ -1,10 +1,3 @@
-brand="google"
-product="redfin"
-model="Pixel 5"
-incremental="7181113"
-build="RQ2A.210405.005"
-manufacture="Google"
-
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
@@ -124,30 +117,6 @@ chooseportold() {
   done
 }
 
-prop() {
-echo "" >> $MODPATH/system.prop
-echo "# $model properties" >> $MODPATH/system.prop
-echo "ro.build.product=$product" >> $MODPATH/system.prop
-echo "" >> $MODPATH/system.prop
-
-echo "# bootimage properties" >> $MODPATH/system.prop
-echo "ro.bootimage.build.fingerprint=$brand/$product/$product:11/$build/$incremental:user/release-keys" >> $MODPATH/system.prop
-echo "" >> $MODPATH/system.prop
-
-for i in "odm" "product" "system" "system_ext" "vendor"; do
-echo "# $i properties" >> $MODPATH/system.prop
-echo "ro.$i.build.fingerprint=$brand/$product/$product:11/$build/$incremental:user/release-keys" >> $MODPATH/system.prop
-echo "ro.$i.build.id=$build" >> $MODPATH/system.prop
-echo "ro.$i.build.version.incremental=$incremental" >> $MODPATH/system.prop
-echo "ro.product.$i.brand=$brand" >> $MODPATH/system.prop
-echo "ro.product.$i.name=$product" >> $MODPATH/system.prop
-echo "ro.product.$i.device=$product" >> $MODPATH/system.prop
-echo "ro.product.$i.manufacture=$manufacture" >> $MODPATH/system.prop
-echo "ro.product.$i.model=$model" >> $MODPATH/system.prop
-echo "" >> $MODPATH/system.prop
-done
-}
-
 # Have user option to skip vol keys
 OIFS=$IFS; IFS=\|; MID=false; NEW=false
 case $(echo $(basename $ZIPFILE) | tr '[:upper:]' '[:lower:]') in
@@ -206,6 +175,7 @@ if [ -d /data/data/$DIALER ]; then
     REMOVE="$REMOVE $DIALER1"
   else
     rm -rf $MODPATH/system/product/priv-app/GoogleDialer
+    print ""
     print "- Enabling Call Screening"
     bool_patch atlas $DIALER_PREF
     bool_patch speak_easy $DIALER_PREF
@@ -242,7 +212,7 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
-prop
+cat $MODPATH/spoof.prop >> $MODPATH/system.prop
 fi
 
 print "  Do you want to install PixelBootanimation?"
@@ -316,7 +286,7 @@ chmod 0644 $MODPATH/srec/en-US/*
 
 #Clean Up
 rm -rf $MODPATH/files
-rm -rf $MODPATH/*.xml
+rm -rf $MODPATH/spoof.prop
 
 ui_print ""
 print "- Done"
