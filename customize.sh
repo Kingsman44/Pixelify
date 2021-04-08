@@ -1,3 +1,10 @@
+brand="google"
+product="redfin"
+model="Pixel 5"
+incremental="7181113"
+build="RQ2A.210405.005"
+manufacture="Google"
+
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
@@ -117,6 +124,30 @@ chooseportold() {
   done
 }
 
+prop() {
+echo "" >> $MODPATH/system.prop
+echo "# $model properties" >> $MODPATH/system.prop
+echo "ro.build.product=$product" >> $MODPATH/system.prop
+echo "" >> $MODPATH/system.prop
+
+echo "# bootimage properties" >> $MODPATH/system.prop
+echo "ro.bootimage.build.fingerprint=$brand/$product/$product:11/$build/$incremental:user/release-keys" >> $MODPATH/system.prop
+echo "" >> $MODPATH/system.prop
+
+for i in "odm" "product" "system" "system_ext" "vendor"; do
+echo "# $i properties" >> $MODPATH/system.prop
+echo "ro.$i.build.fingerprint=$brand/$product/$product:11/$build/$incremental:user/release-keys" >> $MODPATH/system.prop
+echo "ro.$i.build.id=$build" >> $MODPATH/system.prop
+echo "ro.$i.build.version.incremental=$incremental" >> $MODPATH/system.prop
+echo "ro.product.$i.brand=$brand" >> $MODPATH/system.prop
+echo "ro.product.$i.name=$product" >> $MODPATH/system.prop
+echo "ro.product.$i.device=$product" >> $MODPATH/system.prop
+echo "ro.product.$i.manufacture=$manufacture" >> $MODPATH/system.prop
+echo "ro.product.$i.model=$model" >> $MODPATH/system.prop
+echo "" >> $MODPATH/system.prop
+done
+}
+
 # Have user option to skip vol keys
 OIFS=$IFS; IFS=\|; MID=false; NEW=false
 case $(echo $(basename $ZIPFILE) | tr '[:upper:]' '[:lower:]') in
@@ -166,7 +197,8 @@ if [ -d /data/data/$DIALER ]; then
       fi
       rm -rf /data/app/$DIALER*
     fi
-    print "  Extracting GoogleDialer"
+    ui_print ""
+    print "  Installing GoogleDialer"
     ui_print ""
     tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
     chmod 0644 $MODPATH/system/product/priv-app/GoogleDialer/GoogleDialer.apk
@@ -210,7 +242,7 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
-cat $MODPATH/spoof.prop >> $MODPATH/system.prop
+prop
 fi
 
 print "  Do you want to install PixelBootanimation?"
@@ -219,7 +251,7 @@ print "   Vol Down += No"
 if $VKSEL; then
 if [ ! -f /system/bin/themed_bootanimation ]; then
 rm -rf $MODPATH/system/product/media/bootanimation.zip
-mv $MODPATH/product/media/bootanimation-dark.zip $MODPATH/system/product/media/bootanimation.zip
+mv $MODPATH/system/product/media/bootanimation-dark.zip $MODPATH/system/product/media/bootanimation.zip
 fi
 else
 rm -rf $MODPATH/system/product/media/boot*.zip
@@ -231,7 +263,6 @@ print ""
 print " Google Fit is installed."
 print "- Enabling Heart rate Measurement "
 print "- Enabling Respiratory rate."
-ui_print ""
 bool_patch DeviceStateFeature $FIT
 bool_patch TestingFeature $FIT
 bool_patch Sync__sync_after_promo_shown $FIT
@@ -271,7 +302,6 @@ device_config put device_personalization_services Captions__surface_sound_events
 device_config put device_personalization_services Captions__enable_augmented_music true
 device_config put device_personalization_services Captions__enable_caption_call true
 fi
-ui_print ""
 if [ -d /data/app/*/com.google.android.as* ] || [ -d /data/app/com.google.android.as* ]; then
 rm -rf /data/app/*/com.google.android.as*
 rm -rf /data/app/com.google.android.as*
@@ -285,8 +315,8 @@ chmod 0644 $MODPATH/usr/share/ime/google/d3_lms/*
 chmod 0644 $MODPATH/srec/en-US/*
 
 #Clean Up
-rm -rf $MODPATH/spoof.prop
-rm -rf $MODPATH/*.xz
+rm -rf $MODPATH/files
+rm -rf $MODPATH/*.xml
 
 ui_print ""
 print "- Done"
