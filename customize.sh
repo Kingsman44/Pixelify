@@ -137,7 +137,7 @@ esac
 IFS=$OIFS
 
 DIALER=com.google.android.dialer
-
+ui_print ""
 print "- Installing Pixelify Module"
 print "- Extracting Files...."
 tar -xf $MODPATH/files/usr.tar.xz -C $MODPATH/system/product
@@ -159,9 +159,11 @@ if [ -d /data/data/$DIALER ]; then
     if [ -d /data/app/*/$DIALER* ] || [ -d /data/app/$DIALER* ]; then
       ui_print ""
       rm -rf /data/app/*/$DIALER*
-      rm -rf $DIALER_PREF
-      cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
-      chmod 0660 $DIALER_PREF
+      if [ -z $(grep "com.google.android.dialer 4674516" $DIALER_PREF) ]; then
+        rm -rf $DIALER_PREF
+        cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
+        chmod 0660 $DIALER_PREF
+      fi
       rm -rf /data/app/$DIALER*
     fi
     print "  Extracting GoogleDialer"
@@ -206,6 +208,7 @@ print "  Do you want to Spoof your device to Pixel 5 (redfin)?"
 print "  Needed for some features but can break CTS"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
+ui_print ""
 if $VKSEL; then
 cat $MODPATH/spoof.prop >> $MODPATH/system.prop
 fi
@@ -214,15 +217,17 @@ print "  Do you want to install PixelBootanimation?"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 if $VKSEL; then
-print ""
+if [ ! -f /system/bin/themed_bootanimation ]; then
+rm -rf $MODPATH/system/product/media/bootanimation.zip
+mv $MODPATH/product/media/bootanimation-dark.zip $MODPATH/system/product/media/bootanimation.zip
+fi
 else
 rm -rf $MODPATH/system/product/media/boot*.zip
-print ""
 fi
 
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
 if [ -f $FIT ]; then
-ui_print ""
+print ""
 print " Google Fit is installed."
 print "- Enabling Heart rate Measurement "
 print "- Enabling Respiratory rate."
