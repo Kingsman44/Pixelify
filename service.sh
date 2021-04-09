@@ -10,8 +10,9 @@ MODDIR=${0%/*}
 
 export DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
 export GBOARD_PREF=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
-export GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
 export FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
+export GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
+export TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
 
 bool_patch() {
 file=$2
@@ -66,10 +67,9 @@ bool_patch promo $GBOARD_PREF
 bool_patch enable_email_provider_completion $GBOARD_PREF
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
 
-# Google
-string_patch flag.13477 redfin $GOOGLE_PREF
-string_patch flag.14205 "*=nga_pop" $GOOGLE_PREF
-chmod 0660 /data/data/com.google.android.googlequicksearchbox/shared_prefs
+#google
+chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
+cp -Tf /data/adb/modules/Pixelify/GEL.GSAPrefs.xml $GOOGLE_PREF
 
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
@@ -77,6 +77,9 @@ bool_patch TestingFeature $FIT
 bool_patch Sync__sync_after_promo_shown $FIT
 bool_patch Sync__use_experiment_flag_from_promo $FIT
 bool_patch Promotions $FIT
+
+# Turbo
+bool_patch AdaptiveCharging__v1_enabled $TURBO
 
 sleep 120
 

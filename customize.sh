@@ -21,31 +21,25 @@ if [ $ARCH != "arm64" ]; then
  abort "  Only support arm64 devices"
 fi
 
-DIALER1="
-/system/priv-app/GoogleDialer
-/system/app/Dialer
-/system/product/app/Dialer
-/system/product/priv-app/Dialer
-"
+DIALER1=$(find /system -name *Dialer.apk)
+
+GOOGLE=$(find /system -name Velvet.apk)
 
 if [ $API -eq "30" ]; then
-REMOVE="
-/system/product/priv-app/DevicePersonalizationPrebuilt2
-/system/product/priv-app/DevicePersonalizationPrebuilt3
-/system/product/priv-app/DevicePersonalizationPrebuilt4
-/system/product/priv-app/MatchmakerPrebuiltPixel2
-/system/product/priv-app/MatchmakerPrebuiltPixel3
-/system/product/priv-app/MatchmakerPrebuiltPixel4
-/system/product/priv-app/MatchmakerPrebuiltPixel5
-/system/priv-app/DevicePersonalizationPrebuilt2
-/system/priv-app/DevicePersonalizationPrebuilt3
-/system/priv-app/DevicePersonalizationPrebuilt4
-/system/priv-app/MatchmakerPrebuiltPixel2
-/system/priv-app/MatchmakerPrebuiltPixel3
-/system/priv-app/MatchmakerPrebuiltPixel4
-/system/priv-app/MatchmakerPrebuiltPixel5
-"
+if [ ! -z $(find /system -name DevicePerson*.apk) ] && [ ! -z $(find /system -name DevicePerson*.apk) ]; then
+DP1=$(find /system -name DevicePerson*.apk)
+DP2=$(find /system -name Matchmaker*.apk)
+BDP="$DP1 $DP2"
+elif [ -z  $(find /system -name DevicePerson*.apk) ]; then
+DP=$(find /system -name Matchmaker*.apk)
+else
+DP=$(find /system -name DevicePerson*.apk)
 fi
+REMOVE="$DP"
+fi
+
+TUR=$(find /system -name Turbo*.apk)
+REMOVE="$REMOVE $TUR"
 
 bool_patch() {
 file=$2
@@ -140,8 +134,7 @@ DIALER=com.google.android.dialer
 ui_print ""
 print "- Installing Pixelify Module"
 print "- Extracting Files...."
-tar -xf $MODPATH/files/usr.tar.xz -C $MODPATH/system/product
-tar -xf $MODPATH/files/gsf.tar.xz -C $MODPATH/system/system_ext/priv-app
+tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system/product/priv-app
 ui_print ""
 
 GPATCH=1
@@ -157,24 +150,17 @@ if [ -d /data/data/$DIALER ]; then
   print "    Vol Down += No"
   if $VKSEL; then
     if [ -d /data/app/*/$DIALER* ] || [ -d /data/app/$DIALER* ]; then
-      ui_print ""
-      rm -rf /data/app/*/$DIALER*
-      if [ -z $(grep "com.google.android.dialer 4674516" $DIALER_PREF) ]; then
-        rm -rf $DIALER_PREF
-        cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
-        chmod 0660 $DIALER_PREF
-      fi
-      rm -rf /data/app/$DIALER*
+       pm uninstall $DIALER
     fi
     ui_print ""
+    pm clear $DIALER
     print "  Installing GoogleDialer"
     ui_print ""
     tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
-    chmod 0644 $MODPATH/system/product/priv-app/GoogleDialer/GoogleDialer.apk
-    chmod 0755 $MODPATH/system/product/priv-app/GoogleDialer
+    mv $MODPATH/system/product/priv-app/GoogleDialer $MODPATH/system/product/priv-app/Googledialer
     REMOVE="$REMOVE $DIALER1"
   else
-    rm -rf $MODPATH/system/product/priv-app/GoogleDialer
+    rm -rf $MODPATH/system/product/priv-app/Googledialer
     print ""
     print "- Enabling Call Screening"
     bool_patch atlas $DIALER_PREF
@@ -186,15 +172,9 @@ if [ -d /data/data/$DIALER ]; then
     bool_patch transcript $DIALER_PREF
   fi
 else
-  mkdir /data/data/$DIALER
-  mkdir /data/data/$DIALER/shared_prefs
-  chmod 0771 /data/data/$DIALER/shared_prefs
-  cp -f $MODPATH/dialer_phenotype_flags.xml $DIALER_PREF
-  chmod 0660 $DIALER_PREF
   print "  Extracting GoogleDialer"
   tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
-  chmod 0644 $MODPATH/system/product/priv-app/GoogleDialer/GoogleDialer.apk
-  chmod 0755 $MODPATH/system/product/priv-app/GoogleDialer
+  mv $MODPATH/system/product/priv-app/GoogleDialer $MODPATH/system/product/priv-app/Googledialer
   REMOVE="$REMOVE $DIALER1"
 fi
 ui_print "- Note -"
@@ -206,8 +186,77 @@ print "  Just unistall update and reboot your phone !!"
 ui_print "- Note End  -"
 ui_print ""
 
+GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
+if [ -f $GOOGLE_PREF ]; then
+print "  Google is installed."
+print "  Do you want to installed Next generation assistant?"
+print "  - Note: it only supports rom which doesn't force pixel 3 by proputil"
+print "  - and you need to select yes for spoof in below step."
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+ui_print ""
+if $VKSEL; then
+if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
+print "  installing NgaResources from backups"
+mkdir $MODPATH/system/product/app/NgaResources
+cp -f /sdcard/Pixelify/backup/NgaResources.apk $MODPATH/system/product/app/NgaResources/NgaResources.apk
+chmod 0644 $MODPATH/system/product/app/NgaResources/NgaResources.apk
+else
+print "  Interned Needed for Step !!"
+print "  Do you want to install and Download NGA Resources"
+print "  Size: 135mb"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+ui_print ""
+if $VKSEL; then
+print "  Downloading NGA Resources"
+mkdir $MODPATH/system/product/app/NgaResources
+cd $MODPATH/system/product/app/NgaResources
+curl https://gitlab.com/ezio84/android_vendor_pixelgapps/-/raw/r/proprietary/product/app/NgaResources/NgaResources.apk -O &> /proc/self/fd/$OUTFD
+cd /
+ui_print ""
+print "  Do you want to create backup of NGA Resources"
+print "  so that you don't need redownload it everytime."
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+print "  Creating Backup"
+mkdir /sdcard/Pixelify
+mkdir /sdcard/Pixelify/backup
+rm -rf /sdcard/Pixelify/backup/NgaResources.apk
+cp -f $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify/backup/NgaResources.apk
+fi
+fi
+fi
+
+name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
+string_patch GSAPrefs.google_account $name $MODPATH/files/GEL.GSAPrefs.xml
+cp -f $MODPATH/files/GEL.GSAPrefs.xml $MODPATH/GEL.GSAPrefs.xml
+chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
+sed -i '1,$d' $GOOGLE_PREF
+cat $MODPATH/files/GEL.GSAPrefs.xml >> $GOOGLE_PREF
+rm -rf /data/data/com.google.android.googlequicksearchbox/cache/*
+am force-stop "com.google.android.googlequicksearchbox"
+if [ -z $(find /system -name Velvet) ]; then
+print ""
+print "Google is not installed as a system app !!"
+print "Making Google as a system app"
+REMOVE="$REMOVE $GOOGLE"
+mv /data/app/*/com.google.android.googlequicksearchbox* $MODPATH/system/product/priv-app/Velvet
+mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
+rm -rf $MODPATH/system/product/priv-app/Velvet/oat
+mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
+fi
+else
+sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
+sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
+sed -i -e "s/cp -Tf/#cp -f/g" $MODPATH/service.sh
+fi
+fi
+
+print ""
 print "  Do you want to Spoof your device to Pixel 5 (redfin)?"
-print "  Needed for some features but can break CTS"
+print "  Needed For Next Generation Assistant and many more features."
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
@@ -248,7 +297,6 @@ print " GBoard is installed."
 print "- Enabling Redesigned Ui"
 print "- Enabling Lens for Gboard"
 print "- Enabling NGA Voice typing (If Nga is installed)"
-ui_print ""
 bool_patch nga $GBOARD
 bool_patch redesign $GBOARD
 bool_patch lens $GBOARD
@@ -258,11 +306,11 @@ bool_patch core_typing $GBOARD
 fi
 
 if [ $API -eq 30 ]; then
+print ""
 print " Installing DevicePersonalisationService"
 print "- Enabling Adaptive Sound & Live Captions ..."
 tar -xf $MODPATH/files/dp.tar.xz -C $MODPATH/system/product/priv-app
-chmod 0644 $MODPATH/system/product/priv-app/DevicePersonalizationPrebuilt2020/DevicePersonalizationPrebuilt2020.apk
-chmod 0755 $MODPATH/system/product/priv-app/DevicePersonalizationPrebuilt2020
+mv $MODPATH/system/product/priv-app/DevicePersonalizationPrebuiltPixel2020 $MODPATH/system/product/priv-app/devicePersonalizationPrebuiltPixel2020
 if [ -d /data/data/com.google.as ]; then
 device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true
 device_config put device_personalization_services AdaptiveAudio__show_promo_notificatio true
@@ -273,16 +321,15 @@ device_config put device_personalization_services Captions__enable_augmented_mus
 device_config put device_personalization_services Captions__enable_caption_call true
 fi
 if [ -d /data/app/*/com.google.android.as* ] || [ -d /data/app/com.google.android.as* ]; then
-rm -rf /data/app/*/com.google.android.as*
-rm -rf /data/app/com.google.android.as*
+pm uninstall com.google.android.as
 fi
 fi
 
 REPLACE="$REMOVE"
 
 chmod 0644 $MODPATH/system/product/overlay/*.apk
-chmod 0644 $MODPATH/usr/share/ime/google/d3_lms/*
-chmod 0644 $MODPATH/srec/en-US/*
+chmod 0644 $MODPATH/system/product/priv-app/*/*.apk
+chmod 0644 $MODPATH/system/product/app/*/*.apk
 
 #Clean Up
 rm -rf $MODPATH/files
@@ -291,4 +338,3 @@ rm -rf $MODPATH/spoof.prop
 ui_print ""
 print "- Done"
 ui_print ""
-
