@@ -239,8 +239,8 @@ rm -rf /data/data/com.google.android.googlequicksearchbox/cache/*
 am force-stop "com.google.android.googlequicksearchbox"
 if [ -z $(find /system -name Velvet) ]; then
 print ""
-print "Google is not installed as a system app !!"
-print "Making Google as a system app"
+print "  Google is not installed as a system app !!"
+print "  Making Google as a system app"
 REMOVE="$REMOVE $GOOGLE"
 mv /data/app/*/com.google.android.googlequicksearchbox* $MODPATH/system/product/priv-app/Velvet
 mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
