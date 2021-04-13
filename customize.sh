@@ -190,7 +190,6 @@ GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.
 if [ -f $GOOGLE_PREF ]; then
 print "  Google is installed."
 print "  Do you want to installed Next generation assistant?"
-print "  - Note: it only supports rom which doesn't force pixel 3 by proputil"
 print "  - and you need to select yes for spoof in below step."
 print "   Vol Up += Yes"
 print "   Vol Down += No"
@@ -230,7 +229,11 @@ fi
 fi
 
 name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
+f1=$(grep 12490 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
+f2=$(grep 12491 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
 string_patch GSAPrefs.google_account $name $MODPATH/files/GEL.GSAPrefs.xml
+string_patch 12490 $f1 $MODPATH/files/GEL.GSAPrefs.xml
+string_patch 12491 $f2 $MODPATH/files/GEL.GSAPrefs.xml
 cp -f $MODPATH/files/GEL.GSAPrefs.xml $MODPATH/GEL.GSAPrefs.xml
 chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
 sed -i '1,$d' $GOOGLE_PREF
@@ -247,10 +250,14 @@ mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv
 rm -rf $MODPATH/system/product/priv-app/Velvet/oat
 mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
 fi
+if [ -d /data/adb/modules/Pixelify/system/product/Velvet ]; then
+mv /data/adb/modules/Pixelify/system/product/Velvet $MODPATH/system/product/Velvet
+mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
+fi
 else
 sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
 sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
-sed -i -e "s/cp -Tf/#cp -f/g" $MODPATH/service.sh
+sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
 fi
 fi
 

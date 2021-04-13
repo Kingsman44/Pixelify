@@ -33,7 +33,6 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ## ⭐ How to Enable Features
 
 ### 1) Google Next Generation Assistant
-- **It only works on Custom Rom with doesn't force assistant to Pixel 3 with PropUtils**  
 - **Installation**:- Needed to select 'YES' to pixel Spoof , Install NGA RESOURCES in Installation.<br>
 - **How to Enable**:- After installation reboot your phone, then while open assistant you will get prompt to download additional resources, download it and **reboot** your phone<br>
 - **Note**:- Incase Assistant Ui is gone, just Reboot your Phone.<br>
@@ -51,10 +50,12 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ### 3) Portrait Light
 - **Note**:- You might Get directly, if didn't then clear data, open photos and wait for some time.<br>
 
-## ⭐ Device Dependent Bugs and Fixes
+## ⭐ Bugs and Fixes
 - **Call Screening**: caller can't hear your voice.<br>
 **Fix commit (Audio Hal v6):** https://github.com/PotterLab/arrow_device_motorola_potter/pull/1/commits/049dfa580bae0ed0dd47cf9c4acb2df410e119df
-
+- **Call Screening**: can't able to download call screening files.<br>
+**Fix:** Set WIFI to unmetered connection. <br>
+- **Google**: Ok Google doesn't work without hotword.<br>
 ## ⭐ ChangeLogs
 ### Beta 1.0
 - Initial repo

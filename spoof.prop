@@ -60,3 +60,4 @@ ro.product.product.model=Pixel 5
 ro.product.product.model=Pixel 5
 ro.product.odm.model=Pixel 5
 ro.product.system_ext.model=Pixel 5
+ro.product.needs_model_edit=false
