@@ -56,6 +56,12 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **Call Screening**: can't able to download call screening files.<br>
 **Fix:** Set WIFI to unmetered connection. <br>
 - **Google**: Ok Google doesn't work without hotword.<br>
+
+## ⭐ Credits
+- [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
+- [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
+- [thehappydinoa](https://github.com/thehappydinoa) for Initial Call Screening
+
 ## ⭐ ChangeLogs
 ### Beta 1.0
 - Initial repo
