@@ -337,6 +337,8 @@ REPLACE="$REMOVE"
 chmod 0644 $MODPATH/system/product/overlay/*.apk
 chmod 0644 $MODPATH/system/product/priv-app/*/*.apk
 chmod 0644 $MODPATH/system/product/app/*/*.apk
+chmod 0644 $MODPATH/system/product/etc/permissions/*.xml
+chmod 0644 $MODPATH/system/vendor/etc/permissions/*.xml
 
 #Clean Up
 rm -rf $MODPATH/files
