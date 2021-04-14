@@ -68,7 +68,9 @@ bool_patch enable_email_provider_completion $GBOARD_PREF
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
 
 #google
+if [ -d /data/data/com.google.android.googlequicksearchbox/files/datadownloadmanifest ]; then
 chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
+fi
 cp -Tf /data/adb/modules/Pixelify/GEL.GSAPrefs.xml $GOOGLE_PREF
 
 # GoogleFit

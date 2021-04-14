@@ -2,6 +2,15 @@ chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
 
+mkdir $MODPATH/system/product/priv-app
+mkdir $MODPATH/system/product/app
+
+if [ $API -ge 30 ]; then
+app=/data/app/*
+else
+app=/data/app
+fi
+
 print() {
 ui_print "$@"
 sleep 0.3
@@ -137,7 +146,6 @@ print "- Extracting Files...."
 tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system/product/priv-app
 ui_print ""
 
-GPATCH=1
 DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
 print "- Installing Call Screening -"
 if [ -d /data/data/$DIALER ]; then
@@ -149,11 +157,13 @@ if [ -d /data/data/$DIALER ]; then
   print "    Vol Up += Yes"
   print "    Vol Down += No"
   if $VKSEL; then
-    if [ -d /data/app/*/$DIALER* ] || [ -d /data/app/$DIALER* ]; then
+    if [ -d $app/$DIALER* ]; then
        pm uninstall $DIALER
     fi
     ui_print ""
+    if [ -z $(grep "4674516" $DIALER_PREF) ]; then
     pm clear $DIALER
+    fi
     print "  Installing GoogleDialer"
     ui_print ""
     tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
@@ -187,7 +197,7 @@ ui_print "- Note End  -"
 ui_print ""
 
 GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
-if [ -f $GOOGLE_PREF ]; then
+if [ -d /data/data/com.google.android.googlequicksearchbox ]; then
 print "  Google is installed."
 print "  Do you want to installed Next generation assistant?"
 print "  - and you need to select yes for spoof in below step."
@@ -227,33 +237,46 @@ cp -f $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify
 fi
 fi
 fi
-
+ui_print ""
+print "  NGA Resources installation complete"
+print "  Patching Next Generation Assistant Files.."
 name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
 f1=$(grep 12490 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
 f2=$(grep 12491 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
+if [ ! -z $name ]; then
 string_patch GSAPrefs.google_account $name $MODPATH/files/GEL.GSAPrefs.xml
-string_patch 12490 $f1 $MODPATH/files/GEL.GSAPrefs.xml
-string_patch 12491 $f2 $MODPATH/files/GEL.GSAPrefs.xml
+fi
+if [ ! -z $f1]; then
+string_patch 12490 "$f1" $MODPATH/files/GEL.GSAPrefs.xml
+fi
+if [ ! -z $f2 ]; then
+string_patch 12491 "$f2" $MODPATH/files/GEL.GSAPrefs.xml
+fi
 cp -f $MODPATH/files/GEL.GSAPrefs.xml $MODPATH/GEL.GSAPrefs.xml
-chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
-sed -i '1,$d' $GOOGLE_PREF
-cat $MODPATH/files/GEL.GSAPrefs.xml >> $GOOGLE_PREF
+chmod 0771 /data/data/com.google.android.googlequicksearchbox/shared_prefs
+rm -rf $GOOGLE_PREF
 rm -rf /data/data/com.google.android.googlequicksearchbox/cache/*
-am force-stop "com.google.android.googlequicksearchbox"
-if [ -z $(find /system -name Velvet) ]; then
+
+if [ -z $(find /system -name Velvet) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
 print ""
 print "  Google is not installed as a system app !!"
 print "  Making Google as a system app"
 REMOVE="$REMOVE $GOOGLE"
-mv /data/app/*/com.google.android.googlequicksearchbox* $MODPATH/system/product/priv-app/Velvet
+cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
+mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
+rm -rf $MODPATH/system/product/priv-app/Velvet/oat
+mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
+elif [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
+print ""
+print "  Google is not installed as a system app !!"
+print "  Making Google as a system app"
+REMOVE="$REMOVE $GOOGLE"
+cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
 mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
 rm -rf $MODPATH/system/product/priv-app/Velvet/oat
 mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
 fi
-if [ -d /data/adb/modules/Pixelify/system/product/Velvet ]; then
-mv /data/adb/modules/Pixelify/system/product/Velvet $MODPATH/system/product/Velvet
-mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
-fi
+
 else
 sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
 sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
@@ -318,16 +341,7 @@ print " Installing DevicePersonalisationService"
 print "- Enabling Adaptive Sound & Live Captions ..."
 tar -xf $MODPATH/files/dp.tar.xz -C $MODPATH/system/product/priv-app
 mv $MODPATH/system/product/priv-app/DevicePersonalizationPrebuiltPixel2020 $MODPATH/system/product/priv-app/devicePersonalizationPrebuiltPixel2020
-if [ -d /data/data/com.google.as ]; then
-device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true
-device_config put device_personalization_services AdaptiveAudio__show_promo_notificatio true
-device_config put device_personalization_services Autofill__enable true
-device_config put device_personalization_services NotificationAssistant__enable_service true
-device_config put device_personalization_services Captions__surface_sound_events true
-device_config put device_personalization_services Captions__enable_augmented_music true
-device_config put device_personalization_services Captions__enable_caption_call true
-fi
-if [ -d /data/app/*/com.google.android.as* ] || [ -d /data/app/com.google.android.as* ]; then
+if [ -d $app/com.google.android.as* ]; then
 pm uninstall com.google.android.as
 fi
 fi

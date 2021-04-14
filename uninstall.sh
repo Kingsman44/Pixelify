@@ -69,7 +69,3 @@ device_config put device_personalization_services Captions__enable_augmented_mus
 
 # AdaptiveCharging
 device_config put adaptive_charging adaptive_charging_enabled false
-
-if [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet.apk ]; then
-pm install /data/adb/modules/Pixelify/system/product/priv-app/Velvet.apk
-fi
