@@ -1,3 +1,8 @@
+NGAVERSION=1
+LWVERSION=1
+NGASIZE="135mb"
+LWSIZE="81mb"
+
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
@@ -207,13 +212,37 @@ print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
 if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
+if $VKSEL; then
+if [ ! $(cat /sdcard/Pixelify/version/nga.txt) -eq $NGAVERSION ]; then
+ui_print ""
+print "  (Interned Needed)"
+print "  New version Detected."
+print "  Do you Want to update or use Old Backup?"
+print "  Version: $NGAVERSION"
+print "  Size: $NGASIZE"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+ui_print ""
+if $VKSEL; then
+rm -rf /sdcard/Pixelify/backup/NgaResources.apk
+rm -rf /sdcard/Pixelify/version/nga.txt
+mkdir $MODPATH/system/product/app/NgaResources
+cd $MODPATH/system/product/app/NgaResources
+curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk -O &> /proc/self/fd/$OUTFD
+cd /
+print "- Creating Backup"
+print ""
+cp -f $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify/backup/NgaResources.apk
+echo "$NGAVERSION" >> /sdcard/Pixelify/version/nga.txt
+fi
+fi
 print "- Installing NgaResources from backups"
 mkdir $MODPATH/system/product/app/NgaResources
 cp -f /sdcard/Pixelify/backup/NgaResources.apk $MODPATH/system/product/app/NgaResources/NgaResources.apk
 else
 print "  (Interned Needed)"
 print "  Do you want to install and Download NGA Resources"
-print "  Size: 135mb"
+print "  Size: $NGASIZE"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
@@ -221,7 +250,7 @@ if $VKSEL; then
 print "  Downloading NGA Resources"
 mkdir $MODPATH/system/product/app/NgaResources
 cd $MODPATH/system/product/app/NgaResources
-curl https://gitlab.com/ezio84/android_vendor_pixelgapps/-/raw/r/proprietary/product/app/NgaResources/NgaResources.apk -O &> /proc/self/fd/$OUTFD
+curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk -O &> /proc/self/fd/$OUTFD
 cd /
 ui_print ""
 print "  Do you want to create backup of NGA Resources"
@@ -234,6 +263,8 @@ mkdir /sdcard/Pixelify
 mkdir /sdcard/Pixelify/backup
 rm -rf /sdcard/Pixelify/backup/NgaResources.apk
 cp -f $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify/backup/NgaResources.apk
+mkdir /sdcard/Pixelify/version
+echo "$NGAVERSION" >> /sdcard/Pixelify/version/nga.txt
 fi
 fi
 fi
@@ -292,7 +323,29 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
-print "- Installing Pixel LiveWallpapers from backup"
+if [ ! $(cat /sdcard/Pixelify/version/pixel.txt) -eq $LWVERSION ]; then
+ui_print ""
+print "  (Interned Needed)"
+print "  New version Detected "
+print "  Do you Want to update or use Old Backup?"
+print "  Version: $LWVERSION"
+print "  Size: $LWSIZE"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+ui_print ""
+if $VKSEL; then
+rm -rf /sdcard/Pixelify/backup/pixel.tar.xz
+rm -rf /sdcard/Pixelify/version/pixel.txt
+cd $MODPATH/files
+curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz -O &> /proc/self/fd/$OUTFD
+cd /
+print "- Creating Backup"
+print ""
+cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
+echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
+fi
+fi
+print "- Installing Pixel LiveWallpapers"
 tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system/product
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
 REMOVE="$REMOVE $wall"
@@ -301,7 +354,7 @@ else
 ui_print ""
 print "  Interned Needed for Step !!"
 print "  Do you want to install and Download Pixel LiveWallpapers?"
-print "  Size: 75mb"
+print "  Size: $LWSIZE"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
@@ -309,7 +362,7 @@ if $VKSEL; then
 print "- Downloading Pixel LiveWallpapers"
 ui_print ""
 cd $MODPATH/files
-curl https://raw.githubusercontent.com/Kingsman44/files/main/pixel.tar.xz -O &> /proc/self/fd/$OUTFD
+curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz -O &> /proc/self/fd/$OUTFD
 cd /
 print ""
 print "- Installing Pixel LiveWallpapers"
@@ -329,6 +382,8 @@ mkdir /sdcard/Pixelify/backup
 rm -rf /sdcard/Pixelify/backup/pixel.tar.xz
 cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
 print ""
+mkdir /sdcard/Pixelify/version
+echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
 print " - Done"
 fi
 fi
