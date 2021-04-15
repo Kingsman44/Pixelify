@@ -17,10 +17,10 @@ sleep 0.3
 }
 
 ui_print ""
-print "  Detected Arch: $ARCH"
-print "  Detected SDK : $API"
+print "- Detected Arch: $ARCH"
+print "- Detected SDK : $API"
 RAM=$( grep MemTotal /proc/meminfo | tr -dc '0-9')
-print "  Detected Ram: $RAM"
+print "- Detected Ram: $RAM"
 ui_print ""
 if [ $RAM -le "6291456" ]; then
 rm -rf $MODPATH/system/product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
@@ -147,11 +147,12 @@ tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system/product/priv-app
 ui_print ""
 
 DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
-print "- Installing Call Screening -"
+print "- Installing Call Screening"
 if [ -d /data/data/$DIALER ]; then
   ui_print ""
-  print "  Google Dialer Already installed"
-  print "  Call Screening other than US needs GoogleDialer version less 41"
+  print "- Google Dialer Already installed"
+  print ""
+  print " Call Screening other than US needs GoogleDialer version less 41"
   ui_print ""
   print "  Do you want to install GoogleDialer 40.0.275948326??"
   print "    Vol Up += Yes"
@@ -164,7 +165,7 @@ if [ -d /data/data/$DIALER ]; then
     if [ -z $(grep "4674516" $DIALER_PREF) ]; then
     pm clear $DIALER
     fi
-    print "  Installing GoogleDialer"
+    print "- Installing GoogleDialer"
     ui_print ""
     tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
     mv $MODPATH/system/product/priv-app/GoogleDialer $MODPATH/system/product/priv-app/Googledialer
@@ -182,7 +183,7 @@ if [ -d /data/data/$DIALER ]; then
     bool_patch transcript $DIALER_PREF
   fi
 else
-  print "  Extracting GoogleDialer"
+  print "- Extracting GoogleDialer"
   tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
   mv $MODPATH/system/product/priv-app/GoogleDialer $MODPATH/system/product/priv-app/Googledialer
   REMOVE="$REMOVE $DIALER1"
@@ -206,11 +207,11 @@ print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
 if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
-print "  installing NgaResources from backups"
+print "- Installing NgaResources from backups"
 mkdir $MODPATH/system/product/app/NgaResources
 cp -f /sdcard/Pixelify/backup/NgaResources.apk $MODPATH/system/product/app/NgaResources/NgaResources.apk
 else
-print "  Interned Needed for Step !!"
+print "  (Interned Needed)"
 print "  Do you want to install and Download NGA Resources"
 print "  Size: 135mb"
 print "   Vol Up += Yes"
@@ -228,7 +229,7 @@ print "  so that you don't need redownload it everytime."
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 if $VKSEL; then
-print "  Creating Backup"
+print "- Creating Backup"
 mkdir /sdcard/Pixelify
 mkdir /sdcard/Pixelify/backup
 rm -rf /sdcard/Pixelify/backup/NgaResources.apk
@@ -237,8 +238,8 @@ fi
 fi
 fi
 ui_print ""
-print "  NGA Resources installation complete"
-print "  Patching Next Generation Assistant Files.."
+print "- NGA Resources installation complete"
+print "- Patching Next Generation Assistant Files.."
 name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
 f1=$(grep 12490 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
 f2=$(grep 12491 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
@@ -258,8 +259,8 @@ rm -rf /data/data/com.google.android.googlequicksearchbox/cache/*
 
 if [ -z $(find /system -name Velvet) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
 print ""
-print "  Google is not installed as a system app !!"
-print "  Making Google as a system app"
+print "- Google is not installed as a system app !!"
+print "- Making Google as a system app"
 REMOVE="$REMOVE $GOOGLE"
 cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
 mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
@@ -267,8 +268,8 @@ rm -rf $MODPATH/system/product/priv-app/Velvet/oat
 mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
 elif [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
 print ""
-print "  Google is not installed as a system app !!"
-print "  Making Google as a system app"
+print "- Google is not installed as a system app !!"
+print "- Making Google as a system app"
 REMOVE="$REMOVE $GOOGLE"
 cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
 mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
@@ -280,6 +281,56 @@ else
 sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
 sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
 sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
+fi
+fi
+
+if [ -f /sdcard/Pixelify/backup/pixel.tar.xz  ]; then
+ui_print ""
+print "  Do you want to install and Download Pixel LiveWallpapers?"
+print "  (Backup detected, no internet needed)"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+ui_print ""
+if $VKSEL; then
+print "- Installing Pixel LiveWallpapers from backup"
+tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system/product
+wall=$(find /system -name WallpaperPickerGoogle*.apk)
+REMOVE="$REMOVE $wall"
+fi
+else
+ui_print ""
+print "  Interned Needed for Step !!"
+print "  Do you want to install and Download Pixel LiveWallpapers?"
+print "  Size: 75mb"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+ui_print ""
+if $VKSEL; then
+print "- Downloading Pixel LiveWallpapers"
+ui_print ""
+cd $MODPATH/files
+curl https://raw.githubusercontent.com/Kingsman44/files/main/pixel.tar.xz -O &> /proc/self/fd/$OUTFD
+cd /
+print ""
+print "- Installing Pixel LiveWallpapers"
+tar -xf $MODPATH/files/pixel.tar.xz -C $MODPATH/system/product
+wall=$(find /system -name WallpaperPickerGoogle*.apk)
+REMOVE="$REMOVE $wall"
+ui_print ""
+print "  Do you want to create backup of Pixel LiveWallpapers?"
+print "  so that you don't need redownload it everytime."
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+ui_print ""
+print "- Creating Backup"
+mkdir /sdcard/Pixelify
+mkdir /sdcard/Pixelify/backup
+rm -rf /sdcard/Pixelify/backup/pixel.tar.xz
+cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
+print ""
+print " - Done"
+fi
 fi
 fi
 
@@ -336,13 +387,10 @@ fi
 
 if [ $API -eq 30 ]; then
 print ""
-print " Installing DevicePersonalisationService"
+print "- Installing DevicePersonalisationService"
 print "- Enabling Adaptive Sound & Live Captions ..."
 tar -xf $MODPATH/files/dp.tar.xz -C $MODPATH/system/product/priv-app
 mv $MODPATH/system/product/priv-app/DevicePersonalizationPrebuiltPixel2020 $MODPATH/system/product/priv-app/devicePersonalizationPrebuiltPixel2020
-if [ -d $app/com.google.android.as* ]; then
-pm uninstall com.google.android.as
-fi
 fi
 
 REPLACE="$REMOVE"

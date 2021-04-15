@@ -26,6 +26,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Pixel 5 spoof (Optional)
 -   Pixel Blue theme accent
 -   Pixel bootanimation (Optional)
+-   Pixel Live Wallpapers (Optional)
 -   Portrait Light (10+)
 -   Screen Attention Service
 -   Shareable Google Recorder
@@ -83,4 +84,3 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Fixed Installation stuck on NGA resources
 - Some Minor Fixes
 - Fixed velvet (if non system app) is gone after unistall
-
