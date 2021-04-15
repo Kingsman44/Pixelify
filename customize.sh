@@ -285,7 +285,7 @@ fi
 fi
 
 print ""
-print "  Do you want to Spoof your device to Pixel 4 XL (coral)?"
+print "  Do you want to Spoof your device to Pixel 5 (redfin)?"
 print "  Needed For Next Generation Assistant and many more features."
 print "   Vol Up += Yes"
 print "   Vol Down += No"
