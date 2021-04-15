@@ -209,7 +209,6 @@ if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
 print "  installing NgaResources from backups"
 mkdir $MODPATH/system/product/app/NgaResources
 cp -f /sdcard/Pixelify/backup/NgaResources.apk $MODPATH/system/product/app/NgaResources/NgaResources.apk
-chmod 0644 $MODPATH/system/product/app/NgaResources/NgaResources.apk
 else
 print "  Interned Needed for Step !!"
 print "  Do you want to install and Download NGA Resources"
@@ -265,7 +264,7 @@ REMOVE="$REMOVE $GOOGLE"
 cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
 mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
 rm -rf $MODPATH/system/product/priv-app/Velvet/oat
-mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
+mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
 elif [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
 print ""
 print "  Google is not installed as a system app !!"
@@ -274,7 +273,7 @@ REMOVE="$REMOVE $GOOGLE"
 cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
 mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
 rm -rf $MODPATH/system/product/priv-app/Velvet/oat
-mv $MODPATH/files/com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/com.google.android.googlequicksearchbox.xml
+mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
 fi
 
 else
