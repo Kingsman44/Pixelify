@@ -108,7 +108,7 @@ file=$3
 str=$(grep $1 $3 | grep string | cut -c 14- | cut -d'<' -f1)
 str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
 add="$str1>$2"
-sed -i -e "s/${str}/${add}/g" B$file
+sed -i -e "s/${str}/${add}/g" $file
 }
 
 keytest() {
@@ -365,12 +365,21 @@ mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv
 rm -rf $MODPATH/system/product/priv-app/Velvet/oat
 mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
 fi
-
+# else for if dont't want to install
 else
 sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
 sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
 sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
+sed -i -e "s/string_patch GSAPrefs.google_account/#string_patch GSAPrefs.google_account/g" $MODPATH/service.sh
+sed -i -e "s/name=/#name=/g" $MODPATH/service.sh
 fi
+# else for if Google not installed.
+else
+sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
+sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
+sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
+sed -i -e "s/string_patch GSAPrefs.google_account/#string_patch GSAPrefs.google_account/g" $MODPATH/service.sh
+sed -i -e "s/name=/#name=/g" $MODPATH/service.sh
 fi
 
 if [ $API -ge 28 ]; then

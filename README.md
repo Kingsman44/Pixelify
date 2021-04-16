@@ -6,6 +6,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ## ⭐ Requirements
 - **Arm64 device**
 - **Volume Keys**
+- **Internet for NGA Resources & Pixel Livewallpaper**
 
 ## ⭐ Features
 -   Adaptive Charging (Google SystemUI)
@@ -59,9 +60,11 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **Google**: Ok Google doesn't work without hotword.<br>
 
 ## ⭐ Credits
+- [topjohnwu](https://github.com/topjohnwu) for Magisk
 - [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
 - [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
 - [thehappydinoa](https://github.com/thehappydinoa) for Initial Call Screening
+- [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
 ### Beta 1.0
