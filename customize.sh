@@ -1,5 +1,19 @@
+s=$(curl -s -I http://www.google.com --connect-timeout 5 | grep "ok")
+if [ ! -z "$s" ]; then
+internet=1
+else
+internet=0
+fi
+
+if [ $internet -eq 1 ]; then
+ver=$(curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
+NGAVERSION=$(echo "$ver" | grep nga | cut -d'=' -f2)
+LWVERSION=$(echo "$ver" | grep wallpaper | cut -d'=' -f2)
+else
 NGAVERSION=1
 LWVERSION=1
+fi
+
 NGASIZE="135mb"
 LWSIZE="81mb"
 
