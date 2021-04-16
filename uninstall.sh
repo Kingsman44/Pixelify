@@ -69,3 +69,5 @@ device_config put device_personalization_services Captions__enable_augmented_mus
 
 # AdaptiveCharging
 device_config put adaptive_charging adaptive_charging_enabled false
+
+rm -rf /data/pixelify

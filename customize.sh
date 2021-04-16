@@ -1,19 +1,39 @@
+online() {
 s=$(curl -s -I http://www.google.com --connect-timeout 5 | grep "ok")
 if [ ! -z "$s" ]; then
 internet=1
 else
 internet=0
 fi
+}
+
+online
+
+pix=/data/pixelify
+if [ ! -d $pix ]; then
+mkdir $pix
+fi
 
 if [ $internet -eq 1 ]; then
 ver=$(curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
 NGAVERSION=$(echo "$ver" | grep nga | cut -d'=' -f2)
 LWVERSION=$(echo "$ver" | grep wallpaper | cut -d'=' -f2)
+rm -rf $pix/nga.txt
+rm -rf $pix/pixel.txt
+echo "$NGAVERSION" >> $pix/nga.txt
+echo "$LWVERSION" >> $pix/pixel.txt
 else
-NGAVERSION=1
-LWVERSION=1
+if [ ! -f $pix/nga.txt ]; then
+NGAVERSIONP=1
+echo "$NGAVERSIONP" >> $pix/nga.txt
 fi
-
+if [ ! -f $pix/pixel.txt ]; then
+LWVERSIONP=1.1
+echo "$LWVERSIONP" >> $pix/pixel.txt
+fi
+fi
+NGAVERSION=$(cat $pix/nga.txt)
+LWVERSION=$(cat $pix/pixel.txt)
 NGASIZE="135mb"
 LWSIZE="81mb"
 
@@ -88,7 +108,7 @@ file=$3
 str=$(grep $1 $3 | grep string | cut -c 14- | cut -d'<' -f1)
 str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
 add="$str1>$2"
-sed -i -e "s/${str}/${add}/g" $file
+sed -i -e "s/${str}/${add}/g" B$file
 }
 
 keytest() {
@@ -223,7 +243,7 @@ ui_print ""
 fi
 
 GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
-if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ]; then; then
+if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ]; then
 print "  Google is installed."
 print "  Do you want to installed Next generation assistant?"
 print "  - and you need to select yes for spoof in below step."
@@ -232,8 +252,7 @@ print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
 if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
-if [ ! $(cat /sdcard/Pixelify/version/nga.txt) -eq $NGAVERSION ]; then
-ui_print ""
+if [ "$(cat /sdcard/Pixelify/version/nga.txt)" != "$NGAVERSION" ]; then
 print "  (Interned Needed)"
 print "  New version Detected."
 print "  Do you Want to update or use Old Backup?"
@@ -243,16 +262,26 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
+online
+if [ $internet -eq 1 ]; then
 rm -rf /sdcard/Pixelify/backup/NgaResources.apk
 rm -rf /sdcard/Pixelify/version/nga.txt
 mkdir $MODPATH/system/product/app/NgaResources
 cd $MODPATH/system/product/app/NgaResources
 curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk -O &> /proc/self/fd/$OUTFD
 cd /
+print ""
 print "- Creating Backup"
 print ""
 cp -f $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify/backup/NgaResources.apk
 echo "$NGAVERSION" >> /sdcard/Pixelify/version/nga.txt
+else
+print "!! Warning !!"
+print " No internet detected"
+print ""
+print "- Using Old backup for now."
+print ""
+fi
 fi
 fi
 print "- Installing NgaResources from backups"
@@ -266,6 +295,8 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
+online
+if [ $internet -eq 1 ]; then
 print "  Downloading NGA Resources"
 mkdir $MODPATH/system/product/app/NgaResources
 cd $MODPATH/system/product/app/NgaResources
@@ -284,11 +315,19 @@ rm -rf /sdcard/Pixelify/backup/NgaResources.apk
 cp -f $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify/backup/NgaResources.apk
 mkdir /sdcard/Pixelify/version
 echo "$NGAVERSION" >> /sdcard/Pixelify/version/nga.txt
-fi
-fi
-fi
 ui_print ""
 print "- NGA Resources installation complete"
+fi
+else
+print "!! Warning !!"
+print " No internet detected"
+print ""
+print "- Skipping NGA Resources."
+fi
+fi
+fi
+
+ui_print ""
 print "- Patching Next Generation Assistant Files.."
 name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
 f1=$(grep 12490 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
@@ -337,14 +376,13 @@ fi
 if [ $API -ge 28 ]; then
 if [ -f /sdcard/Pixelify/backup/pixel.tar.xz  ]; then
 ui_print ""
-print "  Do you want to install and Download Pixel LiveWallpapers?"
+print "  Do you want to install Pixel Live Wallpapers?"
 print "  (Backup detected, no internet needed)"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
-if [ ! $(cat /sdcard/Pixelify/version/pixel.txt) -eq $LWVERSION ]; then
-ui_print ""
+if [ "$(cat /sdcard/Pixelify/version/pixel.txt)" != "$LWVERSION" ]; then
 print "  (Interned Needed)"
 print "  New version Detected "
 print "  Do you Want to update or use Old Backup?"
@@ -354,6 +392,8 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
+online
+if [ $internet -eq 1 ]; then
 rm -rf /sdcard/Pixelify/backup/pixel.tar.xz
 rm -rf /sdcard/Pixelify/version/pixel.txt
 cd $MODPATH/files
@@ -363,6 +403,13 @@ print "- Creating Backup"
 print ""
 cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
 echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
+else
+print "!! Warning !!"
+print " No internet detected"
+print ""
+print "- Using Old backup for now."
+print ""
+fi
 fi
 fi
 print "- Installing Pixel LiveWallpapers"
@@ -372,13 +419,15 @@ REMOVE="$REMOVE $wall"
 fi
 else
 ui_print ""
-print "  Interned Needed for Step !!"
+print "  (Interned Needed)"
 print "  Do you want to install and Download Pixel LiveWallpapers?"
 print "  Size: $LWSIZE"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
+online
+if [ $internet -eq 1 ]; then
 print "- Downloading Pixel LiveWallpapers"
 ui_print ""
 cd $MODPATH/files
@@ -405,6 +454,13 @@ print ""
 mkdir /sdcard/Pixelify/version
 echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
 print " - Done"
+fi
+else
+print "!! Warning !!"
+print " No internet detected"
+print ""
+print "- Skipping Pixel LiveWallpaper"
+print ""
 fi
 fi
 fi
