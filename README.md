@@ -84,3 +84,11 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Fixed Installation stuck on NGA resources
 - Some Minor Fixes
 - Fixed velvet (if non system app) is gone after unistall
+
+### Version Beta 1.4
+- Added Pixel Live Wallpapers
+- Sdk support unitl 26
+- added Overlay support for sdk less than 30
+- Updated DevicePersonalisationSevice
+- updated Turbo
+- Fixed compatibility for sdk 26-29

@@ -7,6 +7,10 @@ chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
 
+if [ $ARCH != "arm64" ] && [ $API -le 25 ]; then
+ abort "  Only support arm64 devices and Sdk 26+ devices"
+fi
+
 mkdir $MODPATH/system/product/priv-app
 mkdir $MODPATH/system/product/app
 
@@ -31,15 +35,11 @@ if [ $RAM -le "6291456" ]; then
 rm -rf $MODPATH/system/product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
 fi
 
-if [ $ARCH != "arm64" ]; then
- abort "  Only support arm64 devices"
-fi
-
 DIALER1=$(find /system -name *Dialer.apk)
 
 GOOGLE=$(find /system -name Velvet.apk)
 
-if [ $API -eq "30" ]; then
+if [ $API -ge "30" ]; then
 if [ ! -z $(find /system -name DevicePerson*.apk) ] && [ ! -z $(find /system -name DevicePerson*.apk) ]; then
 DP1=$(find /system -name DevicePerson*.apk)
 DP2=$(find /system -name Matchmaker*.apk)
@@ -52,8 +52,10 @@ fi
 REMOVE="$DP"
 fi
 
+if [ $API -ge 28 ]; then
 TUR=$(find /system -name Turbo*.apk)
 REMOVE="$REMOVE $TUR"
+fi
 
 bool_patch() {
 file=$2
@@ -148,10 +150,13 @@ DIALER=com.google.android.dialer
 ui_print ""
 print "- Installing Pixelify Module"
 print "- Extracting Files...."
+if [ $API -ge 28 ]; then
 tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system/product/priv-app
+fi
 ui_print ""
 
 DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
+if [ $API -ge 26 ]; then
 print "- Installing Call Screening"
 if [ -d /data/data/$DIALER ]; then
   ui_print ""
@@ -201,9 +206,10 @@ print "  To get it back.."
 print "  Just unistall update and reboot your phone !!"
 ui_print "- Note End  -"
 ui_print ""
+fi
 
 GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
-if [ -d /data/data/com.google.android.googlequicksearchbox ]; then
+if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ]; then; then
 print "  Google is installed."
 print "  Do you want to installed Next generation assistant?"
 print "  - and you need to select yes for spoof in below step."
@@ -212,7 +218,6 @@ print "   Vol Down += No"
 ui_print ""
 if $VKSEL; then
 if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
-if $VKSEL; then
 if [ ! $(cat /sdcard/Pixelify/version/nga.txt) -eq $NGAVERSION ]; then
 ui_print ""
 print "  (Interned Needed)"
@@ -315,6 +320,7 @@ sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
 fi
 fi
 
+if [ $API -ge 28 ]; then
 if [ -f /sdcard/Pixelify/backup/pixel.tar.xz  ]; then
 ui_print ""
 print "  Do you want to install and Download Pixel LiveWallpapers?"
@@ -388,10 +394,35 @@ print " - Done"
 fi
 fi
 fi
+fi
+
+if [ $API -eq 27 ]; then
+sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/walleye\/walleye:8.1.0\/OPM1.171019.011\/4448085:user\/release-keys/g" $MODPATH/spoof.prop
+sed -i -e "s/redin/walleye/g" $MODPATH/spoof.prop
+sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
+sed -i -e "s/RQ2A.210405.005/OPM1.171019.011/g" $MODPATH/spoof.prop
+sed -i -e "s/7181113/4448085/g" $MODPATH/spoof.prop
+elif [ $API -eq 28 ]; then
+sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/blueline\/blueline:9\/PQ3A.190705.001\/5565753:user\/release-keys/g" $MODPATH/spoof.prop
+sed -i -e "s/redin/blueline/g" $MODPATH/spoof.prop
+sed -i -e "s/Pixel 5/Pixel 3/g" $MODPATH/spoof.prop
+sed -i -e "s/RQ2A.210405.005/PQ3A.190705.001/g" $MODPATH/spoof.prop
+sed -i -e "s/7181113/5565753/g" $MODPATH/spoof.prop
+elif [ $API -eq 29 ]; then
+sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/coral\/coral:10\/QQ3A.200805.001\/6578210:user\/release-keys/g" $MODPATH/spoof.prop
+sed -i -e "s/redin/coral/g" $MODPATH/spoof.prop
+sed -i -e "s/Pixel 5/Pixel 4 XL/g" $MODPATH/spoof.prop
+sed -i -e "s/RQ2A.210405.005/QQ3A.200805.001/g" $MODPATH/spoof.prop
+sed -i -e "s/7181113/6578210/g" $MODPATH/spoof.prop
+fi
 
 print ""
-print "  Do you want to Spoof your device to Pixel 5 (redfin)?"
-print "  Needed For Next Generation Assistant and many more features."
+print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) $(grep ro.product.system.device $MODPATH/spoof.prop | cut -d'=' -f2 )?"
+if [ $API -ge 29 ]; then
+print "  Needed for Next Generation Assistant and US Call Screening"
+else
+print "  Needed for US Call Screening"
+fi
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
@@ -459,6 +490,22 @@ chmod 0644 $MODPATH/system/vendor/etc/permissions/*.xml
 #Clean Up
 rm -rf $MODPATH/files
 rm -rf $MODPATH/spoof.prop
+
+# Disable features as per API in service.sh
+if [ $API -le 29 ]; then
+sed -i -e "s/device_config/#device_config/g" $MODPATH/service.sh
+sed -i -e "s/sleep/#sleep/g" $MODPATH/service.sh
+fi
+
+if [ $API -le 28 ]; then
+sed -i -e "s/chmod/#chmod/g" $MODPATH/service.sh
+sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
+sed -i -e "s/bool_patch nga/#bool_patch nga/g" $MODPATH/service.sh
+fi
+
+if [ $API -le 27 ]; then
+sed -i -e "s/bool_patch AdaptiveCharging__v1_enabled/#bool_patch AdaptiveCharging__v1_enabled/g" $MODPATH/service.sh
+fi
 
 ui_print ""
 print "- Done"
