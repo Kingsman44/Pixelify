@@ -28,6 +28,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Pixel 5 spoof (Optional)
 -   Pixel Blue theme accent
 -   Pixel bootanimation (Optional)
+-   Pixel Launcher with Doubletap to Sleep on HomeScreen (11 only)
 -   Pixel Live Wallpapers (Optional)
 -   Portrait Light (10+)
 -   Screen Attention Service

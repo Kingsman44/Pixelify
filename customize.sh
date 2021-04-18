@@ -434,6 +434,10 @@ fi
 print "- Installing Pixel LiveWallpapers"
 tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system$product
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
+if [ $API -le 28 ]; then
+mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
+rm -rf $MODPATH/system/overlay
+fi
 REMOVE="$REMOVE $wall"
 fi
 else
@@ -455,6 +459,10 @@ cd /
 print ""
 print "- Installing Pixel LiveWallpapers"
 tar -xf $MODPATH/files/pixel.tar.xz -C $MODPATH/system$product
+if [ $API -le 28 ]; then
+mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
+rm -rf $MODPATH/system/overlay
+fi
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
 REMOVE="$REMOVE $wall"
 ui_print ""
@@ -531,6 +539,23 @@ else
 rm -rf $MODPATH/system$product/media/boot*.zip
 fi
 
+if [ $API -eq 30 ]; then
+ui_print ""
+print "  Do you want to install Pixel Launcher?"
+print "  With Double Tap to sleep on Home."
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+tar -xf $MODPATH/files/pl.tar.xz -C $MODPATH/system/product/priv-app
+mv $MODPATH/system/product/priv-app/NexusLauncherRelease/NexusLauncherRelease.apk $MODPATH/system/product/priv-app/NexusLauncherRelease/NexusLauncherrelease.apk
+mv $MODPATH/system/files/privapp-permissions-com.google.android.apps.nexuslauncher.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.apps.nexuslauncher.xml
+PL=$(find /system -name *Launcher*.apk | grep -v overlay)
+REMOVE="$REMOVE $PL"
+else
+rm -rf $MODPATH/system/product/overlay/Pixel*.apk
+fi
+fi
+
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
 if [ -f $FIT ]; then
 print ""
@@ -543,7 +568,6 @@ bool_patch Sync__sync_after_promo_shown $FIT
 bool_patch Sync__use_experiment_flag_from_promo $FIT
 bool_patch Promotions $FIT
 fi
-
 
 GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
 if [ -f $GBOARD ]; then
