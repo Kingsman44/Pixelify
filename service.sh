@@ -99,3 +99,6 @@ device_config put device_personalization_services Captions__enable_augmented_mus
 
 # AdaptiveCharging
 device_config put adaptive_charging adaptive_charging_enabled true
+
+# Wellbeing
+pm enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity

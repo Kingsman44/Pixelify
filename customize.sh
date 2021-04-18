@@ -550,6 +550,13 @@ bool_patch multiword $GBOARD
 bool_patch core_typing $GBOARD
 fi
 
+if [ -d /data/data/com.google.android.apps.wellbeing ]; then
+ui_print ""
+print " Wellbeing is installed."
+print "- Enabling Heads Up (Wellbeing Latest Beta only)"
+pm enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity
+fi
+
 if [ $API -eq 30 ]; then
 print ""
 print "- Installing DevicePersonalisationService"
