@@ -45,8 +45,18 @@ if [ $ARCH != "arm64" ] && [ $API -le 25 ]; then
  abort "  Only support arm64 devices and Sdk 26+ devices"
 fi
 
-mkdir $MODPATH/system/product/priv-app
-mkdir $MODPATH/system/product/app
+if [ $API -le 28 ]; then
+cp -r $MODPATH/system/product/. $MODPATH/system
+cp -r $MODPATH/system/overlay/. $MODPATH/system/vendor/overlay
+rm -rf $MODPATH/system/overlay
+rm -rf $MODPATH/system/product
+product=
+else
+product=/product
+fi
+
+mkdir $MODPATH/system$product/priv-app
+mkdir $MODPATH/system$product/app
 
 if [ $API -ge 30 ]; then
 app=/data/app/*
@@ -66,7 +76,7 @@ RAM=$( grep MemTotal /proc/meminfo | tr -dc '0-9')
 print "- Detected Ram: $RAM"
 ui_print ""
 if [ $RAM -le "6291456" ]; then
-rm -rf $MODPATH/system/product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
+rm -rf $MODPATH/system$product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
 fi
 
 DIALER1=$(find /system -name *Dialer.apk)
@@ -185,7 +195,7 @@ ui_print ""
 print "- Installing Pixelify Module"
 print "- Extracting Files...."
 if [ $API -ge 28 ]; then
-tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system/product/priv-app
+tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
 fi
 ui_print ""
 
@@ -211,11 +221,11 @@ if [ -d /data/data/$DIALER ]; then
     fi
     print "- Installing GoogleDialer"
     ui_print ""
-    tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
-    mv $MODPATH/system/product/priv-app/GoogleDialer $MODPATH/system/product/priv-app/Googledialer
+    tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system$product/priv-app
+    mv $MODPATH/system$product/priv-app/GoogleDialer $MODPATH/system$product/priv-app/Googledialer
     REMOVE="$REMOVE $DIALER1"
   else
-    rm -rf $MODPATH/system/product/priv-app/Googledialer
+    rm -rf $MODPATH/system$product/priv-app/Googledialer
     print ""
     print "- Enabling Call Screening"
     bool_patch atlas $DIALER_PREF
@@ -228,8 +238,8 @@ if [ -d /data/data/$DIALER ]; then
   fi
 else
   print "- Extracting GoogleDialer"
-  tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system/product/priv-app
-  mv $MODPATH/system/product/priv-app/GoogleDialer $MODPATH/system/product/priv-app/Googledialer
+  tar -xf $MODPATH/files/gd.tar.xz -C $MODPATH/system$product/priv-app
+  mv $MODPATH/system$product/priv-app/GoogleDialer $MODPATH/system$product/priv-app/Googledialer
   REMOVE="$REMOVE $DIALER1"
 fi
 ui_print "- Note -"
@@ -422,7 +432,7 @@ fi
 fi
 fi
 print "- Installing Pixel LiveWallpapers"
-tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system/product
+tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system$product
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
 REMOVE="$REMOVE $wall"
 fi
@@ -444,7 +454,7 @@ curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz -O &
 cd /
 print ""
 print "- Installing Pixel LiveWallpapers"
-tar -xf $MODPATH/files/pixel.tar.xz -C $MODPATH/system/product
+tar -xf $MODPATH/files/pixel.tar.xz -C $MODPATH/system$product
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
 REMOVE="$REMOVE $wall"
 ui_print ""
@@ -514,11 +524,11 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 if $VKSEL; then
 if [ ! -f /system/bin/themed_bootanimation ]; then
-rm -rf $MODPATH/system/product/media/bootanimation.zip
-mv $MODPATH/system/product/media/bootanimation-dark.zip $MODPATH/system/product/media/bootanimation.zip
+rm -rf $MODPATH/system$product/media/bootanimation.zip
+mv $MODPATH/system$product/media/bootanimation-dark.zip $MODPATH/system$product/media/bootanimation.zip
 fi
 else
-rm -rf $MODPATH/system/product/media/boot*.zip
+rm -rf $MODPATH/system$product/media/boot*.zip
 fi
 
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
@@ -567,10 +577,11 @@ fi
 
 REPLACE="$REMOVE"
 
-chmod 0644 $MODPATH/system/product/overlay/*.apk
-chmod 0644 $MODPATH/system/product/priv-app/*/*.apk
-chmod 0644 $MODPATH/system/product/app/*/*.apk
-chmod 0644 $MODPATH/system/product/etc/permissions/*.xml
+chmod 0644 $MODPATH/system/vendor/overlay/*.apk
+chmod 0644 $MODPATH/system$product/overlay/*.apk
+chmod 0644 $MODPATH/system$product/priv-app/*/*.apk
+chmod 0644 $MODPATH/system$product/app/*/*.apk
+chmod 0644 $MODPATH/system$product/etc/permissions/*.xml
 chmod 0644 $MODPATH/system/vendor/etc/permissions/*.xml
 
 #Clean Up
