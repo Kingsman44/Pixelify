@@ -14,8 +14,10 @@ if [ ! -d $pix ]; then
 mkdir $pix
 fi
 
+NGAVERSIONP=1
+LWVERSIONP=1.2
 NGASIZE="135 Mb"
-LWSIZE="81 Mb"
+LWSIZE="84 Mb"
 
 if [ $internet -eq 1 ]; then
 ver=$(curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
@@ -29,11 +31,9 @@ NGASIZE="$(curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/Ng
 LWSIZE="$(curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | cut -c 2-3) Mb"
 else
 if [ ! -f $pix/nga.txt ]; then
-NGAVERSIONP=1
 echo "$NGAVERSIONP" >> $pix/nga.txt
 fi
 if [ ! -f $pix/pixel.txt ]; then
-LWVERSIONP=1.1
 echo "$LWVERSIONP" >> $pix/pixel.txt
 fi
 fi
@@ -498,19 +498,19 @@ fi
 
 if [ $API -eq 27 ]; then
 sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/walleye\/walleye:8.1.0\/OPM1.171019.011\/4448085:user\/release-keys/g" $MODPATH/spoof.prop
-sed -i -e "s/redin/walleye/g" $MODPATH/spoof.prop
+sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
 sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
 sed -i -e "s/RQ2A.210405.005/OPM1.171019.011/g" $MODPATH/spoof.prop
 sed -i -e "s/7181113/4448085/g" $MODPATH/spoof.prop
 elif [ $API -eq 28 ]; then
 sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/blueline\/blueline:9\/PQ3A.190705.001\/5565753:user\/release-keys/g" $MODPATH/spoof.prop
-sed -i -e "s/redin/blueline/g" $MODPATH/spoof.prop
+sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
 sed -i -e "s/Pixel 5/Pixel 3/g" $MODPATH/spoof.prop
 sed -i -e "s/RQ2A.210405.005/PQ3A.190705.001/g" $MODPATH/spoof.prop
 sed -i -e "s/7181113/5565753/g" $MODPATH/spoof.prop
 elif [ $API -eq 29 ]; then
 sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/coral\/coral:10\/QQ3A.200805.001\/6578210:user\/release-keys/g" $MODPATH/spoof.prop
-sed -i -e "s/redin/coral/g" $MODPATH/spoof.prop
+sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
 sed -i -e "s/Pixel 5/Pixel 4 XL/g" $MODPATH/spoof.prop
 sed -i -e "s/RQ2A.210405.005/QQ3A.200805.001/g" $MODPATH/spoof.prop
 sed -i -e "s/7181113/6578210/g" $MODPATH/spoof.prop
