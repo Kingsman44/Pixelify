@@ -14,6 +14,9 @@ if [ ! -d $pix ]; then
 mkdir $pix
 fi
 
+NGASIZE="135 Mb"
+LWSIZE="81 Mb"
+
 if [ $internet -eq 1 ]; then
 ver=$(curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
 NGAVERSION=$(echo "$ver" | grep nga | cut -d'=' -f2)
@@ -22,6 +25,8 @@ rm -rf $pix/nga.txt
 rm -rf $pix/pixel.txt
 echo "$NGAVERSION" >> $pix/nga.txt
 echo "$LWVERSION" >> $pix/pixel.txt
+NGASIZE="$(curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk | grep -i Content-Length | cut -d':' -f2 | cut -c 2-4) Mb"
+LWSIZE="$(curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | cut -c 2-3) Mb"
 else
 if [ ! -f $pix/nga.txt ]; then
 NGAVERSIONP=1
@@ -34,8 +39,6 @@ fi
 fi
 NGAVERSION=$(cat $pix/nga.txt)
 LWVERSION=$(cat $pix/pixel.txt)
-NGASIZE="135mb"
-LWSIZE="81mb"
 
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
