@@ -15,9 +15,15 @@ mkdir $pix
 fi
 
 NGAVERSIONP=1
-LWVERSIONP=1.2
+LWVERSIONP=1.3
 NGASIZE="135 Mb"
 LWSIZE="84 Mb"
+
+if [ $API -eq 29 ]; then
+WSIZE="3.6 Mb"
+elif [ $API -eq 28 ]; then
+WSIZE="1.6 Mb"
+fi
 
 if [ $internet -eq 1 ]; then
 ver=$(curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
@@ -37,8 +43,13 @@ if [ ! -f $pix/pixel.txt ]; then
 echo "$LWVERSIONP" >> $pix/pixel.txt
 fi
 fi
+
 NGAVERSION=$(cat $pix/nga.txt)
 LWVERSION=$(cat $pix/pixel.txt)
+
+if [ $API -le 29 ] && [ $API -ge 28 ]; then
+LWVERSION="$LWVERSION + $WSIZE"
+fi
 
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
@@ -441,6 +452,40 @@ if [ $API -le 28 ]; then
 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
 rm -rf $MODPATH/system/overlay
 fi
+
+if [ $API -le 29 ]; then
+if [ -f /sdcard/Pixelify/backup/wpg-$API.tar.xz ]; then
+ui_print ""
+print "  (Internet needed)"
+print "  Do you want to Download Styles and Wallpapers?"
+print "  Size: $WSIZE"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+online
+if [ $internet -eq 1 ]; then
+print ""
+print "- Downloading Styles and Wallpapers"
+cd $MODPATH/files
+curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
+cd /
+rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
+tar -xf $MODPATH/files/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
+print ""
+print "  Do you want to Create backups of Styles and Wallpapers?"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+if $VKSEL; then
+cp -f $MODPATH/files/gwp-$API.tar.xz /sdcard/Pixelify/backup/gwp-$API.tar.xz
+fi
+fi
+fi
+else
+rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
+tar -xf /sdcard/Pixelify/backup/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
+fi
+fi
+
 REMOVE="$REMOVE $wall"
 fi
 else
@@ -462,6 +507,16 @@ cd /
 print ""
 print "- Installing Pixel LiveWallpapers"
 tar -xf $MODPATH/files/pixel.tar.xz -C $MODPATH/system$product
+if [ $API -le 29 ]; then
+print ""
+print "- Downloading Styles and Wallpapers"
+cd $MODPATH/files
+curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
+cd /
+rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
+tar -xf $MODPATH/files/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
+fi
+
 if [ $API -le 28 ]; then
 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
 rm -rf $MODPATH/system/overlay
@@ -481,6 +536,9 @@ mkdir /sdcard/Pixelify/backup
 rm -rf /sdcard/Pixelify/backup/pixel.tar.xz
 cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
 print ""
+if [ $API -le 29 ]; then
+cp -f $MODPATH/files/gwp-$API.tar.xz /sdcard/Pixelify/backup/gwp-$API.tar.xz
+fi
 mkdir /sdcard/Pixelify/version
 echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
 print " - Done"
@@ -551,9 +609,10 @@ print "   Vol Down += No"
 if $VKSEL; then
 tar -xf $MODPATH/files/pl.tar.xz -C $MODPATH/system/product/priv-app
 mv $MODPATH/system/product/priv-app/NexusLauncherRelease/NexusLauncherRelease.apk $MODPATH/system/product/priv-app/NexusLauncherRelease/NexusLauncherrelease.apk
-mv $MODPATH/system/files/privapp-permissions-com.google.android.apps.nexuslauncher.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.apps.nexuslauncher.xml
+mv $MODPATH/files/privapp-permissions-com.google.android.apps.nexuslauncher.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.apps.nexuslauncher.xml
 PL=$(find /system -name *Launcher*.apk | grep -v overlay)
-REMOVE="$REMOVE $PL"
+TR=$(find /system -name *Trebuchet*.apk | grep -v overlay)
+REMOVE="$REMOVE $PL $TR"
 else
 rm -rf $MODPATH/system/product/overlay/Pixel*.apk
 fi

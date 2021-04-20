@@ -10,7 +10,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ Features
 -   Adaptive Charging (Google SystemUI)
--   Adaptive Sound (11+)
+-   Adaptive Sound (11+)(Pixel Device Spoof must be ON)
 -   Enables Google Dialer install via Playstore
 -   Enables Google Dialer's Call Screening (9+)
 -   Enables Nexus, Pixel, and Android One app support
@@ -25,7 +25,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Live captions (11+)
 -   Next Generation Assistant (10+)(Optional)
 -   Now Playing Export (Works only on Pixel Phone)
--   Pixel 5 spoof (Optional)
+-   Pixel Device spoof (Optional)
 -   Pixel Blue theme accent
 -   Pixel bootanimation (Optional)
 -   Pixel Launcher with Doubletap to Sleep on HomeScreen (11 only)
@@ -102,3 +102,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Improved backups support
 - Fixed Google crashes
 - Add Wellbeing headsup (beta only)
+
+### Version 1.0
+- Fixed Bootloops because of permissions
+- Added Styles and Wallpapers for Pie and Ten
