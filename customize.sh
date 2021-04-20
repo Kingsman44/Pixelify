@@ -270,7 +270,6 @@ GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.
 if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ]; then
 print "  Google is installed."
 print "  Do you want to installed Next generation assistant?"
-print "  - and you need to select yes for spoof in below step."
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 ui_print ""
@@ -577,7 +576,7 @@ fi
 print ""
 print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) $(grep ro.product.system.device $MODPATH/spoof.prop | cut -d'=' -f2 )?"
 if [ $API -ge 29 ]; then
-print "  Needed for Next Generation Assistant and US Call Screening"
+print "  Needed for Next Generation Assistant Continued Conversation and US Call Screening"
 else
 print "  Needed for US Call Screening"
 fi

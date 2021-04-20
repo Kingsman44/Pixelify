@@ -4,6 +4,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ### Please Read [this](https://github.com/Kingsman44/magisk_module_pixelify#-how-to-enable-features) before installing
 
 ## ⭐ Requirements
+- **At least Nougat**
 - **Arm64 device**
 - **Volume Keys**
 - **Internet for NGA Resources & Pixel Livewallpaper**
@@ -36,8 +37,8 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ How to Enable Features
 
-### 1) Google Next Generation Assistant
-- **Installation**:- Needed to select 'YES' to pixel Spoof , Install NGA RESOURCES in Installation.<br>
+### 1) Google Next Generation Assistant (Works without Spoof props for some people)
+- **Installation**:- Install NGA RESOURCES in Installation.<br>
 - **How to Enable**:- After installation reboot your phone, then while open assistant you will get prompt to download additional resources, download it and **reboot** your phone<br>
 - **Note**:- Incase Assistant Ui is gone, just Reboot your Phone.<br>
 
@@ -59,7 +60,8 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 **Fix commit (Audio Hal v6):** https://github.com/PotterLab/arrow_device_motorola_potter/pull/1/commits/049dfa580bae0ed0dd47cf9c4acb2df410e119df
 - **Call Screening**: can't able to download call screening files.<br>
 **Fix:** Set WIFI to unmetered connection. <br>
-- **Google**: Ok Google doesn't work without hotword.<br>
+- **Google**: Ok Google doesn't work without hotword with spoof to pixel.<br>
+- **Google**: Next Generation Assistant Continued Conversation doesn't work without spoof to pixel<br>
 
 ## ⭐ Credits
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
