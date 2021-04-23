@@ -213,6 +213,11 @@ tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
 fi
 ui_print ""
 
+print "  Do you want to install Call Screening"
+print "    Vol Up += Yes"
+print "    Vol Down += No"
+print ""
+if $VKSEL; then
 DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
 if [ $API -ge 26 ]; then
 print "- Installing Call Screening"
@@ -264,6 +269,7 @@ print "  To get it back.."
 print "  Just unistall update and reboot your phone !!"
 ui_print "- Note End  -"
 ui_print ""
+fi
 fi
 
 GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
@@ -634,6 +640,7 @@ GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.x
 if [ -f $GBOARD ]; then
 ui_print ""
 print " GBoard is installed."
+print "- Enabling Smart Compose"
 print "- Enabling Redesigned Ui"
 print "- Enabling Lens for Gboard"
 print "- Enabling NGA Voice typing (If Nga is installed)"

@@ -66,6 +66,15 @@ bool_patch multiword $GBOARD_PREF
 bool_patch promo $GBOARD_PREF
 bool_patch enable_email_provider_completion $GBOARD_PREF
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
+bool_patch enable_inline_suggestions_on_decoder_side $GBOARD_PREF
+bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD_PREF
+bool_patch enable_inline_suggestions_on_client_side $GBOARD_PREF
+bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD_PREF
+sed -i -e 's/name="inline_suggestion_experiment_version" value="0"/name="inline_suggestion_experiment_version" value="1"/g' $GBOARD_PREF
+bool_patch enable_inline_suggestions_space_tooltip $GBOARD_PREF
+bool_patch enable_matched_predictions_as_inline_from_crank_cifg $GBOARD_PREF
+bool_patch enable_single_word_suggestions_as_inline_from_crank_cifg $GBOARD_PREF
+
 
 #google
 chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
