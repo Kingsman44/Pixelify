@@ -228,7 +228,13 @@ if [ -d /data/data/$DIALER ]; then
   print " Call Screening other than US needs GoogleDialer version less 41"
   ui_print ""
   print "  Do you want to install GoogleDialer 40.0.275948326??"
-  print "    Vol Up += Yes"
+bool_patch speak_easy $DIALER_PREF
+bool_patch speakeasy $DIALER_PREF
+bool_patch call_screen $DIALER_PREF
+bool_patch revelio $DIALER_PREF
+bool_patch record $DIALER_PREF
+bool_patch atlas $DIALER_PREF
+bool_patch transript $DIALER_PREF  print "    Vol Up += Yes"
   print "    Vol Down += No"
   if $VKSEL; then
     if [ -d $app/$DIALER* ]; then
@@ -270,6 +276,15 @@ print "  Just unistall update and reboot your phone !!"
 ui_print "- Note End  -"
 ui_print ""
 fi
+else
+sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
+sed -i -e "s/bool_patch speak_easy/#disabled/g" $MODPATH/service.sh
+sed -i -e "s/bool_patch speakeasy/#disabled/g"$MODPATH/service.sh
+sed -i -e "s/bool_patch call_screen/#disabled/g"$MODPATH/service.sh
+sed -i -e "s/bool_patch revelio/#disabled/g"$MODPATH/service.sh
+sed -i -e "s/bool_patch record/#disabled/g"$MODPATH/service.sh
+sed -i -e "s/bool_patch atlas/#disabled/g"$MODPATH/service.sh
+sed -i -e "s/bool_patch transript/#disabled/g"$MODPATH/service.sh
 fi
 
 GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
@@ -613,7 +628,6 @@ print "   Vol Up += Yes"
 print "   Vol Down += No"
 if $VKSEL; then
 tar -xf $MODPATH/files/pl.tar.xz -C $MODPATH/system/product/priv-app
-mv $MODPATH/system/product/priv-app/NexusLauncherRelease/NexusLauncherRelease.apk $MODPATH/system/product/priv-app/NexusLauncherRelease/NexusLauncherrelease.apk
 mv $MODPATH/files/privapp-permissions-com.google.android.apps.nexuslauncher.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.apps.nexuslauncher.xml
 PL=$(find /system -name *Launcher*.apk | grep -v overlay)
 TR=$(find /system -name *Trebuchet*.apk | grep -v overlay)
