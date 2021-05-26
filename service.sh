@@ -48,6 +48,16 @@ sed -i -e "s/${str}/${add}/g" $file
 fi
 }
 
+long_patch() {
+file=$3
+str=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1-2)
+str1=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
+add="$str\"$2"
+if [ ! "$add" == "$str1" ]; then
+sed -i -e "s/${str1}/${add}/g" $file
+fi
+}
+
 # Call Screening
 bool_patch speak_easy $DIALER_PREF
 bool_patch speakeasy $DIALER_PREF
@@ -66,16 +76,29 @@ bool_patch multiword $GBOARD_PREF
 bool_patch voice_promo $GBOARD_PREF
 bool_patch silk $GBOARD_PREF
 bool_patch enable_email_provider_completion $GBOARD_PREF
+bool_patch enable_multiword_predictions $GBOARD_PREF
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
+bool_patch crank $GBOARD_PREF
 bool_patch enable_inline_suggestions_on_decoder_side $GBOARD_PREF
 bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD_PREF
 bool_patch enable_inline_suggestions_on_client_side $GBOARD_PREF
 bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD_PREF
-sed -i -e 's/name="inline_suggestion_experiment_version" value="0"/name="inline_suggestion_experiment_version" value="1"/g' $GBOARD_PREF
+long_patch inline_suggestion_experiment_version 2 $GBOARD_PREF
+long_patch user_history_learning_strategies 1 $GBOARD_PREF
+long_patch crank_max_char_num_limit 100 $GBOARD_PREF
+long_patch crank_min_char_num_limit 5 $GBOARD_PREF
+long_patch keyboard_redesign 1 $GBOARD_PREF
 bool_patch enable_inline_suggestions_space_tooltip $GBOARD_PREF
-bool_patch enable_matched_predictions_as_inline_from_crank_cifg $GBOARD_PREF
-bool_patch enable_single_word_suggestions_as_inline_from_crank_cifg $GBOARD_PREF
-
+bool_patch fast_access_bar $GBOARD_PREF
+bool_patch tiresias $GBOARD_PREF
+bool_patch agsa $GBOARD_PREF
+bool_patch enable_voice $GBOARD_PREF
+bool_patch personalization $GBOARD_PREF
+bool_patch lm $GBOARD_PREF
+bool_patch feature_cards $GBOARD_PREF
+string_patch crank_inline_suggestion_language_tags * $GBOARD_PREF
+bool_patch_false force_key_shadows $GBOARD_PREF
+#bool_patch pill $GBOARD_PREF (for rounded buttons)
 
 #google
 chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
