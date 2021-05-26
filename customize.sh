@@ -228,13 +228,7 @@ if [ -d /data/data/$DIALER ]; then
   print " Call Screening other than US needs GoogleDialer version less 41"
   ui_print ""
   print "  Do you want to install GoogleDialer 40.0.275948326??"
-bool_patch speak_easy $DIALER_PREF
-bool_patch speakeasy $DIALER_PREF
-bool_patch call_screen $DIALER_PREF
-bool_patch revelio $DIALER_PREF
-bool_patch record $DIALER_PREF
-bool_patch atlas $DIALER_PREF
-bool_patch transript $DIALER_PREF  print "    Vol Up += Yes"
+  print "    Vol Up += Yes"
   print "    Vol Down += No"
   if $VKSEL; then
     if [ -d $app/$DIALER* ]; then

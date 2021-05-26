@@ -63,7 +63,8 @@ bool_patch redesign $GBOARD_PREF
 bool_patch lens $GBOARD_PREF
 bool_patch generation $GBOARD_PREF
 bool_patch multiword $GBOARD_PREF
-bool_patch promo $GBOARD_PREF
+bool_patch voice_promo $GBOARD_PREF
+bool_patch silk $GBOARD_PREF
 bool_patch enable_email_provider_completion $GBOARD_PREF
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
 bool_patch enable_inline_suggestions_on_decoder_side $GBOARD_PREF
