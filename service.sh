@@ -40,22 +40,27 @@ done
 
 string_patch() {
 file=$3
-str=$(grep $1 $3 | grep string | cut -c 14- | cut -d'<' -f1)
 str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
-add="$str1>$2"
-if [ ! $add == $str ]; then
-sed -i -e "s/${str}/${add}/g" $file
+for i in $str1; do
+str2=$(grep $i $3 | grep string | cut -c 14- | cut -d'<' -f1)
+add="$i>$2"
+if [ ! "$add" == "$str2" ]; then
+sed -i -e "s/${str2}/${add}/g" $file
 fi
+done
 }
 
 long_patch() {
 file=$3
-str=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1-2)
-str1=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
+lon=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1)
+for i in $lon; do
+str=$(grep $i $3 | grep long | cut -c 17-  | cut -d'"' -f1-2)
+str1=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
 add="$str\"$2"
 if [ ! "$add" == "$str1" ]; then
 sed -i -e "s/${str1}/${add}/g" $file
 fi
+done
 }
 
 # Call Screening
@@ -96,7 +101,7 @@ bool_patch enable_voice $GBOARD_PREF
 bool_patch personalization $GBOARD_PREF
 bool_patch lm $GBOARD_PREF
 bool_patch feature_cards $GBOARD_PREF
-string_patch crank_inline_suggestion_language_tags * $GBOARD_PREF
+string_patch crank_inline_suggestion_language_tags "ar,de,en,es,fr,hi-IN,hi-Latn,id,it,ja,ko,nl,pl,pt,ru,th,tr,zh-CN,zh-HK,zh-TW" $GBOARD_PREF
 bool_patch_false force_key_shadows $GBOARD_PREF
 #bool_patch pill $GBOARD_PREF (for rounded buttons)
 
