@@ -1,3 +1,6 @@
+id="RQ2A.210505.003"
+inc="7255357"
+
 online() {
 s=$(curl -s -I http://www.google.com --connect-timeout 5 | grep "ok")
 if [ ! -z "$s" ]; then
@@ -569,23 +572,23 @@ fi
 fi
 
 if [ $API -eq 27 ]; then
-sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/walleye\/walleye:8.1.0\/OPM1.171019.011\/4448085:user\/release-keys/g" $MODPATH/spoof.prop
+sed -i -e "s/google\/redfin\/redfin:11\/${id}\/${inc}:user\/release-keys/google\/walleye\/walleye:8.1.0\/OPM1.171019.011\/4448085:user\/release-keys/g" $MODPATH/spoof.prop
 sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
 sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
-sed -i -e "s/RQ2A.210405.005/OPM1.171019.011/g" $MODPATH/spoof.prop
-sed -i -e "s/7181113/4448085/g" $MODPATH/spoof.prop
+sed -i -e "s/${id}/OPM1.171019.011/g" $MODPATH/spoof.prop
+sed -i -e "s/${inc}/4448085/g" $MODPATH/spoof.prop
 elif [ $API -eq 28 ]; then
-sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/blueline\/blueline:9\/PQ3A.190705.001\/5565753:user\/release-keys/g" $MODPATH/spoof.prop
+sed -i -e "s/google\/redfin\/redfin:11\/${id}\/${inc}:user\/release-keys/google\/blueline\/blueline:9\/PQ3A.190705.001\/5565753:user\/release-keys/g" $MODPATH/spoof.prop
 sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
 sed -i -e "s/Pixel 5/Pixel 3/g" $MODPATH/spoof.prop
-sed -i -e "s/RQ2A.210405.005/PQ3A.190705.001/g" $MODPATH/spoof.prop
-sed -i -e "s/7181113/5565753/g" $MODPATH/spoof.prop
+sed -i -e "s/${id}/PQ3A.190705.001/g" $MODPATH/spoof.prop
+sed -i -e "s/${inc}/5565753/g" $MODPATH/spoof.prop
 elif [ $API -eq 29 ]; then
-sed -i -e "s/google\/redfin\/redfin:11\/RQ2A.210405.005\/7181113:user\/release-keys/google\/coral\/coral:10\/QQ3A.200805.001\/6578210:user\/release-keys/g" $MODPATH/spoof.prop
+sed -i -e "s/google\/redfin\/redfin:11\/${id}\/${inc}:user\/release-keys/google\/coral\/coral:10\/QQ3A.200805.001\/6578210:user\/release-keys/g" $MODPATH/spoof.prop
 sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
 sed -i -e "s/Pixel 5/Pixel 4 XL/g" $MODPATH/spoof.prop
-sed -i -e "s/RQ2A.210405.005/QQ3A.200805.001/g" $MODPATH/spoof.prop
-sed -i -e "s/7181113/6578210/g" $MODPATH/spoof.prop
+sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
+sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
 fi
 
 print ""
@@ -617,14 +620,13 @@ fi
 if [ $API -eq 30 ]; then
 ui_print ""
 print "  Do you want to install Pixel Launcher?"
-print "  With Double Tap to sleep on Home."
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 if $VKSEL; then
 tar -xf $MODPATH/files/pl.tar.xz -C $MODPATH/system/product/priv-app
 mv $MODPATH/files/privapp-permissions-com.google.android.apps.nexuslauncher.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.apps.nexuslauncher.xml
-PL=$(find /system -name *Launcher*.apk | grep -v overlay)
-TR=$(find /system -name *Trebuchet*.apk | grep -v overlay)
+PL=$(find /system -name *Launcher* | grep -v overlay | grep -v *.*)
+TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v *.*)
 REMOVE="$REMOVE $PL $TR"
 else
 rm -rf $MODPATH/system/product/overlay/Pixel*.apk
@@ -658,6 +660,23 @@ bool_patch lens $GBOARD
 bool_patch generation $GBOARD
 bool_patch multiword $GBOARD
 bool_patch core_typing $GBOARD
+if [ -z $(find /system -name LatinIMEGooglePrebuilt) ] && [ ! -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk ]; then
+print ""
+print "- GBoard is not installed as a system app !!"
+print "- Making Gboard as a system app"
+cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/Velvet
+mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
+rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
+mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
+elif [ -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk ]; then
+print ""
+print "- GBoard is not installed as a system app !!"
+print "- Making Gboard as a system app"
+cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/Velvet
+mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
+rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
+mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
+fi
 fi
 
 if [ -d /data/data/com.google.android.apps.wellbeing ]; then
@@ -692,6 +711,7 @@ rm -rf $MODPATH/spoof.prop
 if [ $API -le 29 ]; then
 sed -i -e "s/device_config/#device_config/g" $MODPATH/service.sh
 sed -i -e "s/sleep/#sleep/g" $MODPATH/service.sh
+rm -rf $MODPATH/system$product/priv-app/SimpleDeviceConfig
 fi
 
 if [ $API -le 28 ]; then

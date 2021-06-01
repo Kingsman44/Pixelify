@@ -11,7 +11,8 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ Features
 -   Adaptive Charging (Google SystemUI)
--   Adaptive Sound (11+)(Pixel Device Spoof must be ON)
+-   Adaptive Connectivty (11+)
+-   Adaptive Sound (11+)
 -   Enables Google Dialer install via Playstore
 -   Enables Google Dialer's Call Screening (9+)
 -   Enables Nexus, Pixel, and Android One app support
@@ -19,10 +20,10 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Google Duo features
 -   Google Fit Heart rate (needed reboot if installed after module installtion)
 -   Google Fit Respiratory rate (needed reboot if installed after module installtion)
--   Google GBoard New Design
--   Google Gboard Assistant Mic (If Preinstalled & NGA installed)
--   Google Gboard Lens support
--   Google Gboard Smart Compose
+-   Google GBoard New Design*
+-   Google Gboard Assistant Mic* (If Preinstalled & NGA installed)
+-   Google Gboard Lens support*
+-   Google Gboard Smart Compose*
 -   Google Sans Font
 -   Live captions (11+)
 -   Next Generation Assistant (10+)(Optional)
@@ -34,7 +35,9 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Pixel Live Wallpapers (Optional)
 -   Portrait Light (10+)
 -   Screen Attention Service
--   Shareable Google Recorder
+-   Shareable Google Recorder 
+<br>
+* - There are two types of Gboard (com.android.inputmethod.latin and com.google.android.inputmethod.latin), These are only available for com.google.android.inputmethod.latin
 
 ## ⭐ How to Enable Features
 
@@ -120,3 +123,17 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Updated GEL.GSAPrefs.xml
 - Fixed Pixel Launcher not installed
 - Disabled Call screening if not selected
+
+### Version 1.3
+- Added Adaptive Connectivity
+- Fixed small bug
+- Signed all pixelify overlays with system signature
+- Improved Gboard Smart Compose
+- Improved gboard new design (Now more colors are available in Themes)
+- Removed Gboard's restriction for en-US for smart compose (now even it shows suggestion on other languages, Tested Hinglish (Hindi in English))
+- Gboard will also converted into system-app if isn't
+- Fixed Fingerprint for A10 to A8 devices. 
+- Added SimpleDeviceConfig.apk
+- No need for spoof for Adaptive Sound.
+- Switch to Normal Pixel Launcher
+- Fixed Uninstallation of other Launcher  
