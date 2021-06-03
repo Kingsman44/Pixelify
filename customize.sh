@@ -629,7 +629,7 @@ PL=$(find /system -name *Launcher* | grep -v overlay | grep -v *.*)
 TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v *.*)
 REMOVE="$REMOVE $PL $TR"
 else
-rm -rf $MODPATH/system/product/overlay/Pixel*.apk
+rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
 fi
 fi
 
