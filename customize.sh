@@ -724,6 +724,7 @@ if [ $API -le 27 ]; then
 sed -i -e "s/bool_patch AdaptiveCharging__v1_enabled/#bool_patch AdaptiveCharging__v1_enabled/g" $MODPATH/service.sh
 fi
 
+sh $MODPATH/service.sh
 ui_print ""
 print "- Done"
 ui_print ""

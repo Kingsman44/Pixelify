@@ -109,7 +109,7 @@ bool_patch_false force_key_shadows $GBOARD_PREF
 chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
 name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
 if [ ! -z $name ]; then
-string_patch GSAPrefs.google_account $name $MODPATH/files/GEL.GSAPrefs.xml
+string_patch GSAPrefs.google_account $name $MODDIR/files/GEL.GSAPrefs.xml
 fi
 cp -Tf /data/adb/modules/Pixelify/GEL.GSAPrefs.xml $GOOGLE_PREF
 
@@ -119,6 +119,8 @@ bool_patch TestingFeature $FIT
 bool_patch Sync__sync_after_promo_shown $FIT
 bool_patch Sync__use_experiment_flag_from_promo $FIT
 bool_patch Promotions $FIT
+bool_patch googler $FIT
+bool_patch dasher $FIT
 
 # Turbo
 bool_patch AdaptiveCharging__v1_enabled $TURBO
