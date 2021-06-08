@@ -127,13 +127,12 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ### Version 1.3
 - Added Adaptive Connectivity
 - Fixed small bug
-- Signed all pixelify overlays with system signature
+- Signed all overlays with system signature
 - Improved Gboard Smart Compose
 - Improved gboard new design (Now more colors are available in Themes)
-- Removed Gboard's restriction for en-US for smart compose (now even it shows suggestion on other languages, Tested Hinglish (Hindi in English))
 - Gboard will also converted into system-app if isn't
 - Fixed Fingerprint for A10 to A8 devices. 
 - Added SimpleDeviceConfig.apk
-- No need for spoof for Adaptive Sound.
 - Switch to Normal Pixel Launcher
 - Fixed Uninstallation of other Launcher  
+- Updated spoof props to june sec patch

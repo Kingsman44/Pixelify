@@ -83,17 +83,15 @@ bool_patch silk $GBOARD_PREF
 bool_patch enable_email_provider_completion $GBOARD_PREF
 bool_patch enable_multiword_predictions $GBOARD_PREF
 bool_patch_false disable_multiword_autocompletion $GBOARD_PREF
-bool_patch crank $GBOARD_PREF
 bool_patch enable_inline_suggestions_on_decoder_side $GBOARD_PREF
 bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD_PREF
 bool_patch enable_inline_suggestions_on_client_side $GBOARD_PREF
 bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD_PREF
-long_patch inline_suggestion_experiment_version 2 $GBOARD_PREF
+long_patch inline_suggestion_experiment_version 1 $GBOARD_PREF
 long_patch user_history_learning_strategies 1 $GBOARD_PREF
 long_patch crank_max_char_num_limit 100 $GBOARD_PREF
 long_patch crank_min_char_num_limit 5 $GBOARD_PREF
 long_patch keyboard_redesign 1 $GBOARD_PREF
-bool_patch enable_inline_suggestions_space_tooltip $GBOARD_PREF
 bool_patch fast_access_bar $GBOARD_PREF
 bool_patch tiresias $GBOARD_PREF
 bool_patch agsa $GBOARD_PREF
@@ -109,8 +107,7 @@ bool_patch_false force_key_shadows $GBOARD_PREF
 chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
 name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
 if [ ! -z $name ]; then
-string_patch GSAPrefs.google_account $name $MODDIR/files/GEL.GSAPrefs.xml
-fi
+string_patch GSAPrefs.google_account $name $MODDIR/files/GEL.GSAPrefs.xml fi
 cp -Tf /data/adb/modules/Pixelify/GEL.GSAPrefs.xml $GOOGLE_PREF
 
 # GoogleFit
@@ -124,19 +121,6 @@ bool_patch dasher $FIT
 
 # Turbo
 bool_patch AdaptiveCharging__v1_enabled $TURBO
-
-sleep 120
-
-# DevicePersonalization
-device_config put device_personalization_services AdaptiveAudio__enable_adaptive_audio true
-device_config put device_personalization_services AdaptiveAudio__show_promo_notificatio true
-device_config put device_personalization_services Autofill__enable true
-device_config put device_personalization_services NotificationAssistant__enable_service true
-device_config put device_personalization_services Captions__surface_sound_events true
-device_config put device_personalization_services Captions__enable_augmented_music true
-
-# AdaptiveCharging
-device_config put adaptive_charging adaptive_charging_enabled true
 
 # Wellbeing
 pm enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity

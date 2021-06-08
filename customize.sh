@@ -1,5 +1,5 @@
-id="RQ2A.210505.003"
-inc="7255357"
+id="RQ3A.210605.005"
+inc="7349499"
 
 online() {
 s=$(curl -s -I http://www.google.com --connect-timeout 5 | grep "ok")
@@ -664,7 +664,7 @@ if [ -z $(find /system -name LatinIMEGooglePrebuilt) ] && [ ! -f /data/adb/modul
 print ""
 print "- GBoard is not installed as a system app !!"
 print "- Making Gboard as a system app"
-cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/Velvet
+cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
 mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
 rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
 mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
@@ -672,7 +672,7 @@ elif [ -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/L
 print ""
 print "- GBoard is not installed as a system app !!"
 print "- Making Gboard as a system app"
-cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/Velvet
+cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
 mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
 rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
 mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
