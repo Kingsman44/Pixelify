@@ -13,9 +13,11 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Adaptive Charging (Google SystemUI)
 -   Adaptive Connectivty (11+)
 -   Adaptive Sound (11+)
--   Enables Google Dialer install via Playstore
--   Enables Google Dialer's Call Screening (9+)
+-   Call Captions (11+)
 -   Enables Nexus, Pixel, and Android One app support
+-   Google Dialer Call Screening Latest
+-   Google Dialer Hold for me
+-   Google Dialer Call Recording (Device depended for working)
 -   Google Digital Wellbeing Heads up (Beta only)
 -   Google Duo features
 -   Google Fit Heart rate (needed reboot if installed after module installtion)
@@ -31,7 +33,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Pixel Device spoof (Optional)
 -   Pixel Blue theme accent
 -   Pixel bootanimation (Optional)
--   Pixel Launcher with Doubletap to Sleep on HomeScreen (11 only)
+-   Pixel Launcher (11)
 -   Pixel Live Wallpapers (Optional)
 -   Portrait Light (10+)
 -   Screen Attention Service
@@ -46,15 +48,9 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **How to Enable**:- After installation reboot your phone, then while open assistant you will get prompt to download additional resources, download it and **reboot** your phone<br>
 - **Note**:- Incase Assistant Ui is gone, just Reboot your Phone.<br>
 
-### 2.1) Call Screening Latest with all Features [ US only ] [ Beta ]
+### 2.1) Call Screening Latest with all Features
 - **Installation**:- Needed to select 'YES' to pixel Spoof, If Dialer Preinstalled (As SystemApp) No need to Install Dialer from module <br>
 - **Note**:- Incase Call Screening is gone, just Reboot your Phone.<br> 
-
-### 2.2) Call Screening V1 [ Available to all regions ]
-- **Installation**:- Needed to Install Dialer from module <br>
-- **How to Enable**:- After installation reboot your phone, , Open Dialer wait 4-5 Min, Then reboot your Phone<br>
-- **Note**:- 1) Do not Update Dialer
-<br>2) Incase Call Screening is gone, just Reboot your Phone.<br>
 
 ### 3) Portrait Light
 - **Note**:- You might Get directly, if didn't then clear data, open photos and wait for some time.<br>
@@ -136,3 +132,13 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Switch to Normal Pixel Launcher
 - Fixed Uninstallation of other Launcher  
 - Updated spoof props to june sec patch
+
+### Version 1.4
+- Introduced auto set Fp according build id to fix cts
+- Google Latest Call Screening for everyone
+- Google Hold for Me
+- Google Photos Locked Folder
+- Google Assistant to Answer Call, Reject Call 
+- Updated GEL.GSAPrefs.xml
+- Introduced Logs, saved at Internal Storage > Pixelify > logs.txt (Beta)
+- Forced Enable Caption Call (In Live Caption Settings)

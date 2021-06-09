@@ -5,25 +5,25 @@ export GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_pre
 export TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
 
 bool_patch() {
-file=$2
-line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
-for i in $line; do
-  val_false='value="true"'
-  val_true='value="flase"'
-  write="${i} $val_true"
-  find="${i} $val_false"
-  sed -i -e "s/${find}/${write}/g" $file
-done
+    file=$2
+    line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
+    for i in $line; do
+        val_false='value="true"'
+        val_true='value="flase"'
+        write="${i} $val_true"
+        find="${i} $val_false"
+        sed -i -e "s/${find}/${write}/g" $file
+    done
 }
 
 string_patch() {
-file=$3
-str=$(grep $1 $3 | grep string | cut -c 14- | cut -d'<' -f1)
-str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
-add="$str1>$2"
-if [ ! $add == $str ]; then
-sed -i -e "s/${str}/${add}/g" $file
-fi
+    file=$3
+    str=$(grep $1 $3 | grep string | cut -c 14- | cut -d'<' -f1)
+    str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
+    add="$str1>$2"
+    if [ ! $add == $str ]; then
+        sed -i -e "s/${str}/${add}/g" $file
+    fi
 }
 
 # Call Screening
@@ -34,6 +34,7 @@ bool_patch revelio $DIALER_PREF
 bool_patch record $DIALER_PREF
 bool_patch atlas $DIALER_PREF
 bool_patch transript $DIALER_PREF
+rm -rf /data/data/com.android.google.dialer/files/phenotype/com.google.android.dialer
 
 # GBoard
 bool_patch nga $GBOARD_PREF
