@@ -177,6 +177,8 @@ while true; do
         sleep 10
 	mkdir -p /data/data/com.google.android.dialer/files/phenotype
 	cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+	chmod 0500 /data/data/com.google.android.dialer/files/phenotype
+	chmod 0400 /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
 	am force-stop com.google.android.dialer
         break
     fi
