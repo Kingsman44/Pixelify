@@ -1,3 +1,5 @@
+tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
+
 id="$(grep ro.build.id $MODPATH/spoof.prop | cut -d'=' -f2)"
 inc="$(grep ro.build.version.incremental $MODPATH/spoof.prop | cut -d'=' -f2)"
 
@@ -100,6 +102,8 @@ DIALER1=$(find /system -name *Dialer.apk)
 
 GOOGLE=$(find /system -name Velvet.apk)
 
+REMOVE=""
+
 if [ $API -ge "30" ]; then
     if [ ! -z $(find /system -name DevicePerson*.apk) ] && [ ! -z $(find /system -name DevicePerson*.apk) ]; then
         DP1=$(find /system -name DevicePerson*.apk)
@@ -114,7 +118,7 @@ if [ $API -ge "30" ]; then
 fi
 
 if [ $API -ge 28 ]; then
-    TUR=$(find /system -name Turbo*.apk)
+    TUR=$(find /system -name Turbo*.apk | grep -v overlay)
     REMOVE="$REMOVE $TUR"
 fi
 
@@ -145,7 +149,7 @@ keytest() {
         return 0
     else
         ui_print "   Try again:"
-        timeout 3 keycheck
+        timeout 3 $MODPATH/addon/keycheck
         local SEL=$?
         [ $SEL -eq 143 ] && abort "   Vol key not detected!" || return 1
     fi
@@ -171,8 +175,8 @@ chooseportold() {
     # Keycheck binary by someone755 @Github, idea for code below by Zappo @xda-developers
     # Calling it first time detects previous input. Calling it second time will do what we want
     while true; do
-        keycheck
-        keycheck
+        $MODPATH/addon/keycheck
+        $MODPATH/addon/keycheck
         local SEL=$?
         if [ "$1" == "UP" ]; then
             UP=$SEL
@@ -265,11 +269,15 @@ if [ -d /data/data/$DIALER ]; then
     print ""
     if $VKSEL; then
         DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
+        sed -i -e "s/CallScreening=0/CallScreening=1/g" $MODPATH/config.prop
         print "- Enabling Call Screening"
-        print ""
-        print "- Enabling Call Recording (Device dependent)"
+        print " "
+        print "- Enabling Call Recording (Working is device dependent)"
+        setprop sys.persist.locale en-US
+        print " "
+        print "- Please set your launguage to English (United States) for call screening"
 
-	cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
+        cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
         cp -Tf $MODPATH/files/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
         am force-stop $DIALER
 
@@ -280,7 +288,7 @@ if [ -d /data/data/$DIALER ]; then
         bool_patch record $DIALER_PREF
         bool_patch atlas $DIALER_PREF
 
-        if [ -z $(find /system -name GoogleDialer) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
+        if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
             print "- Google Dialer is not installed as a system app !!"
             print "- Making Google Dialer as a system app"
@@ -295,25 +303,7 @@ if [ -d /data/data/$DIALER ]; then
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
             rm -rf $MODPATH/system$product/priv-app/GoogleDialer/oat
         fi
-    else
-        sed -i -e "s/bool_patch speak_easy/#disabled/g" $MODPATH/service.sh
-        sed -i -e "s/bool_patch speakeasy/#disabled/g" $MODPATH/service.sh
-        sed -i -e "s/bool_patch call_screen/#disabled/g" $MODPATH/service.sh
-        sed -i -e "s/bool_patch revelio/#disabled/g" $MODPATH/service.sh
-        sed -i -e "s/bool_patch record/#disabled/g" $MODPATH/service.sh
-        sed -i -e "s/bool_patch atlas/#disabled/g" $MODPATH/service.sh
-        sed -i -e "s/bool_patch transript/#disabled/g" $MODPATH/service.sh
-        sed -i -e "s/bool_patch callscreen #1/#disabled/g" $MODPATH/service.sh
     fi
-else
-    sed -i -e "s/bool_patch speak_easy/#disabled/g" $MODPATH/service.sh
-    sed -i -e "s/bool_patch speakeasy/#disabled/g" $MODPATH/service.sh
-    sed -i -e "s/bool_patch call_screen/#disabled/g" $MODPATH/service.sh
-    sed -i -e "s/bool_patch revelio/#disabled/g" $MODPATH/service.sh
-    sed -i -e "s/bool_patch record/#disabled/g" $MODPATH/service.sh
-    sed -i -e "s/bool_patch atlas/#disabled/g" $MODPATH/service.sh
-    sed -i -e "s/bool_patch transript/#disabled/g" $MODPATH/service.sh
-    sed -i -e "s/bool_patch callscreen #1/#disabled/g" $MODPATH/service.sh
 fi
 
 ui_print ""
@@ -325,6 +315,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
     print "   Vol Down += No"
     ui_print ""
     if $VKSEL; then
+        sed -i -e "s/Assistant=0/Assistant=1/g" $MODPATH/config.prop
         if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
             if [ "$(cat /sdcard/Pixelify/version/nga.txt)" != "$NGAVERSION" ]; then
                 print "  (Interned Needed)"
@@ -409,7 +400,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
         if [ ! -z $name ]; then
             string_patch GSAPrefs.google_account $name $MODPATH/files/GEL.GSAPrefs.xml
         fi
-        if [ ! -z $f1]; then
+        if [ ! -z $f1 ]; then
             string_patch 12490 "$f1" $MODPATH/files/GEL.GSAPrefs.xml
         fi
         if [ ! -z $f2 ]; then
@@ -420,11 +411,10 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
         rm -rf $GOOGLE_PREF
         rm -rf /data/data/com.google.android.googlequicksearchbox/cache/*
 
-        if [ -z $(find /system -name Velvet) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
+        if [ -z $(pm list packages -s com.google.android.googlequicksearchbox | grep -v nga) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
             print ""
             print "- Google is not installed as a system app !!"
             print "- Making Google as a system app"
-            REMOVE="$REMOVE $GOOGLE"
             cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
             mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
             rm -rf $MODPATH/system/product/priv-app/Velvet/oat
@@ -433,33 +423,17 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             print ""
             print "- Google is not installed as a system app !!"
             print "- Making Google as a system app"
-            REMOVE="$REMOVE $GOOGLE"
             cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
             mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
             rm -rf $MODPATH/system/product/priv-app/Velvet/oat
             mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
         fi
-        # else for if dont't want to install
-    else
-        sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
-        sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
-        sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
-        sed -i -e "s/string_patch GSAPrefs.google_account/#string_patch GSAPrefs.google_account/g" $MODPATH/service.sh
-        sed -i -e "s/name=/#name=/g" $MODPATH/service.sh
-        sed -i -e "s/fi #1/#fi/g" $MODPATH/service.sh
     fi
-    # else for if Google not installed.
-else
-    sed -i -e "s/export GOOGLE/#export GOOGLE/g" $MODPATH/service.sh
-    sed -i -e "s/chmod 0551/#chmod 0551/g" $MODPATH/service.sh
-    sed -i -e "s/cp -Tf/#cp -Tf/g" $MODPATH/service.sh
-    sed -i -e "s/string_patch GSAPrefs.google_account/#string_patch GSAPrefs.google_account/g" $MODPATH/service.sh
-    sed -i -e "s/name=/#name=/g" $MODPATH/service.sh
-    sed -i -e "s/fi #1/#fi/g" $MODPATH/service.sh
 fi
 
+wall=$(find /system -name WallpaperPickerGoogle*.apk)
 if [ $API -ge 28 ]; then
-    if [ -f /sdcard/Pixelify/backup/pixel.tar.xz  ]; then
+    if [ -f /sdcard/Pixelify/backup/pixel.tar.xz ]; then
         ui_print ""
         print "  Do you want to install Pixel Live Wallpapers?"
         print "  (Backup detected, no internet needed)"
@@ -467,6 +441,7 @@ if [ $API -ge 28 ]; then
         print "   Vol Down += No"
         ui_print ""
         if $VKSEL; then
+            REMOVE="$REMOVE $wall"
             if [ "$(cat /sdcard/Pixelify/version/pixel.txt)" != "$LWVERSION" ]; then
                 print "  (Interned Needed)"
                 print "  New version Detected "
@@ -499,7 +474,6 @@ if [ $API -ge 28 ]; then
             fi
             print "- Installing Pixel LiveWallpapers"
             tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system$product
-            wall=$(find /system -name WallpaperPickerGoogle*.apk)
             if [ $API -le 28 ]; then
                 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                 rm -rf $MODPATH/system/overlay
@@ -509,7 +483,7 @@ if [ $API -ge 28 ]; then
                 if [ -f /sdcard/Pixelify/backup/wpg-$API.tar.xz ]; then
                     ui_print ""
                     print "  (Internet needed)"
-                    print "  Do you want to Download Styles and Wallpapers?"
+                    print "  Do you want to Download Google Styles and Wallpapers?"
                     print "  Size: $WSIZE"
                     print "   Vol Up += Yes"
                     print "   Vol Down += No"
@@ -537,8 +511,6 @@ if [ $API -ge 28 ]; then
                     tar -xf /sdcard/Pixelify/backup/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
                 fi
             fi
-
-            REMOVE="$REMOVE $wall"
         fi
     else
         ui_print ""
@@ -573,7 +545,6 @@ if [ $API -ge 28 ]; then
                     mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                     rm -rf $MODPATH/system/overlay
                 fi
-                wall=$(find /system -name WallpaperPickerGoogle*.apk)
                 REMOVE="$REMOVE $wall"
                 ui_print ""
                 print "  Do you want to create backup of Pixel LiveWallpapers?"
@@ -618,20 +589,23 @@ else
     rm -rf $MODPATH/system$product/media/boot*.zip
 fi
 
-if [ $API -eq 30 ]; then
+if [ $API -ge 29 ]; then
     ui_print ""
     print "  Do you want to install Pixel Launcher?"
     print "   Vol Up += Yes"
     print "   Vol Down += No"
     if $VKSEL; then
-        tar -xf $MODPATH/files/pl.tar.xz -C $MODPATH/system/product/priv-app
+        tar -xf $MODPATH/files/pl-$API.tar.xz -C $MODPATH/system/product/priv-app
         mv $MODPATH/files/privapp-permissions-com.google.android.apps.nexuslauncher.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.apps.nexuslauncher.xml
-        PL=$(find /system -name *Launcher* | grep -v overlay | grep -v *.*)
-        TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v *.*)
-        REMOVE="$REMOVE $PL $TR"
+        PL=$(find /system -name *Launcher* | grep -v overlay | grep -v "\.")
+        TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v "\.")
+        QS=$(find /system -name *QuickStep* | grep -v overlay | grep -v "\.")
+        REMOVE="$REMOVE $PL $TR $QS"
     else
         rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
     fi
+else
+    rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
 fi
 
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
@@ -661,7 +635,7 @@ if [ -f $GBOARD ]; then
     bool_patch generation $GBOARD
     bool_patch multiword $GBOARD
     bool_patch core_typing $GBOARD
-    if [ -z $(find /system -name LatinIMEGooglePrebuilt) ] && [ ! -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk ]; then
+    if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ ! -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard as a system app"
@@ -687,11 +661,15 @@ if [ -d /data/data/com.google.android.apps.wellbeing ]; then
     pm enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity > /dev/null 2>&1
 fi
 
-if [ $API -eq 30 ]; then
+if [ $API -ge 29 ]; then
     print ""
     print "- Installing DevicePersonalisationService"
-    print "- Enabling Adaptive Sound & Live Captions ..."
-    tar -xf $MODPATH/files/dp.tar.xz -C $MODPATH/system/product/priv-app
+    if [ $API -ge 30 ]; then
+        print "- Enabling Adaptive Sound & Live Captions ..."
+    else
+        print "- Enabling Live Captions ..."
+    fi
+    tar -xf $MODPATH/files/dp-$API.tar.xz -C $MODPATH/system/product/priv-app
     mv $MODPATH/system/product/priv-app/DevicePersonalizationPrebuiltPixel2020 $MODPATH/system/product/priv-app/devicePersonalizationPrebuiltPixel2020
 fi
 
@@ -735,4 +713,3 @@ rm -rf /storage/emulated/0/Pixelify/logs.txt
 ui_print ""
 print "- Done"
 ui_print ""
-

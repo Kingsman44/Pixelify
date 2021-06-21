@@ -25,7 +25,6 @@ pm_enable() {
 log() {
     date=$(date +%y/%m/%d)
     tim=$(date +%H:%M:%S)
-    #echo "$date $tim: $@" >> /storage/emulated/0/Pixelify/logs.txt
     temp="$temp
 $date $tim: $@"
 }
@@ -37,70 +36,80 @@ set_prop() {
 
 bool_patch() {
     file=$2
-    line=$(grep $1 $2 | grep false | cut -c 16- | cut -d' ' -f1)
-    for i in $line; do
-        val_false='value="false"'
-        val_true='value="true"'
-        write="${i} $val_true"
-        find="${i} $val_false"
-        log "Setting bool $(echo $i | cut -d'"' -f2) to True"
-        sed -i -e "s/${find}/${write}/g" $file
-    done
+    if [ -f $file ]; then
+        line=$(grep $1 $2 | grep false | cut -c 16- | cut -d' ' -f1)
+        for i in $line; do
+            val_false='value="false"'
+            val_true='value="true"'
+            write="${i} $val_true"
+            find="${i} $val_false"
+            log "Setting bool $(echo $i | cut -d'"' -f2) to True"
+            sed -i -e "s/${find}/${write}/g" $file
+        done
+    fi
 }
 
 bool_patch_false() {
     file=$2
-    line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
-    for i in $line; do
-        val_false='value="true"'
-        val_true='value="false"'
-        write="${i} $val_true"
-        find="${i} $val_false"
-        log "Setting bool $i to False"
-        sed -i -e "s/${find}/${write}/g" $file
-    done
+    if [ -f $file ]; then
+        line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
+        for i in $line; do
+            val_false='value="true"'
+            val_true='value="false"'
+            write="${i} $val_true"
+            find="${i} $val_false"
+            log "Setting bool $i to False"
+            sed -i -e "s/${find}/${write}/g" $file
+        done
+    fi
 }
 
 string_patch() {
     file=$3
-    str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
-    for i in $str1; do
-        str2=$(grep $i $3 | grep string | cut -c 14- | cut -d'<' -f1)
-        add="$i>$2"
-        if [ ! "$add" == "$str2" ]; then
-            log "Setting string $i to $2"
-            sed -i -e "s/${str2}/${add}/g" $file
-        fi
-    done
+    if [ -f $file ]; then
+        str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
+        for i in $str1; do
+            str2=$(grep $i $3 | grep string | cut -c 14- | cut -d'<' -f1)
+            add="$i>$2"
+            if [ ! "$add" == "$str2" ]; then
+                log "Setting string $i to $2"
+                sed -i -e "s/${str2}/${add}/g" $file
+            fi
+        done
+    fi
 }
 
 long_patch() {
     file=$3
-    lon=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1)
-    for i in $lon; do
-        str=$(grep $i $3 | grep long | cut -c 17-  | cut -d'"' -f1-2)
-        str1=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
-        add="$str\"$2"
-        if [ ! "$add" == "$str1" ]; then
-            log "Setting string $i to $2"
-            sed -i -e "s/${str1}/${add}/g" $file
-        fi
-    done
+    if [ -f $file ]; then
+        lon=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1)
+        for i in $lon; do
+            str=$(grep $i $3 | grep long | cut -c 17-  | cut -d'"' -f1-2)
+            str1=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
+            add="$str\"$2"
+            if [ ! "$add" == "$str1" ]; then
+                log "Setting string $i to $2"
+                sed -i -e "s/${str1}/${add}/g" $file
+            fi
+        done
+    fi
 }
 
 mkdir -p /storage/emulated/0/Pixelify
 
 log "Service Started"
 
-# Call Screening
-bool_patch speak_easy $DIALER_PREF
-bool_patch speakeasy $DIALER_PREF
-bool_patch call_screen $DIALER_PREF
-bool_patch revelio $DIALER_PREF
-bool_patch record $DIALER_PREF
-bool_patch atlas $DIALER_PREF
-bool_patch transript $DIALER_PREF
-cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
+    # Call Screening
+    bool_patch speak_easy $DIALER_PREF
+    bool_patch speakeasy $DIALER_PREF
+    bool_patch call_screen $DIALER_PREF
+    bool_patch revelio $DIALER_PREF
+    bool_patch record $DIALER_PREF
+    bool_patch atlas $DIALER_PREF
+    bool_patch transript $DIALER_PREF
+    cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+fi
 
 # GBoard
 bool_patch nga $GBOARD_PREF
@@ -142,16 +151,18 @@ string_patch crank_inline_suggestion_language_tags "ar,de,en,es,fr,hi-IN,hi-Latn
 bool_patch_false force_key_shadows $GBOARD_PREF
 
 #google
-chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
-name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
-if [ ! -z $name ]; then
-    string_patch GSAPrefs.google_account $name $MODDIR/GEL.GSAPrefs.xml
-fi #1
-model=$(getprop | grep ro.product.model | cut -d':' -f2 | cut -d'[' -f2 | cut -d']' -f1)
-if [ "$model" != "Pixel 5" ]; then
-    string_patch 7325 "Pixel 4,Pixel 4 XL,Pixel 4a,Pixel 4a (5G),Pixel 5,$model" $MODDIR/GEL.GSAPrefs.xml
+if [ $(grep Assistant $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
+    chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
+    name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
+    if [ ! -z $name ]; then
+        string_patch GSAPrefs.google_account $name $MODDIR/GEL.GSAPrefs.xml
+    fi #1
+    model=$(getprop | grep ro.product.model | cut -d':' -f2 | cut -d'[' -f2 | cut -d']' -f1)
+    if [ "$model" != "Pixel 5" ]; then
+        string_patch 7325 "Pixel 4,Pixel 4 XL,Pixel 4a,Pixel 4a (5G),Pixel 5,$model" $MODDIR/GEL.GSAPrefs.xml
+    fi
+    cp -Tf $MODDIR/GEL.GSAPrefs.xml $GOOGLE_PREF
 fi
-cp -Tf /data/adb/modules/Pixelify/GEL.GSAPrefs.xml $GOOGLE_PREF
 
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
@@ -175,15 +186,16 @@ while true; do
     boot=$(getprop | grep sys.boot_completed | cut -d':' -f2 | cut -d'[' -f2 | cut -d']' -f1)
     if [ "$boot" == 1 ]; then
         sleep 10
-	mkdir -p /data/data/com.google.android.dialer/files/phenotype
-	cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
-	chmod 0500 /data/data/com.google.android.dialer/files/phenotype
-	chmod 0400 /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
-	am force-stop com.google.android.dialer
         break
     fi
 done
 
+if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
+    mkdir -p /data/data/com.google.android.dialer/files/phenotype
+    cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+    chmod 500 /data/data/com.google.android.dialer/files/phenotype
+    am force-stop com.google.android.dialer
+fi
+
 log "Service Finished"
 echo "$temp" >> /storage/emulated/0/Pixelify/logs.txt
-

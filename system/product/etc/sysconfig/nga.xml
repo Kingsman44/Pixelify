@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!-- These are configurations that should exist on devices that support Next Generation Assistant -->
-<config>
-    <!-- This feature is meant to be the feature identifying devices that support NGA -->
-    <feature name="com.google.android.feature.NEXT_GENERATION_ASSISTANT" />
-</config>

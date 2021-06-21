@@ -27,7 +27,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Google Gboard Lens support*
 -   Google Gboard Smart Compose*
 -   Google Sans Font
--   Live captions (11+)
+-   Live captions (10+)
 -   Next Generation Assistant (10+)(Optional)
 -   Now Playing Export (Works only on Pixel Phone)
 -   Pixel Device spoof (Optional)
@@ -142,3 +142,5 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Updated GEL.GSAPrefs.xml
 - Introduced Logs, saved at Internal Storage > Pixelify > logs.txt (Beta)
 - Forced Enable Caption Call (In Live Caption Settings)
+- Bug Fixes
+- Support for Live Caption and Pixel Launcher for Android Q
