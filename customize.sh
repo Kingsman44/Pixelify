@@ -327,7 +327,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
     if $VKSEL; then
         if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
             if [ "$(cat /sdcard/Pixelify/version/nga.txt)" != "$NGAVERSION" ]; then
-                print "  (Interned Needed)"
+                print "  (Network Connection Needed)"
                 print "  New version Detected."
                 print "  Do you Want to update or use Old Backup?"
                 print "  Version: $NGAVERSION"
@@ -362,7 +362,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             mkdir $MODPATH/system/product/app/NgaResources
             cp -f /sdcard/Pixelify/backup/NgaResources.apk $MODPATH/system/product/app/NgaResources/NgaResources.apk
         else
-            print "  (Interned Needed)"
+            print "  (Network Connection Needed)"
             print "  Do you want to install and Download NGA Resources"
             print "  Size: $NGASIZE"
             print "   Vol Up += Yes"
@@ -468,7 +468,7 @@ if [ $API -ge 28 ]; then
         ui_print ""
         if $VKSEL; then
             if [ "$(cat /sdcard/Pixelify/version/pixel.txt)" != "$LWVERSION" ]; then
-                print "  (Interned Needed)"
+                print "  (Network Connection Needed)"
                 print "  New version Detected "
                 print "  Do you Want to update or use Old Backup?"
                 print "  Version: $LWVERSION"
@@ -542,7 +542,7 @@ if [ $API -ge 28 ]; then
         fi
     else
         ui_print ""
-        print "  (Interned Needed)"
+        print "  (Network Connection Needed)"
         print "  Do you want to install and Download Pixel LiveWallpapers?"
         print "  Size: $LWSIZE"
         print "   Vol Up += Yes"
