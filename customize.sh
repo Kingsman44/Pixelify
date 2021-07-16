@@ -15,6 +15,8 @@ online() {
 online
 
 pix=/data/pixelify
+mkdir /sdcard/Pixelify
+
 if [ ! -d $pix ]; then
     mkdir $pix
 fi
@@ -703,11 +705,7 @@ if [ $API -le 27 ]; then
     sed -i -e "s/bool_patch AdaptiveCharging__v1_enabled/#bool_patch AdaptiveCharging__v1_enabled/g" $MODPATH/service.sh
 fi
 
-if [ ! -z "$(find /system -name SystemUIGoogle.apk)" ]; then
-    rm -rf $MODPATH/system/$product/etc/firmware
-fi
-
-rm -rf /storage/emulated/0/Pixelify/logs.txt
+rm -rf /sdcard/Pixelify/logs.txt
 
 ui_print ""
 print "- Done"
