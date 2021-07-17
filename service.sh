@@ -157,7 +157,7 @@ if [ $(grep Assistant $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
     if [ ! -z $name ]; then
         string_patch GSAPrefs.google_account $name $MODDIR/GEL.GSAPrefs.xml
     fi #1
-    model=$(getprop | grep ro.product.model | cut -d':' -f2 | cut -d'[' -f2 | cut -d']' -f1)
+    model=$(getprop ro.product.model)
     if [ "$model" != "Pixel 5" ]; then
         string_patch 7325 "Pixel 4,Pixel 4 XL,Pixel 4a,Pixel 4a (5G),Pixel 5,$model" $MODDIR/GEL.GSAPrefs.xml
     fi
@@ -183,7 +183,7 @@ bool_patch AdaptiveCharging__v1_enabled $TURBO
 pm_enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity
 
 while true; do
-    boot=$(getprop | grep sys.boot_completed | cut -d':' -f2 | cut -d'[' -f2 | cut -d']' -f1)
+    boot=$(getprop sys.boot_completed)
     if [ "$boot" == 1 ]; then
         sleep 10
         break
@@ -198,4 +198,4 @@ if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
 fi
 
 log "Service Finished"
-echo "$temp" >> /storage/emulated/0/Pixelify/logs.txt
+echo "$temp" >> /sdcard/Pixelify/logs.txt

@@ -221,7 +221,7 @@ if [ $API -ge 28 ]; then
     tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
 fi
 
-curid="$(getprop | grep ro.build.id | cut -d':' -f2 | cut -d'[' -f2 | cut -d']' -f1)"
+curid="$(getprop ro.build.id)"
 if [ "$curid" != "$id" ]; then
     if [ ! -z "$(grep $curid $MODPATH/inc.prop | head -1)" ]; then
         newinc=$(grep $curid $MODPATH/inc.prop | head -1 | cut -d'=' -f2)
@@ -233,19 +233,16 @@ if [ "$curid" != "$id" ]; then
 fi
 
 if [ $API -eq 27 ]; then
-    sed -i -e "s/google\/redfin\/redfin:11\/${id}\/${inc}:user\/release-keys/google\/walleye\/walleye:8.1.0\/OPM1.171019.011\/4448085:user\/release-keys/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/OPM1.171019.011/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/4448085/g" $MODPATH/spoof.prop
 elif [ $API -eq 28 ]; then
-    sed -i -e "s/google\/redfin\/redfin:11\/${id}\/${inc}:user\/release-keys/google\/blueline\/blueline:9\/PQ3A.190705.001\/5565753:user\/release-keys/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 3/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/PQ3A.190705.001/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/5565753/g" $MODPATH/spoof.prop
 elif [ $API -eq 29 ]; then
-    sed -i -e "s/google\/redfin\/redfin:11\/${id}\/${inc}:user\/release-keys/google\/coral\/coral:10\/QQ3A.200805.001\/6578210:user\/release-keys/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 4 XL/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
@@ -265,7 +262,7 @@ if $VKSEL; then
 fi
 
 if [ -d /data/data/$DIALER ]; then
-    print "  Do you want to install Call Screening"
+    print "  Do you want to install Call Screening & Call Recording?"
     print "    Vol Up += Yes"
     print "    Vol Down += No"
     print ""
@@ -278,6 +275,60 @@ if [ -d /data/data/$DIALER ]; then
         setprop sys.persist.locale en-US
         print " "
         print "- Please set your launguage to English (United States) for call screening"
+
+        device="$(getprop ro.product.device)"
+        device_len=${#device}
+
+        if [ -z "$(cat $MODPATH/recording.txt | grep $device)" ]; then
+            case $device_len in
+                3)
+                    sed -i -e "s/lmi/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                4)
+                    sed -i -e "s/ares/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                5)
+                    sed -i -e "s/bhima/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                6)
+                    sed -i -e "s/ginkgo/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                7)
+                    sed -i -e "s/gauguin/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                8)
+                    sed -i -e "s/camellia/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                9)
+                    sed -i -e "s/camellian/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                11)
+                    sed -i -e "s/OnePlusN200/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                12)
+                    sed -i -e "s/Infinix-X692/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                13)
+                    sed -i -e "s/gauguininpro/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                14)
+                    sed -i -e "s/Infinix-X687BR/${device}/g" $MODPATH/files/$DIALER
+                    ;;
+                *)
+                    print ""
+                    print "  Warning !!"
+                    print "  For Call Recording your ro.product.device"
+                    print "  needs to set (redfin)"
+                    print "  Do you Wish to Install Google Dialer Call Recording?"
+                    print "    Vol Up += Yes"
+                    print "    Vol Down += No"
+                    print ""
+                    if $VKSEL; then
+                        echo "ro.product.device=redfin" >> $MODPATH/system.prop
+                    fi
+                    ;;
+            esac
+        fi
 
         cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
         cp -Tf $MODPATH/files/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
