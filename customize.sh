@@ -107,14 +107,14 @@ GOOGLE=$(find /system -name Velvet.apk)
 REMOVE=""
 
 if [ $API -ge "29" ]; then
-    if [ ! -z $(find /system -name DevicePerson* | grep -v ".") ] && [ ! -z $(find /system -name DevicePerson* | grep -v ".") ]; then
-        DP1=$(find /system -name DevicePerson* | grep -v ".")
-        DP2=$(find /system -name Matchmaker* | grep -v ".")
-        BDP="$DP1 $DP2"
-    elif [ -z  $(find /system -name DevicePerson* | grep -v ".") ]; then
-        DP=$(find /system -name Matchmaker* | grep -v ".")
+    if [ ! -z $(find /system -name DevicePerson* | grep -v "\.") ] && [ ! -z $(find /system -name DevicePerson* | grep -v "\.") ]; then
+        DP1=$(find /system -name DevicePerson* | grep -v "\.")
+        DP2=$(find /system -name Matchmaker* | grep -v "\.")
+        DP="$DP1 $DP2"
+    elif [ -z  $(find /system -name DevicePerson* | grep -v "\.") ]; then
+        DP=$(find /system -name Matchmaker* | grep -v "\.")
     else
-        DP=$(find /system -name DevicePerson* | grep -v ".")
+        DP=$(find /system -name DevicePerson* | grep -v "\.")
     fi
     REMOVE="$DP"
 fi

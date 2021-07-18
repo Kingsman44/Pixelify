@@ -95,7 +95,7 @@ long_patch() {
     fi
 }
 
-mkdir -p /storage/emulated/0/Pixelify
+mkdir -p /sdcard/Pixelify
 
 log "Service Started"
 
