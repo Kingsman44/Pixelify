@@ -330,6 +330,9 @@ if [ -d /data/data/$DIALER ]; then
             esac
         fi
 
+	# Remove old prompt to replace to use within overlay
+        rm -rf /data/data/com.google.android.dialer/files/callrecordingprompt
+
         cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
         cp -Tf $MODPATH/files/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
         am force-stop $DIALER
