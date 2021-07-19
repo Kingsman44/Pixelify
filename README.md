@@ -13,12 +13,12 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Adaptive Charging (Google SystemUI)
 -   Adaptive Connectivty (11+)
 -   Adaptive Sound (11+)
--   Call Captions (11+)
+-   Call Captions (11+)(Depends on Rom)
 -   Enables Nexus, Pixel, and Android One app support
 -   Google Dialer Call Screening Latest
 -   Google Dialer Hold for me
--   Google Dialer Call Recording (Device depended for working)
--   Google Digital Wellbeing Heads up (Beta only)
+-   Google Dialer Call Recording (Device depended for working)(Beta)
+-   Google Digital Wellbeing Heads up
 -   Google Duo features
 -   Google Fit Heart rate (needed reboot if installed after module installtion)
 -   Google Fit Respiratory rate (needed reboot if installed after module installtion)
@@ -38,6 +38,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Portrait Light (10+)
 -   Screen Attention Service
 -   Shareable Google Recorder 
+-   Unlimited Storage for Photos backup
 <br>
 * - There are two types of Gboard (com.android.inputmethod.latin and com.google.android.inputmethod.latin), These are only available for com.google.android.inputmethod.latin
 
@@ -47,13 +48,6 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **Installation**:- Install NGA RESOURCES in Installation.<br>
 - **How to Enable**:- After installation reboot your phone, then while open assistant you will get prompt to download additional resources, download it and **reboot** your phone<br>
 - **Note**:- Incase Assistant Ui is gone, just Reboot your Phone.<br>
-
-### 2.1) Call Screening Latest with all Features
-- **Installation**:- Needed to select 'YES' to pixel Spoof, If Dialer Preinstalled (As SystemApp) No need to Install Dialer from module <br>
-- **Note**:- Incase Call Screening is gone, just Reboot your Phone.<br> 
-
-### 3) Portrait Light
-- **Note**:- You might Get directly, if didn't then clear data, open photos and wait for some time.<br>
 
 ## ⭐ Bugs and Fixes
 - **Call Screening**: caller can't hear your voice.<br>
@@ -147,3 +141,4 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - July Sec Patch
 - Fixed small Issues
 - Added Google Call Recording (Beta)
+- Fixed now playing for pixel devices
