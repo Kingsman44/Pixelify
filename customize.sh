@@ -1,3 +1,6 @@
+s_inc="7608474"
+s_id="SPB4.210715.011"
+
 tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
 chmod 0755 $MODPATH/addon/*
@@ -36,10 +39,12 @@ LWVERSIONP=1.3
 NGASIZE="135 Mb"
 LWSIZE="84 Mb"
 
-
-if [ $API -ge 30 ]; then
-    DPSIZE="20 Mb"
+if [ $API -ge 31 ]; then
+    DPSIZE="17 Mb"
     DPVERSIONP=1
+elif [ $API -eq 30 ]; then
+    DPSIZE="20.1 Mb"
+    DPVERSIONP=1.1
 elif [ $API -eq 29 ]; then
     WSIZE="3.6 Mb"
     DPSIZE="15 Mb"
@@ -255,20 +260,27 @@ if [ "$curid" != "$id" ]; then
 fi
 
 if [ $API -eq 27 ]; then
+    sed -i -e "s/:11/:8/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/OPM1.171019.011/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/4448085/g" $MODPATH/spoof.prop
 elif [ $API -eq 28 ]; then
+    sed -i -e "s/:11/:9/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 3/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/PQ3A.190705.001/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/5565753/g" $MODPATH/spoof.prop
 elif [ $API -eq 29 ]; then
+    sed -i -e "s/:11/:10/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 4 XL/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
+elif [ $API -eq 31 ]; then
+    sed -i -e "s/:11/:12/g" $MODPATH/spoof.prop
+    sed -i -e "s/${id}/${s_id}/g" $MODPATH/spoof.prop
+    sed -i -e "s/${inc}/${s_inc}/g" $MODPATH/spoof.prop
 fi
 
 print ""
@@ -290,7 +302,7 @@ elif [ -z $(pm list packages -s | grep com.google.android.as) ] && [ -z $(cat $p
     DPAS=0
 fi
 
-if [ $API -le 28 ]; then
+if [ $API -le 27 ]; then
     DPAS=0
 fi
 
@@ -329,7 +341,7 @@ if [ $DPAS -eq 1 ]; then
             fi
         fi
         print "- Installing Device Personalisation Services"
-                print ""
+        print ""
         tar -xf /sdcard/Pixelify/backup/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
         echo dp-$API > $pix/app.txt
     else
