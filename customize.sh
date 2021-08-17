@@ -290,7 +290,7 @@ if [ $API -ge 29 ]; then
 fi
 print "   Vol Up += Yes"
 print "   Vol Down += No"
-ui_print ""
+
 if $VKSEL; then
     cat $MODPATH/spoof.prop >> $MODPATH/system.prop
 fi
@@ -298,7 +298,7 @@ fi
 DPAS=1
 if [ $API -ge 30 ] && [ ! -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel5) ] && [ -z $(cat $pix/app_temp.txt | grep 'dp-$API') ]; then
     DPAS=0
-elif [ -z $(pm list packages -s | grep com.google.android.as) ] && [ -z $(cat $pix/app_temp.txt | grep 'dp-$API') ]; then
+elif [ ! -z $(pm list packages -s | grep com.google.android.as) ] && [ ! -z $(cat $pix/app_temp.txt | grep 'dp-$API') ]; then
     DPAS=0
 fi
 
@@ -309,16 +309,17 @@ fi
 if [ $DPAS -eq 1 ]; then
     if [ -f /sdcard/Pixelify/backup/dp-$API.tar.xz ]; then
         REMOVE="$REMOVE $DP"
-        if [ "$(cat /sdcard/Pixelify/version/dp.txt | grep $API | cut -d= -f2)" != "$DPVERSION" ]; then
+        if [ "$(cat /sdcard/Pixelify/version/dp.txt)" != "$DPVERSION_$API" ]; then
+            ui_print ""
+	    print " - Installing Device Personalistaion Services"
             ui_print ""
             print "  (Network Connection Needed)"
-            print "  New version Detected "
+            print "  New version Detected of Device Personalistaion Services"
             print "  Do you Want to update or use Old Backup?"
             print "  Version: $DPVERSION"
             print "  Size: $DPSIZE"
             print "   Vol Up += Yes"
             print "   Vol Down += No"
-            ui_print ""
             if $VKSEL; then
                 online
                 if [ $internet -eq 1 ]; then
@@ -327,11 +328,13 @@ if [ $DPAS -eq 1 ]; then
                     cd $MODPATH/files
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz -O &> /proc/self/fd/$OUTFD
                     cd /
+                    print ""
                     print "- Creating Backup"
                     print ""
                     cp -f $MODPATH/files/dp-$API.tar.xz /sdcard/Pixelify/backup/dp-$API.tar.xz
-                    echo "$DPVERSION" >> /sdcard/Pixelify/version/pixel.txt
+                    echo "$DPVERSION_$API" >> /sdcard/Pixelify/version/dp.txt
                 else
+                    print ""
                     print "!! Warning !!"
                     print " No internet detected"
                     print ""
@@ -407,7 +410,7 @@ if [ -d /data/data/$DIALER ]; then
         setprop sys.persist.locale en-US
         print " "
         print "- Please set your launguage to English (United States) for call screening"
-
+	print " "
         device="$(getprop ro.product.device)"
         device_len=${#device}
 
@@ -626,7 +629,6 @@ fi
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
 if [ $API -ge 28 ]; then
     if [ -f /sdcard/Pixelify/backup/pixel.tar.xz ]; then
-        ui_print ""
         print "  Do you want to install Pixel Live Wallpapers?"
         print "  (Backup detected, no internet needed)"
         print "   Vol Up += Yes"
@@ -757,18 +759,19 @@ if [ $API -ge 28 ]; then
                     mkdir /sdcard/Pixelify/version
                     echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
                     print " - Done"
+	            print ""
                 fi
             else
                 print "!! Warning !!"
                 print " No internet detected"
                 print ""
                 print "- Skipping Pixel LiveWallpaper"
+                print ""
             fi
         fi
     fi
 fi
 
-print ""
 print "  Do you want to install PixelBootanimation?"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
@@ -814,7 +817,7 @@ if [ -f $FIT ]; then
 fi
 
 GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
-if [ -f $GBOARD ]; then
+if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; then
     ui_print ""
     print " GBoard is installed."
     print "- Enabling Smart Compose"
@@ -832,7 +835,7 @@ if [ -f $GBOARD ]; then
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard as a system app"
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
-        mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
+        mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
     elif [ -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk ]; then
@@ -840,7 +843,7 @@ if [ -f $GBOARD ]; then
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard as a system app"
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
-        mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
+        mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
     fi
