@@ -15,6 +15,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Adaptive Sound (11+)
 -   Call Captions (11+)(Depends on Rom)
 -   Enables Nexus, Pixel, and Android One app support
+-   Extreme Battery Saver (11) [ Settings > Battery > Extreme Battery Saver ]
 -   Google Dialer Call Screening Latest
 -   Google Dialer Hold for me
 -   Google Dialer Call Recording (Device depended for working)(Beta)
@@ -38,7 +39,6 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Portrait Light (10+)
 -   Screen Attention Service
 -   Shareable Google Recorder 
--   Unlimited Storage for Photos backup
 <br>
 * - There are two types of Gboard (com.android.inputmethod.latin and com.google.android.inputmethod.latin), These are only available for com.google.android.inputmethod.latin
 
@@ -142,3 +142,13 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Fixed small Issues
 - Added Google Call Recording (Beta)
 - Fixed now playing for pixel devices
+
+### Version 1.5
+- Fixed No Internet Connection problem on some roms.
+- August Sec Patch
+- Fixes Camera Crash for some deivces
+- Device Personalisation is Optional
+- Size of Module Reduze to 25Mb
+- Android S Minimal Support
+- Added Extreme Battery Saver (Android 11 Only | S will be supported on afterwards) [ On Settings > Battery ]
+- Enabled Google Dialer Video Calling Preference, Bussiness Search, Android S Ui (For all Android Version), Prefix (May Not Work)

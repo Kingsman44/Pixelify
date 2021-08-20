@@ -1,0 +1,38 @@
+type flipendo_userfaultfd
+type flipendo
+typeattribute flipendo appdomain
+typeattribute flipendo halclientdomain
+typeattribute flipendo hal_power_client
+allow flipendo app_api_service service_manager find
+allow flipendo fwk_stats_hwservice hwservice_manager find
+allow flipendo color_display_service service_manager find
+allow flipendo hal_power_service service_manager find
+allow flipendo hal_power_default binder { call transfer }
+allow flipendo hal_power_client binder { receive call }
+allow flipendo statsd binder { receive call }
+allow flipendo gpuservice binder { receive call }
+allow flipendo stats_service_server binder { receive call }
+allow flipendo flipendo_userfaultfd anon_inode { ioctl read create }
+allow flipendo appdomain_tmpfs file { read write getattr map execute }
+allow flipendo servicemanager binder { call transfer }
+allow servicemanager flipendo binder { call transfer }
+allow servicemanager flipendo dir { search }
+allow servicemanager flipendo file { read open }
+allow servicemanager flipendo process { getattr }
+
+allow untrusted_app app_api_service service_manager find
+allow untrusted_app fwk_stats_hwservice hwservice_manager find
+allow untrusted_app color_display_service service_manager find
+allow untrusted_app hal_power_service service_manager find
+allow untrusted_app hal_power_default binder { call transfer }
+allow untrusted_app hal_power_client binder { receive call }
+allow untrusted_app statsd binder { receive call }
+allow untrusted_app gpuservice binder { receive call }
+allow untrusted_app stats_service_server binder { receive call }
+allow untrusted_app untrusted_app_userfaultfd anon_inode { ioctl read create }
+allow untrusted_app appdomain_tmpfs file { read write getattr map execute }
+allow untrusted_app servicemanager binder { call transfer }
+allow servicemanager untrusted_app binder { call transfer }
+allow servicemanager untrusted_app dir { search }
+allow servicemanager untrusted_app file { read open }
+allow servicemanager untrusted_app process { getattr }

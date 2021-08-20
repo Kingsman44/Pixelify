@@ -197,5 +197,26 @@ if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
     am force-stop com.google.android.dialer
 fi
 
+flip_perm="android.permission.READ_DEVICE_CONFIG
+android.permission.SUSPEND_APPS
+android.permission.QUERY_ALL_PACKAGES
+android.permission.RECEIVE_BOOT_COMPLETED
+android.permission.FOREGROUND_SERVICE
+android.permission.SYSTEM_ALERT_WINDOW
+android.permission.WRITE_SECURE_SETTINGS
+android.permission.WRITE_SETTINGS
+android.permission.REAL_GET_TASKS
+android.permission.INTERACT_ACROSS_USERS_FULL
+android.permission.KILL_BACKGROUND_PROCESSES
+android.permission.MODIFY_QUIET_MODE
+android.permission.INTERACT_ACROSS_PROFILES
+android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS
+android.permission.TETHER_PRIVILEGED
+android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
+
+for i in $flip_perm; do
+    pm grant com.google.android.flipendo $i
+done
+
 log "Service Finished"
 echo "$temp" >> /sdcard/Pixelify/logs.txt

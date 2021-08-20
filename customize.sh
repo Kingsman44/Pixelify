@@ -311,7 +311,7 @@ if [ $DPAS -eq 1 ]; then
         REMOVE="$REMOVE $DP"
         if [ "$(cat /sdcard/Pixelify/version/dp.txt)" != "$DPVERSION_$API" ]; then
             ui_print ""
-	    print " - Installing Device Personalistaion Services"
+            print " - Installing Device Personalistaion Services"
             ui_print ""
             print "  (Network Connection Needed)"
             print "  New version Detected of Device Personalistaion Services"
@@ -330,7 +330,6 @@ if [ $DPAS -eq 1 ]; then
                     cd /
                     print ""
                     print "- Creating Backup"
-                    print ""
                     cp -f $MODPATH/files/dp-$API.tar.xz /sdcard/Pixelify/backup/dp-$API.tar.xz
                     echo "$DPVERSION_$API" >> /sdcard/Pixelify/version/dp.txt
                 else
@@ -339,10 +338,10 @@ if [ $DPAS -eq 1 ]; then
                     print " No internet detected"
                     print ""
                     print "- Using Old backup for now."
-                    print ""
                 fi
             fi
         fi
+        print ""
         print "- Installing Device Personalisation Services"
         print ""
         tar -xf /sdcard/Pixelify/backup/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
@@ -410,9 +409,20 @@ if [ -d /data/data/$DIALER ]; then
         setprop sys.persist.locale en-US
         print " "
         print "- Please set your launguage to English (United States) for call screening"
-	print " "
+        print " "
         device="$(getprop ro.product.device)"
         device_len=${#device}
+
+        carr="$(getprop gsm.sim.operator.numeric)"
+        carrier=${#carr}
+        case $carrier in
+            6)
+                sed -i -e "s/310004/${carr}/g" $MODPATH/files/$DIALER
+                ;;
+            5)
+                sed -i -e "s/21403/${carr}/g" $MODPATH/files/$DIALER
+                ;;
+        esac
 
         if [ -z "$(cat $MODPATH/recording.txt | grep $device)" ]; then
             case $device_len in
@@ -575,14 +585,14 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                         echo "$NGAVERSION" >> /sdcard/Pixelify/version/nga.txt
                         ui_print ""
                         print "- NGA Resources installation complete"
-	                print ""
+                        print ""
                     fi
                 else
                     print "!! Warning !!"
                     print " No internet detected"
                     print ""
                     print "- Skipping NGA Resources."
-		    print ""
+                    print ""
                 fi
             fi
         fi
@@ -667,21 +677,21 @@ if [ $API -ge 28 ]; then
                 fi
             fi
             print "- Installing Pixel LiveWallpapers"
-	    print ""
+            print ""
             tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system$product
             if [ $API -le 28 ]; then
                 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                 rm -rf $MODPATH/system/overlay
             fi
 
-            if [ $API -le 29 ]; then
+            if [ $API -le 29 ] && [ $API -ge 28 ]; then
                 if [ -f /sdcard/Pixelify/backup/wpg-$API.tar.xz ]; then
-        	    print "  (Network Connection Needed)"
+                    print "  (Network Connection Needed)"
                     print "  Do you want to Download Google Styles and Wallpapers?"
                     print "  Size: $WSIZE"
                     print "   Vol Up += Yes"
                     print "   Vol Down += No"
-	            print ""
+                    print ""
                     if $VKSEL; then
                         online
                         if [ $internet -eq 1 ]; then
@@ -695,7 +705,7 @@ if [ $API -ge 28 ]; then
                             print "  Do you want to Create backups of Styles and Wallpapers?"
                             print "   Vol Up += Yes"
                             print "   Vol Down += No"
-	            	    print ""
+                            print ""
                             if $VKSEL; then
                                 cp -f $MODPATH/files/gwp-$API.tar.xz /sdcard/Pixelify/backup/gwp-$API.tar.xz
                             fi
@@ -732,7 +742,7 @@ if [ $API -ge 28 ]; then
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
                     cd /
                     rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
-                    tar -xf $MODPATH/files/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
+                    tar -xf $MODPATH/files/wpg-$API.tar.xz -C $MODPATH/system$product/priv-app
                 fi
 
                 if [ $API -le 28 ]; then
@@ -748,8 +758,7 @@ if [ $API -ge 28 ]; then
                 if $VKSEL; then
                     ui_print ""
                     print "- Creating Backup"
-                    mkdir /sdcard/Pixelify
-                    mkdir /sdcard/Pixelify/backup
+                    mkdir -p /sdcard/Pixelify/backup
                     rm -rf /sdcard/Pixelify/backup/pixel.tar.xz
                     cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
                     print ""
@@ -759,7 +768,7 @@ if [ $API -ge 28 ]; then
                     mkdir /sdcard/Pixelify/version
                     echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
                     print " - Done"
-	            print ""
+                    print ""
                 fi
             else
                 print "!! Warning !!"
@@ -830,7 +839,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     bool_patch generation $GBOARD
     bool_patch multiword $GBOARD
     bool_patch core_typing $GBOARD
-    if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ ! -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk ]; then
+    if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/app_temp.txt | grep gboard)" ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard as a system app"
@@ -838,7 +847,8 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
-    elif [ -f /data/adb/modules/Pixelify/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk ]; then
+        echo "gboard" >> $pix/app.txt
+    elif [ ! -z "$(cat $pix/app_temp.txt | grep gboard)" ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard as a system app"
@@ -846,11 +856,31 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
+        echo "gboard" >> $pix/app.txt
     fi
 fi
 
 if [ -d /data/data/com.google.android.apps.wellbeing ]; then
     pm enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity > /dev/null 2>&1
+fi
+
+if [ $API -eq 30 ]; then
+    tar -xf $MODPATH/files/flip.tar.xz -C $MODPATH/system
+    if [ -f /system/system_ext/etc/selinux/system_ext_seapp_contexts ]; then
+        flip=/system/system_ext/etc/selinux/system_ext_seapp_contexts
+    elif [ -f /system_ext/etc/selinux/system_ext_seapp_contexts ]; then
+        flip=/system_ext/etc/selinux/system_ext_seapp_contexts
+    else
+        flip=""
+        echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
+    fi
+    if [ ! -z "$flip" ]; then
+        if [ -z "$(cat $flip | grep com.google.android.flipendo)" ]; then
+            cp -r $flip $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
+            echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
+        fi
+    fi
+    REMOVE="$REMOVE /system/system_ext/priv-app/Flipendo"
 fi
 
 REPLACE="$REMOVE"
