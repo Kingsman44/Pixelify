@@ -865,6 +865,8 @@ if [ -d /data/data/com.google.android.apps.wellbeing ]; then
 fi
 
 if [ $API -eq 30 ]; then
+    print ""
+    print "- Installing Extreme Battery Saver (Flipendo)"
     tar -xf $MODPATH/files/flip.tar.xz -C $MODPATH/system
     if [ -f /system/system_ext/etc/selinux/system_ext_seapp_contexts ]; then
         flip=/system/system_ext/etc/selinux/system_ext_seapp_contexts
