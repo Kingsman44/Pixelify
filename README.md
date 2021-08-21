@@ -27,6 +27,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Google Gboard Assistant Mic* (If Preinstalled & NGA installed)
 -   Google Gboard Lens support*
 -   Google Gboard Smart Compose*
+-   Google Photos Unlimited Storage
 -   Google Sans Font
 -   Live captions (10+)
 -   Next Generation Assistant (10+)(Optional)
@@ -65,67 +66,15 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
-### Beta 1.0
-- Initial repo
-
-### Version Beta 1.1
-- Add Next gen Assitant
-- Fixed crash of GoogleDialer
-- Removed Google Framework
-- Added Option to backup NGA Resources
-- Fixed CTS fail for some devices with Spoof 
-
-### Version Beta 1.2
-- Fixed NGA Mic
-- Added Settings Overlay for Screen Attention and Adaptive Charging
-- Update Permissions for Dialer and DevicePersonalisation
-- Fixed NGA on Roms using PropUtils
-
-### Version Beta 1.3
-- Fixed Installation stuck on NGA resources
-- Some Minor Fixes
-- Fixed velvet (if non system app) is gone after uninstall
-
-### Version Beta 1.4
-- Added Pixel Live Wallpapers
-- Sdk support unitl 26
-- added Overlay support for sdk less than 30
-- Updated DevicePersonalisationSevice
-- updated Turbo
-- Fixed compatibility for sdk 26-29
-
-### Version Beta 1.5
-- Improved backups support
-- Fixed Google crashes
-- Add Wellbeing headsup (beta only)
-
-### Version 1.0
-- Fixed Bootloops because of permissions
-- Added Styles and Wallpapers for Pie and Ten
-
-### Version 1.1
-- Added NGA support without Pixel spoof
-- Added Gboard Smart Compose
-- Call Screening Optional
-
-### Version 1.2
-- Updated Pixel Props to may
-- Updated GEL.GSAPrefs.xml
-- Fixed Pixel Launcher not installed
-- Disabled Call screening if not selected
-
-### Version 1.3
-- Added Adaptive Connectivity
-- Fixed small bug
-- Signed all overlays with system signature
-- Improved Gboard Smart Compose
-- Improved gboard new design (Now more colors are available in Themes)
-- Gboard will also converted into system-app if isn't
-- Fixed Fingerprint for A10 to A8 devices. 
-- Added SimpleDeviceConfig.apk
-- Switch to Normal Pixel Launcher
-- Fixed Uninstallation of other Launcher  
-- Updated spoof props to june sec patch
+### Version 1.5
+- Fixed No Internet Connection problem on some roms.
+- August Sec Patch
+- Fixes Camera Crash for some deivces
+- Device Personalisation is Optional
+- Size of Module Reduze to 25Mb
+- Android S Minimal Support
+- Added Extreme Battery Saver (Android 11 Only | S will be supported on afterwards) [ On Settings > Battery ]
+- Enabled Google Dialer Video Calling Preference, Bussiness Search, Android S Ui (For all Android Version), Prefix (May Not Work)
 
 ### Version 1.4
 - Introduced auto set Fp according build id to fix cts
@@ -143,12 +92,65 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Added Google Call Recording (Beta)
 - Fixed now playing for pixel devices
 
-### Version 1.5
-- Fixed No Internet Connection problem on some roms.
-- August Sec Patch
-- Fixes Camera Crash for some deivces
-- Device Personalisation is Optional
-- Size of Module Reduze to 25Mb
-- Android S Minimal Support
-- Added Extreme Battery Saver (Android 11 Only | S will be supported on afterwards) [ On Settings > Battery ]
-- Enabled Google Dialer Video Calling Preference, Bussiness Search, Android S Ui (For all Android Version), Prefix (May Not Work)
+### Version 1.3
+- Added Adaptive Connectivity
+- Fixed small bug
+- Signed all overlays with system signature
+- Improved Gboard Smart Compose
+- Improved gboard new design (Now more colors are available in Themes)
+- Gboard will also converted into system-app if isn't
+- Fixed Fingerprint for A10 to A8 devices. 
+- Added SimpleDeviceConfig.apk
+- Switch to Normal Pixel Launcher
+- Fixed Uninstallation of other Launcher  
+- Updated spoof props to june sec patch
+
+### Version 1.2
+- Updated Pixel Props to may
+- Updated GEL.GSAPrefs.xml
+- Fixed Pixel Launcher not installed
+- Disabled Call screening if not selected
+
+### Version 1.1
+- Added NGA support without Pixel spoof
+- Added Gboard Smart Compose
+- Call Screening Optional
+
+### Version 1.0
+- Fixed Bootloops because of permissions
+- Added Styles and Wallpapers for Pie and Ten
+
+### Version Beta 1.5
+- Improved backups support
+- Fixed Google crashes
+- Add Wellbeing headsup (beta only)
+
+### Version Beta 1.4
+- Added Pixel Live Wallpapers
+- Sdk support unitl 26
+- added Overlay support for sdk less than 30
+- Updated DevicePersonalisationSevice
+- updated Turbo
+- Fixed compatibility for sdk 26-29
+
+### Version Beta 1.3
+- Fixed Installation stuck on NGA resources
+- Some Minor Fixes
+- Fixed velvet (if non system app) is gone after uninstall
+
+### Version Beta 1.2
+- Fixed NGA Mic
+- Added Settings Overlay for Screen Attention and Adaptive Charging
+- Update Permissions for Dialer and DevicePersonalisation
+- Fixed NGA on Roms using PropUtils
+
+### Version Beta 1.1
+- Add Next gen Assitant
+- Fixed crash of GoogleDialer
+- Removed Google Framework
+- Added Option to backup NGA Resources
+- Fixed CTS fail for some devices with Spoof 
+
+### Beta 1.0
+- Initial repo
+

@@ -1,5 +1,13 @@
-s_inc="7608474"
-s_id="SPB4.210715.011"
+s_inc="SPB4.210715.014"
+s_id="7654839"
+s_change=0
+
+if [ $ARCH != "arm64" ] && [ $API -le 23 ]; then
+    ui_print "Error: Minimum requirements doesn't meet"
+    ui_print "arch: ARM64"
+    ui_print "android version: 7.0+"
+    exit 1
+fi
 
 tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
@@ -88,10 +96,6 @@ DPVERSION=$(cat $pix/dp.txt)
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
-
-if [ $ARCH != "arm64" ] && [ $API -le 25 ]; then
-    abort "  Only support arm64 devices and Sdk 26+ devices"
-fi
 
 if [ $API -le 28 ]; then
     cp -r $MODPATH/system/product/. $MODPATH/system
@@ -256,21 +260,36 @@ if [ "$curid" != "$id" ]; then
         sed -i -e "s/${inc}/${newinc}/g" $MODPATH/spoof.prop
         id=$curid
         inc=$newinc
+        s_change=1
     fi
 fi
 
-if [ $API -eq 27 ]; then
-    sed -i -e "s/:11/:8/g" $MODPATH/spoof.prop
+if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.miui.ui.version.code)" ]; then
+    while read p; do
+        if [ ! -z "$(echo $p | grep vendor)" ]; then
+            sed -i -e "s/${p}/#${p}/g" $MODPATH/spoof.prop
+        fi
+    done <$MODPATH/spoof.prop
+fi
+
+if [ $API -eq 26 ]; then
+    sed -i -e "s/:11/:8.0.0/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
-    sed -i -e "s/${id}/OPM1.171019.011/g" $MODPATH/spoof.prop
-    sed -i -e "s/${inc}/4448085/g" $MODPATH/spoof.prop
+    sed -i -e "s/${id}/OPD1.170816.025/g" $MODPATH/spoof.prop
+    sed -i -e "s/${inc}/4424668/g" $MODPATH/spoof.prop
+elif [ $API -eq 27 ]; then
+    sed -i -e "s/:11/:8.1.0/g" $MODPATH/spoof.prop
+    sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
+    sed -i -e "s/${id}/OPM2.171026.006.G1/g" $MODPATH/spoof.prop
+    sed -i -e "s/${inc}/4820017/g" $MODPATH/spoof.prop
 elif [ $API -eq 28 ]; then
     sed -i -e "s/:11/:9/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
     sed -i -e "s/Pixel 5/Pixel 3/g" $MODPATH/spoof.prop
-    sed -i -e "s/${id}/PQ3A.190705.001/g" $MODPATH/spoof.prop
-    sed -i -e "s/${inc}/5565753/g" $MODPATH/spoof.prop
+    sed -i -e "s/${id}/PQ3A.190801.002/g" $MODPATH/spoof.prop
+    sed -i -e "s/${inc}/5670241/g" $MODPATH/spoof.prop
 elif [ $API -eq 29 ]; then
     sed -i -e "s/:11/:10/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
@@ -279,8 +298,10 @@ elif [ $API -eq 29 ]; then
     sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
 elif [ $API -eq 31 ]; then
     sed -i -e "s/:11/:12/g" $MODPATH/spoof.prop
-    sed -i -e "s/${id}/${s_id}/g" $MODPATH/spoof.prop
-    sed -i -e "s/${inc}/${s_inc}/g" $MODPATH/spoof.prop
+    if [ $s_change -eq 0 ]; then
+        sed -i -e "s/${id}/${s_id}/g" $MODPATH/spoof.prop
+        sed -i -e "s/${inc}/${s_inc}/g" $MODPATH/spoof.prop
+    fi
 fi
 
 print ""
@@ -679,6 +700,13 @@ if [ $API -ge 28 ]; then
             print "- Installing Pixel LiveWallpapers"
             print ""
             tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system$product
+
+            if [ $API -ge 28 ]; then
+                mv $MDOPATH/files/PixelifyWallpaper.apk $MODPATH/system/product/overlay/PixelifyWallpaper.apk
+                mkdir -p $MODPATH/system/product/app/PixelifyThemesStub
+                mv $MDOPATH/files/PixelifyThemesStub.apk $MODPATH/system/product/app/PixelifyThemesStub/PixelifyThemesStub.apk
+            fi
+
             if [ $API -le 28 ]; then
                 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                 rm -rf $MODPATH/system/overlay
@@ -882,7 +910,8 @@ if [ $API -eq 30 ]; then
             echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
         fi
     fi
-    REMOVE="$REMOVE /system/system_ext/priv-app/Flipendo"
+    FLIPENDO=$(find /system -name Flipendo)
+    REMOVE="$REMOVE $FLIPENDO"
 fi
 
 REPLACE="$REMOVE"
@@ -900,6 +929,11 @@ rm -rf $MODPATH/spoof.prop
 rm -rf $MODPATH/inc.prop
 
 # Disable features as per API in service.sh
+if [ $API -eq 31 ]; then
+    rm -rf $MODPATH/system/product/overlay/PixelifyPixel.apk
+    rm -rf $MODPATH/system/product/priv-app/WallpaperPickerGoogleRelease
+fi
+
 if [ $API -le 29 ]; then
     sed -i -e "s/device_config/#device_config/g" $MODPATH/service.sh
     sed -i -e "s/sleep/#sleep/g" $MODPATH/service.sh
