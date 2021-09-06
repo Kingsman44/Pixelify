@@ -840,6 +840,32 @@ else
     rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
 fi
 
+if [ $API -eq 30 ]; then
+    print ""
+    print "  Do you want to install Extreme Battery Saver (Flipendo)?"
+    print "    Vol Up += Yes"
+    print "    Vol Down += No"
+    if $VKSEL; then
+        print ""
+        print "- Installing Extreme Battery Saver (Flipendo)"
+        tar -xf $MODPATH/files/flip.tar.xz -C $MODPATH/system
+        if [ -f /system/system_ext/etc/selinux/system_ext_seapp_contexts ]; then
+            flip=/system/system_ext/etc/selinux/system_ext_seapp_contexts
+        elif [ -f /system_ext/etc/selinux/system_ext_seapp_contexts ]; then
+            flip=/system_ext/etc/selinux/system_ext_seapp_contexts
+        else
+            flip=""
+            echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinu>        fi
+        if [ ! -z "$flip" ]; then
+            if [ -z "$(cat $flip | grep com.google.android.flipendo)" ]; then
+                cp -r $flip $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
+                echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/se>            fi
+        fi
+        FLIPENDO=$(find /system -name Flipendo)
+        REMOVE="$REMOVE $FLIPENDO"
+    fi
+fi
+
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
 if [ -f $FIT ]; then
     print ""
@@ -890,28 +916,6 @@ fi
 
 if [ -d /data/data/com.google.android.apps.wellbeing ]; then
     pm enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity > /dev/null 2>&1
-fi
-
-if [ $API -eq 30 ]; then
-    print ""
-    print "- Installing Extreme Battery Saver (Flipendo)"
-    tar -xf $MODPATH/files/flip.tar.xz -C $MODPATH/system
-    if [ -f /system/system_ext/etc/selinux/system_ext_seapp_contexts ]; then
-        flip=/system/system_ext/etc/selinux/system_ext_seapp_contexts
-    elif [ -f /system_ext/etc/selinux/system_ext_seapp_contexts ]; then
-        flip=/system_ext/etc/selinux/system_ext_seapp_contexts
-    else
-        flip=""
-        echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
-    fi
-    if [ ! -z "$flip" ]; then
-        if [ -z "$(cat $flip | grep com.google.android.flipendo)" ]; then
-            cp -r $flip $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
-            echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
-        fi
-    fi
-    FLIPENDO=$(find /system -name Flipendo)
-    REMOVE="$REMOVE $FLIPENDO"
 fi
 
 REPLACE="$REMOVE"
