@@ -1,5 +1,5 @@
-s_inc="SPB4.210715.014"
-s_id="7654839"
+s_inc="SPB5.210812.002"
+s_id="7671067"
 s_change=0
 
 if [ $ARCH != "arm64" ] && [ $API -le 23 ]; then
@@ -855,11 +855,13 @@ if [ $API -eq 30 ]; then
             flip=/system_ext/etc/selinux/system_ext_seapp_contexts
         else
             flip=""
-            echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinu>        fi
+            echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
+        fi
         if [ ! -z "$flip" ]; then
             if [ -z "$(cat $flip | grep com.google.android.flipendo)" ]; then
                 cp -r $flip $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
-                echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/se>            fi
+                echo "user=_app seinfo=platform name=com.google.android.flipendo domain=flipendo type=app_data_file levelFrom=all" >> $MODPATH/system/system_ext/etc/selinux/system_ext_seapp_contexts
+            fi
         fi
         FLIPENDO=$(find /system -name Flipendo)
         REMOVE="$REMOVE $FLIPENDO"
