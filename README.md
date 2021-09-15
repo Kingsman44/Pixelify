@@ -66,6 +66,14 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
+### Version 1.6
+- Fixed Android S dimension problem and Accent colors problem
+- Sept Sec Patch
+- Fixed bootloop on some devices due to Extreme battery Saver
+- Added Pixel Photos Unlimted storage backup
+- Minor bug fixes 
+- Extreme Battery Saver now optional.
+
 ### Version 1.5
 - Fixed No Internet Connection problem on some roms.
 - August Sec Patch
