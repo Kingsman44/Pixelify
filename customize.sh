@@ -422,6 +422,7 @@ if [ -d /data/data/$DIALER ]; then
     print "    Vol Down += No"
     print ""
     if $VKSEL; then
+		AP=/vendor/etc/audio_policy_configuration.xml
         DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
         sed -i -e "s/CallScreening=0/CallScreening=1/g" $MODPATH/config.prop
         print "- Enabling Call Screening"
@@ -494,6 +495,14 @@ if [ -d /data/data/$DIALER ]; then
                     ;;
             esac
         fi
+		
+		if [ -z "$(grep call_screen_mode_supported $AP)'" ]; then
+			mkdir -p $MODPATH/system/vendor/etc
+			cp -f $AP $MODPATH/system/vendor/etc/audio_policy_configuration.xml
+			sed -i -e "s/speaker_drc_enabled=\"true\"/speaker_drc_enabled=\"true\" call_screen_mode_supported=\"true\"/g" $MODPATH/system/vendor/etc/audio_policy_configuration.xml
+		fi
+		
+		echo "vendor.audio.feature.incall_music.enable=true" $MODPATH/system.prop
 
         # Remove old prompt to replace to use within overlay
         rm -rf /data/data/com.google.android.dialer/files/callrecordingprompt
