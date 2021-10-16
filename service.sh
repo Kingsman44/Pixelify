@@ -11,9 +11,7 @@ MODDIR=${0%/*}
 export DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
 export GBOARD_PREF=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
 export FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
-export GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
 export TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
-export PHOTOS=/data/data/com.google.android.apps.photos/shared_prefs/com.google.android.apps.photos.phenotype.xml
 
 temp=""
 
@@ -150,20 +148,6 @@ bool_patch enable_nebulae_materializer_v2 $GBOARD_PREF
 string_patch crank_inline_suggestion_language_tags "ar,de,en,es,fr,hi-IN,hi-Latn,id,it,ja,ko,nl,pl,pt,ru,th,tr,zh-CN,zh-HK,zh-TW" $GBOARD_PREF
 bool_patch_false force_key_shadows $GBOARD_PREF
 
-#google
-if [ $(grep Assistant $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
-    chmod 0551 /data/data/com.google.android.googlequicksearchbox/shared_prefs
-    name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
-    if [ ! -z $name ]; then
-        string_patch GSAPrefs.google_account $name $MODDIR/GEL.GSAPrefs.xml
-    fi #1
-    model=$(getprop ro.product.model)
-    if [ "$model" != "Pixel 5" ]; then
-        string_patch 7325 "Pixel 4,Pixel 4 XL,Pixel 4a,Pixel 4a (5G),Pixel 5,$model" $MODDIR/GEL.GSAPrefs.xml
-    fi
-    cp -Tf $MODDIR/GEL.GSAPrefs.xml $GOOGLE_PREF
-fi
-
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
 bool_patch TestingFeature $FIT
@@ -172,9 +156,6 @@ bool_patch Sync__use_experiment_flag_from_promo $FIT
 bool_patch Promotions $FIT
 bool_patch googler $FIT
 bool_patch dasher $FIT
-
-# Photos
-bool_patch false $PHOTOS
 
 # Turbo
 bool_patch AdaptiveCharging__v1_enabled $TURBO

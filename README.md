@@ -1,10 +1,8 @@
 # PIXELIFY MAGISK MODULE
 Enables Pixel Ui and Some Exclusive Features.<br>
 
-### Please Read [this](https://github.com/Kingsman44/magisk_module_pixelify#-how-to-enable-features) before installing
-
 ## ⭐ Requirements
-- **At least Nougat**
+- **Android Version: 7.0+**
 - **Arm64 device**
 - **Volume Keys**
 - **Internet for NGA Resources & Pixel Livewallpaper**
@@ -18,13 +16,13 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Extreme Battery Saver (11) [ Settings > Battery > Extreme Battery Saver ]
 -   Google Dialer Call Screening Latest
 -   Google Dialer Hold for me
--   Google Dialer Call Recording (Device depended for working)(Beta)
+-   Google Dialer Call Recording (Device depended for working)
 -   Google Digital Wellbeing Heads up
 -   Google Duo features
 -   Google Fit Heart rate (needed reboot if installed after module installtion)
 -   Google Fit Respiratory rate (needed reboot if installed after module installtion)
 -   Google GBoard New Design*
--   Google Gboard Assistant Mic* (If Preinstalled & NGA installed)
+-   Google Gboard Assistant Mic* (NGA installed)
 -   Google Gboard Lens support*
 -   Google Gboard Smart Compose*
 -   Google Photos Unlimited Storage
@@ -43,16 +41,9 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 <br>
 * - There are two types of Gboard (com.android.inputmethod.latin and com.google.android.inputmethod.latin), These are only available for com.google.android.inputmethod.latin
 
-## ⭐ How to Enable Features
-
-### 1) Google Next Generation Assistant (Works without Spoof props for some people)
-- **Installation**:- Install NGA RESOURCES in Installation.<br>
-- **How to Enable**:- After installation reboot your phone, then while open assistant you will get prompt to download additional resources, download it and **reboot** your phone<br>
-- **Note**:- Incase Assistant Ui is gone, just Reboot your Phone.<br>
-
 ## ⭐ Bugs and Fixes
 - **Call Screening**: caller can't hear your voice.<br>
-**Fix commit (Audio Hal v6):** https://github.com/PotterLab/arrow_device_motorola_potter/pull/1/commits/049dfa580bae0ed0dd47cf9c4acb2df410e119df
+**Fix commit:** https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/0074cac9a4b098f8c4c996a4ef7ca44d00b158d9,https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/de2146fdd88771182a677aa94ccb8237479d793d (According to your qcom board)
 - **Call Screening**: can't able to download call screening files.<br>
 **Fix:** Set WIFI to unmetered connection. <br>
 - **Google**: Ok Google doesn't work without hotword with spoof to pixel.<br>
@@ -62,10 +53,18 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
 - [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
 - [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
-- [thehappydinoa](https://github.com/thehappydinoa) for Initial Call Screening
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
+### Version 1.7
+- Oct Sec. Patch
+- Fixed Photos Editor (Need Clear data)
+- Added Small patch for call screening voice fix (may not work with all devices)
+- Updated Live Wallpaper (all) and Device Personalisation (A11) packages
+- Added Pixel launcher for A12
+- New Pixel 6 Design Google Assistant (NGA)
+- Switched Model to Pixel 6
+
 ### Version 1.6
 - Fixed Android S dimension problem and Accent colors problem
 - Sept Sec Patch

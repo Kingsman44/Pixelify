@@ -1,6 +1,7 @@
 s_inc="SPB5.210812.002"
 s_id="7671067"
 s_change=0
+pixel_spoof=0
 
 if [ $ARCH != "arm64" ] && [ $API -le 23 ]; then
     ui_print "Error: Minimum requirements doesn't meet"
@@ -43,16 +44,16 @@ fi
 
 DPVERSIONP=1
 NGAVERSIONP=1
-LWVERSIONP=1.3
+LWVERSIONP=1.4
 NGASIZE="135 Mb"
-LWSIZE="84 Mb"
+LWSIZE="87 Mb"
 
-if [ $API -ge 31 ]; then
-    DPSIZE="17 Mb"
-    DPVERSIONP=1
-elif [ $API -eq 30 ]; then
-    DPSIZE="20.1 Mb"
+if [ $API -eq 31 ]; then
+    DPSIZE="19.6 Mb"
     DPVERSIONP=1.1
+elif [ $API -eq 30 ]; then
+    DPSIZE="20 Mb"
+    DPVERSIONP=1.2
 elif [ $API -eq 29 ]; then
     WSIZE="3.6 Mb"
     DPSIZE="15 Mb"
@@ -275,25 +276,25 @@ fi
 if [ $API -eq 26 ]; then
     sed -i -e "s/:11/:8.0.0/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 6/Pixel 2/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/OPD1.170816.025/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/4424668/g" $MODPATH/spoof.prop
 elif [ $API -eq 27 ]; then
     sed -i -e "s/:11/:8.1.0/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 5/Pixel 2/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 6/Pixel 2/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/OPM2.171026.006.G1/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/4820017/g" $MODPATH/spoof.prop
 elif [ $API -eq 28 ]; then
     sed -i -e "s/:11/:9/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 5/Pixel 3/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 6/Pixel 3/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/PQ3A.190801.002/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/5670241/g" $MODPATH/spoof.prop
 elif [ $API -eq 29 ]; then
     sed -i -e "s/:11/:10/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 5/Pixel 4 XL/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 6/Pixel 4 XL/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
 elif [ $API -eq 31 ]; then
@@ -305,14 +306,12 @@ elif [ $API -eq 31 ]; then
 fi
 
 print ""
-print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) $(grep ro.product.system.device $MODPATH/spoof.prop | cut -d'=' -f2 )?"
-if [ $API -ge 29 ]; then
-    print "  Needed for Next Generation Assistant Continued Conversation"
-fi
+print "  Do you want to Spoof your device to MODEL to Pixel 6 and fingerprint to redfin (Pixel 5)?"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 
 if $VKSEL; then
+	pixel_spoof=1
     cat $MODPATH/spoof.prop >> $MODPATH/system.prop
 fi
 
@@ -496,13 +495,13 @@ if [ -d /data/data/$DIALER ]; then
             esac
         fi
 		
-		if [ -z "$(grep call_screen_mode_supported $AP)'" ]; then
+		if [ -z "$(grep call_screen_mode_supported $AP)" ]; then
 			mkdir -p $MODPATH/system/vendor/etc
 			cp -f $AP $MODPATH/system/vendor/etc/audio_policy_configuration.xml
 			sed -i -e "s/speaker_drc_enabled=\"true\"/speaker_drc_enabled=\"true\" call_screen_mode_supported=\"true\"/g" $MODPATH/system/vendor/etc/audio_policy_configuration.xml
 		fi
 		
-		echo "vendor.audio.feature.incall_music.enable=true" $MODPATH/system.prop
+		echo "vendor.audio.feature.incall_music.enable=true" >> $MODPATH/system.prop
 
         # Remove old prompt to replace to use within overlay
         rm -rf /data/data/com.google.android.dialer/files/callrecordingprompt
@@ -542,11 +541,13 @@ GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.
 if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ]; then
     print "  Google is installed."
     print "  Do you want to installed Next generation assistant?"
+	if [  $pixel_spoof -eq 0 ]; then
+		print "Note: Your Model will be set to Pixel 6 if YES"
+	fi
     print "   Vol Up += Yes"
     print "   Vol Down += No"
     ui_print ""
     if $VKSEL; then
-        sed -i -e "s/Assistant=0/Assistant=1/g" $MODPATH/config.prop
         if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
             if [ "$(cat /sdcard/Pixelify/version/nga.txt)" != "$NGAVERSION" ]; then
                 print "  (Network Connection Needed)"
@@ -626,25 +627,12 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                 fi
             fi
         fi
-
-        print "- Patching Next Generation Assistant Files.."
-        print ""
-        name=$(grep current_account_name /data/data/com.android.vending/shared_prefs/account_shared_prefs.xml | cut -d">" -f2 | cut -d"<" -f1)
-        f1=$(grep 12490 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
-        f2=$(grep 12491 $GOOGLE_PREF | cut -d'>' -f2 | cut -d'<' -f1)
-        if [ ! -z $name ]; then
-            string_patch GSAPrefs.google_account $name $MODPATH/files/GEL.GSAPrefs.xml
-        fi
-        if [ ! -z $f1 ]; then
-            string_patch 12490 "$f1" $MODPATH/files/GEL.GSAPrefs.xml
-        fi
-        if [ ! -z $f2 ]; then
-            string_patch 12491 "$f2" $MODPATH/files/GEL.GSAPrefs.xml
-        fi
-        cp -f $MODPATH/files/GEL.GSAPrefs.xml $MODPATH/GEL.GSAPrefs.xml
-        chmod 0771 /data/data/com.google.android.googlequicksearchbox/shared_prefs
-        rm -rf $GOOGLE_PREF
-        rm -rf /data/data/com.google.android.googlequicksearchbox/cache/*
+		
+		if [  $pixel_spoof -eq 0 ]; then
+			echo "ro.product.model=Pixel 6" >> $MODPATH/spoof.prop
+		fi
+		
+		cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
 
         if [ -z $(pm list packages -s com.google.android.googlequicksearchbox | grep -v nga) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
             print "- Google is not installed as a system app !!"
