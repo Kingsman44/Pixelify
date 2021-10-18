@@ -13,7 +13,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Adaptive Sound (11+)
 -   Call Captions (11+)(Depends on Rom)
 -   Enables Nexus, Pixel, and Android One app support
--   Extreme Battery Saver (11) [ Settings > Battery > Extreme Battery Saver ]
+-   Extreme Battery Saver (11+) [ Settings > Battery > Extreme Battery Saver - 11 | Settings > Battery > Battery Saver > Extreme Battery Saver -12 ]
 -   Google Dialer Call Screening Latest
 -   Google Dialer Hold for me
 -   Google Dialer Call Recording (Device depended for working)
@@ -25,7 +25,6 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Google Gboard Assistant Mic* (NGA installed)
 -   Google Gboard Lens support*
 -   Google Gboard Smart Compose*
--   Google Photos Unlimited Storage
 -   Google Sans Font
 -   Live captions (10+)
 -   Next Generation Assistant (10+)(Optional)
@@ -57,8 +56,8 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ ChangeLogs
 ### Version 1.7
-- Oct Sec. Patch
-- Fixed Photos Editor (Need Clear data)
+- Oct Sec. Patch (A11)
+- Fixed Photos Editor & not detecting pixel devices on spoof (Need Clear data)
 - Added Small patch for call screening voice fix (may not work with all devices)
 - Updated Live Wallpaper (all) and Device Personalisation (A11+A12) packages
 - Added Pixel launcher for A12
