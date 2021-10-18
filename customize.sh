@@ -44,7 +44,7 @@ fi
 
 DPVERSIONP=1
 NGAVERSIONP=1
-LWVERSIONP=1.5
+LWVERSIONP=1.4
 NGASIZE="135 Mb"
 LWSIZE="87 Mb"
 WNEED=0
@@ -697,6 +697,7 @@ install_wallpaper() {
 		else
 			WREM=0
 			print "- Installing Styles and Wallpapers"
+			ui_print ""
 			rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
 			tar -xf /sdcard/Pixelify/backup/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
 		fi
