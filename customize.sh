@@ -35,22 +35,25 @@ if [ ! -d $pix ]; then
     mkdir $pix
 fi
 
-if [ -f $pix/apps.txt ]; then
+if [ -f $pix/app.txt ]; then
     rm -rf $pix/apps_temp.txt
-    mv $pix/apps.txt $pix/apps_temp.txt
+    mv $pix/app.txt $pix/apps_temp.txt
 else
     touch $pix/apps_temp.txt
 fi
 
 DPVERSIONP=1
 NGAVERSIONP=1
-LWVERSIONP=1.4
+LWVERSIONP=1.5
 NGASIZE="135 Mb"
 LWSIZE="87 Mb"
+WNEED=0
 
 if [ $API -eq 31 ]; then
     DPSIZE="19.6 Mb"
     DPVERSIONP=1.1
+	WSIZE="2.0 Mb"
+	WNEED=1
 elif [ $API -eq 30 ]; then
     DPSIZE="20 Mb"
     DPVERSIONP=1.2
@@ -58,10 +61,12 @@ elif [ $API -eq 29 ]; then
     WSIZE="3.6 Mb"
     DPSIZE="15 Mb"
     DPVERSIONP=1
+	WNEED=1
 elif [ $API -eq 28 ]; then
     WSIZE="1.6 Mb"
     DPSIZE="10 Mb"
     DPVERSIONP=1
+	WNEED=1
 fi
 
 if [ $internet -eq 1 ]; then
@@ -316,10 +321,12 @@ if $VKSEL; then
 fi
 
 DPAS=1
-if [ $API -ge 30 ] && [ ! -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel5) ] && [ -z $(cat $pix/app_temp.txt | grep 'dp-$API') ]; then
-    DPAS=0
-elif [ ! -z $(pm list packages -s | grep com.google.android.as) ] && [ ! -z $(cat $pix/app_temp.txt | grep 'dp-$API') ]; then
-    DPAS=0
+if [ -z $(cat $pix/apps_temp.txt | grep "dp-$API") ]; then
+	if [ $API -ge 30 ] && [ ! -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel5) ]; then
+		DPAS=0
+	elif [ ! -z $(pm list packages -s | grep com.google.android.as) ]; then
+		DPAS=0
+	fi
 fi
 
 if [ $API -le 27 ]; then
@@ -654,6 +661,48 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
     fi
 fi
 
+WREM=1
+
+install_wallpaper() {
+	if [ $WNEED -eq 1 ]; then
+		if [ ! -f /sdcard/Pixelify/backup/wpg-$API.tar.xz ]; then
+			print "  (Network Connection Needed)"
+			print "  Do you want to Download Google Styles and Wallpapers?"
+			print "  Size: $WSIZE"
+			print "   Vol Up += Yes"
+			print "   Vol Down += No"
+			print ""
+			if $VKSEL; then
+				online
+				if [ $internet -eq 1 ]; then
+					print "- Downloading Styles and Wallpapers"
+					cd $MODPATH/files
+					$MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
+					cd /
+					rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
+					print ""
+					print "- Installing Styles and Wallpapers"
+					tar -xf $MODPATH/files/wpg-$API.tar.xz -C $MODPATH/system$product/priv-app
+					WREM=0
+					print ""
+					print "  Do you want to Create backups of Styles and Wallpapers?"
+					print "   Vol Up += Yes"
+					print "   Vol Down += No"
+					print ""
+					if $VKSEL; then
+						cp -f $MODPATH/files/wpg-$API.tar.xz /sdcard/Pixelify/backup/wpg-$API.tar.xz
+					fi
+				fi
+			fi
+		else
+			WREM=0
+			print "- Installing Styles and Wallpapers"
+			rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
+			tar -xf /sdcard/Pixelify/backup/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
+		fi
+	fi
+}
+
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
 if [ $API -ge 28 ]; then
     if [ -f /sdcard/Pixelify/backup/pixel.tar.xz ]; then
@@ -698,50 +747,17 @@ if [ $API -ge 28 ]; then
             print ""
             tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system$product
 
-            if [ $API -ge 28 ]; then
-                mv $MDOPATH/files/PixelifyWallpaper.apk $MODPATH/system/product/overlay/PixelifyWallpaper.apk
-                mkdir -p $MODPATH/system/product/app/PixelifyThemesStub
-                mv $MDOPATH/files/PixelifyThemesStub.apk $MODPATH/system/product/app/PixelifyThemesStub/PixelifyThemesStub.apk
+            if [ $API -ge 31 ]; then
+				rm -rf $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+                mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
             fi
 
             if [ $API -le 28 ]; then
                 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                 rm -rf $MODPATH/system/overlay
             fi
-
-            if [ $API -le 29 ] && [ $API -ge 28 ]; then
-                if [ -f /sdcard/Pixelify/backup/wpg-$API.tar.xz ]; then
-                    print "  (Network Connection Needed)"
-                    print "  Do you want to Download Google Styles and Wallpapers?"
-                    print "  Size: $WSIZE"
-                    print "   Vol Up += Yes"
-                    print "   Vol Down += No"
-                    print ""
-                    if $VKSEL; then
-                        online
-                        if [ $internet -eq 1 ]; then
-                            print "- Downloading Styles and Wallpapers"
-                            cd $MODPATH/files
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
-                            cd /
-                            rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
-                            tar -xf $MODPATH/files/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
-                            print ""
-                            print "  Do you want to Create backups of Styles and Wallpapers?"
-                            print "   Vol Up += Yes"
-                            print "   Vol Down += No"
-                            print ""
-                            if $VKSEL; then
-                                cp -f $MODPATH/files/gwp-$API.tar.xz /sdcard/Pixelify/backup/gwp-$API.tar.xz
-                            fi
-                        fi
-                    fi
-                else
-                    rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
-                    tar -xf /sdcard/Pixelify/backup/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
-                fi
-            fi
-        fi
+			install_wallpaper
+			fi
     else
         print "  (Network Connection Needed)"
         print "  Do you want to install and Download Pixel LiveWallpapers?"
@@ -760,16 +776,7 @@ if [ $API -ge 28 ]; then
                 print ""
                 print "- Installing Pixel LiveWallpapers"
                 tar -xf $MODPATH/files/pixel.tar.xz -C $MODPATH/system$product
-                if [ $API -le 29 ]; then
-                    print ""
-                    print "- Downloading Styles and Wallpapers"
-                    cd $MODPATH/files
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
-                    cd /
-                    rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
-                    tar -xf $MODPATH/files/wpg-$API.tar.xz -C $MODPATH/system$product/priv-app
-                fi
-
+				
                 if [ $API -le 28 ]; then
                     mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                     rm -rf $MODPATH/system/overlay
@@ -787,14 +794,12 @@ if [ $API -ge 28 ]; then
                     rm -rf /sdcard/Pixelify/backup/pixel.tar.xz
                     cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
                     print ""
-                    if [ $API -le 29 ]; then
-                        cp -f $MODPATH/files/gwp-$API.tar.xz /sdcard/Pixelify/backup/gwp-$API.tar.xz
-                    fi
                     mkdir /sdcard/Pixelify/version
                     echo "$LWVERSION" >> /sdcard/Pixelify/version/pixel.txt
                     print " - Done"
                     print ""
                 fi
+				install_wallpaper
             else
                 print "!! Warning !!"
                 print " No internet detected"
@@ -837,7 +842,7 @@ else
     rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
 fi
 
-if [ $API -eq 30 ]; then
+if [ $API -ge 30 ]; then
     print ""
     print "  Do you want to install Extreme Battery Saver (Flipendo)?"
     print "    Vol Up += Yes"
@@ -846,6 +851,7 @@ if [ $API -eq 30 ]; then
         print ""
         print "- Installing Extreme Battery Saver (Flipendo)"
         tar -xf $MODPATH/files/flip.tar.xz -C $MODPATH/system
+		tar -xf $MODPATH/files/flip-$API.tar.xz -C $MODPATH/system
         if [ -f /system/system_ext/etc/selinux/system_ext_seapp_contexts ]; then
             flip=/system/system_ext/etc/selinux/system_ext_seapp_contexts
         elif [ -f /system_ext/etc/selinux/system_ext_seapp_contexts ]; then
@@ -934,7 +940,9 @@ rm -rf $MODPATH/inc.prop
 # Disable features as per API in service.sh
 if [ $API -eq 31 ]; then
     rm -rf $MODPATH/system/product/overlay/PixelifyPixel.apk
-    rm -rf $MODPATH/system/product/priv-app/WallpaperPickerGoogleRelease
+	if [ $WREM -eq 1 ]; then
+		rm -rf $MODPATH/system/product/priv-app/WallpaperPickerGoogleRelease
+	fi
 fi
 
 if [ $API -le 29 ]; then

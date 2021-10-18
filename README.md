@@ -60,10 +60,13 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Oct Sec. Patch
 - Fixed Photos Editor (Need Clear data)
 - Added Small patch for call screening voice fix (may not work with all devices)
-- Updated Live Wallpaper (all) and Device Personalisation (A11) packages
+- Updated Live Wallpaper (all) and Device Personalisation (A11+A12) packages
 - Added Pixel launcher for A12
 - New Pixel 6 Design Google Assistant (NGA)
 - Switched Model to Pixel 6
+- Fixed crashing of Device Personalisation on Android 12
+- Added Styles and Wallpaper & Extreme Battery Saver for Android 12
+- fixed minor bugs
 
 ### Version 1.6
 - Fixed Android S dimension problem and Accent colors problem
