@@ -1,5 +1,5 @@
-s_inc="SPB5.210812.002"
-s_id="7671067"
+s_inc="SD1A.210817.015.A4"
+s_id="7697517"
 s_change=0
 pixel_spoof=0
 
@@ -13,6 +13,10 @@ fi
 tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
 chmod 0755 $MODPATH/addon/*
+
+if [ $API != 31 ]; then
+	rm -rf $MODPATH/files/system/product/priv-app/GoogleSecurityHub
+fi
 
 id="$(grep ro.build.id $MODPATH/spoof.prop | cut -d'=' -f2)"
 inc="$(grep ro.build.version.incremental $MODPATH/spoof.prop | cut -d'=' -f2)"
@@ -50,8 +54,8 @@ LWSIZE="87 Mb"
 WNEED=0
 
 if [ $API -eq 31 ]; then
-    DPSIZE="19.6 Mb"
-    DPVERSIONP=1.1
+    DPSIZE="23.2 Mb"
+    DPVERSIONP=1.2
 	WSIZE="2.0 Mb"
 	WNEED=1
 elif [ $API -eq 30 ]; then
@@ -281,25 +285,27 @@ fi
 if [ $API -eq 26 ]; then
     sed -i -e "s/:11/:8.0.0/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 6/Pixel 2/g" $MODPATH/spoof.prop
+    sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/OPD1.170816.025/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/4424668/g" $MODPATH/spoof.prop
 elif [ $API -eq 27 ]; then
     sed -i -e "s/:11/:8.1.0/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 6/Pixel 2/g" $MODPATH/spoof.prop
+    sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/OPM2.171026.006.G1/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/4820017/g" $MODPATH/spoof.prop
 elif [ $API -eq 28 ]; then
     sed -i -e "s/:11/:9/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 6/Pixel 3/g" $MODPATH/spoof.prop
+	sed -i -e "s/raven/blueline/g" $MODPATH/spoof.prop
+    sed -i -e "s/Pixel 6 Pro/Pixel 3/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/PQ3A.190801.002/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/5670241/g" $MODPATH/spoof.prop
 elif [ $API -eq 29 ]; then
     sed -i -e "s/:11/:10/g" $MODPATH/spoof.prop
     sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 6/Pixel 4 XL/g" $MODPATH/spoof.prop
     sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
     sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
 elif [ $API -eq 31 ]; then
@@ -311,7 +317,7 @@ elif [ $API -eq 31 ]; then
 fi
 
 print ""
-print "  Do you want to Spoof your device to MODEL to Pixel 6 and fingerprint to redfin (Pixel 5)?"
+print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) $(grep ro.product.system.device $MODPATH/spoof.prop | cut -d'=' -f2 )?"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 
@@ -322,7 +328,9 @@ fi
 
 DPAS=1
 if [ -z $(cat $pix/apps_temp.txt | grep "dp-$API") ]; then
-	if [ $API -ge 30 ] && [ ! -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel5) ]; then
+	if [ $API -eq 30 ] && [ ! -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel5) ]; then
+		DPAS=0
+	elif [ $API -eq 31 ] && [ ! -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel6) ]; then
 		DPAS=0
 	elif [ ! -z $(pm list packages -s | grep com.google.android.as) ]; then
 		DPAS=0
@@ -345,8 +353,8 @@ if [ $DPAS -eq 1 ]; then
             print "  Do you Want to update or use Old Backup?"
             print "  Version: $DPVERSION"
             print "  Size: $DPSIZE"
-            print "   Vol Up += Yes"
-            print "   Vol Down += No"
+            print "   Vol Up += Update"
+            print "   Vol Down += Use Old Backup"
             if $VKSEL; then
                 online
                 if [ $internet -eq 1 ]; then
@@ -420,6 +428,8 @@ if [ $DPAS -eq 1 ]; then
             fi
         fi
     fi
+else
+	print ""
 fi
 
 if [ -d /data/data/$DIALER ]; then
@@ -431,12 +441,14 @@ if [ -d /data/data/$DIALER ]; then
 		AP=/vendor/etc/audio_policy_configuration.xml
         DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
         sed -i -e "s/CallScreening=0/CallScreening=1/g" $MODPATH/config.prop
-        print "- Enabling Call Screening"
-        print " "
+        print "- Enabling Call Screening & Hold for me & Direct My Call"
+        print "- Please Use google Dialer apk for Direct my Call given in Pixelify github link"
+		print " "
         print "- Enabling Call Recording (Working is device dependent)"
         setprop sys.persist.locale en-US
         print " "
-        print "- Please set your launguage to English (United States) for call screening"
+        print "- Please set your launguage to"
+		print "  English (United States) for call screening"
         print " "
         device="$(getprop ro.product.device)"
         device_len=${#device}
@@ -451,56 +463,57 @@ if [ -d /data/data/$DIALER ]; then
                 sed -i -e "s/21403/${carr}/g" $MODPATH/files/$DIALER
                 ;;
         esac
-
-        if [ -z "$(cat $MODPATH/recording.txt | grep $device)" ]; then
-            case $device_len in
-                3)
-                    sed -i -e "s/lmi/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                4)
-                    sed -i -e "s/ares/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                5)
-                    sed -i -e "s/bhima/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                6)
-                    sed -i -e "s/ginkgo/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                7)
-                    sed -i -e "s/gauguin/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                8)
-                    sed -i -e "s/camellia/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                9)
-                    sed -i -e "s/camellian/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                11)
-                    sed -i -e "s/OnePlusN200/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                12)
-                    sed -i -e "s/Infinix-X692/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                13)
-                    sed -i -e "s/gauguininpro/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                14)
-                    sed -i -e "s/Infinix-X687BR/${device}/g" $MODPATH/files/$DIALER
-                    ;;
-                *)
-                    print ""
-                    print "  Warning !!"
-                    print "  For Call Recording your ro.product.device"
-                    print "  needs to set (redfin)"
-                    print "  Do you Wish to Install Google Dialer Call Recording?"
-                    print "    Vol Up += Yes"
-                    print "    Vol Down += No"
-                    if $VKSEL; then
-                        echo "ro.product.device=redfin" >> $MODPATH/system.prop
-                    fi
-                    ;;
-            esac
-        fi
+		if [ $pixel_spoof -eq 0 ]; then
+			if [ -z "$(cat $MODPATH/recording.txt | grep $device)" ]; then
+				case $device_len in
+					3)
+						sed -i -e "s/lmi/${device}/g" $MODPATH/files/$DIALER
+						;;
+					4)
+						sed -i -e "s/ares/${device}/g" $MODPATH/files/$DIALER
+						;;
+					5)
+						sed -i -e "s/bhima/${device}/g" $MODPATH/files/$DIALER
+						;;
+					6)
+						sed -i -e "s/ginkgo/${device}/g" $MODPATH/files/$DIALER
+						;;
+					7)
+						sed -i -e "s/gauguin/${device}/g" $MODPATH/files/$DIALER
+						;;
+					8)
+						sed -i -e "s/camellia/${device}/g" $MODPATH/files/$DIALER
+						;;
+					9)
+						sed -i -e "s/camellian/${device}/g" $MODPATH/files/$DIALER
+						;;
+					11)
+						sed -i -e "s/OnePlusN200/${device}/g" $MODPATH/files/$DIALER
+						;;
+					12)
+						sed -i -e "s/Infinix-X692/${device}/g" $MODPATH/files/$DIALER
+						;;
+					13)
+						sed -i -e "s/gauguininpro/${device}/g" $MODPATH/files/$DIALER
+						;;
+					14)
+						sed -i -e "s/Infinix-X687BR/${device}/g" $MODPATH/files/$DIALER
+						;;
+					*)
+						print ""
+						print "  Warning !!"
+						print "  For Call Recording your ro.product.device"
+						print "  needs to set (raven)"
+						print "  Do you Wish to Install Google Dialer Call Recording?"
+						print "    Vol Up += Yes"
+						print "    Vol Down += No (Call recording won't be installed)"
+						if $VKSEL; then
+							echo "ro.product.device=raven" >> $MODPATH/system.prop
+						fi
+						;;
+				esac
+			fi
+		fi
 		
 		if [ -z "$(grep call_screen_mode_supported $AP)" ]; then
 			mkdir -p $MODPATH/system/vendor/etc
@@ -562,8 +575,8 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                 print "  Do you Want to update or use Old Backup?"
                 print "  Version: $NGAVERSION"
                 print "  Size: $NGASIZE"
-                print "   Vol Up += Yes"
-                print "   Vol Down += No"
+                print "   Vol Up += Update"
+                print "   Vol Down += Use old backup"
                 ui_print ""
                 if $VKSEL; then
                     online
@@ -665,41 +678,26 @@ WREM=1
 
 install_wallpaper() {
 	if [ $WNEED -eq 1 ]; then
-		if [ ! -f /sdcard/Pixelify/backup/wpg-$API.tar.xz ]; then
-			print "  (Network Connection Needed)"
-			print "  Do you want to Download Google Styles and Wallpapers?"
-			print "  Size: $WSIZE"
-			print "   Vol Up += Yes"
-			print "   Vol Down += No"
-			print ""
-			if $VKSEL; then
-				online
-				if [ $internet -eq 1 ]; then
-					print "- Downloading Styles and Wallpapers"
-					cd $MODPATH/files
-					$MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
-					cd /
-					rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
-					print ""
-					print "- Installing Styles and Wallpapers"
-					tar -xf $MODPATH/files/wpg-$API.tar.xz -C $MODPATH/system$product/priv-app
-					WREM=0
-					print ""
-					print "  Do you want to Create backups of Styles and Wallpapers?"
-					print "   Vol Up += Yes"
-					print "   Vol Down += No"
-					print ""
-					if $VKSEL; then
-						cp -f $MODPATH/files/wpg-$API.tar.xz /sdcard/Pixelify/backup/wpg-$API.tar.xz
-					fi
-				fi
+		print "  (Network Connection Needed)"
+		print "  Do you want to Download Google Styles and Wallpapers?"
+		print "  Size: $WSIZE"
+		print "   Vol Up += Yes"
+		print "   Vol Down += No"
+		print ""
+		if $VKSEL; then
+			online
+			if [ $internet -eq 1 ]; then
+				print "- Downloading Styles and Wallpapers"
+				cd $MODPATH/files
+				$MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &> /proc/self/fd/$OUTFD
+				cd /
+				rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
+				print ""
+				print "- Installing Styles and Wallpapers"
+				print ""
+				tar -xf $MODPATH/files/wpg-$API.tar.xz -C $MODPATH/system$product/priv-app
+				WREM=0
 			fi
-		else
-			WREM=0
-			print "- Installing Styles and Wallpapers"
-			ui_print ""
-			rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
-			tar -xf /sdcard/Pixelify/backup/gwp-$API.tar.xz -C $MODPATH/system$product/priv-app
 		fi
 	fi
 }
@@ -720,8 +718,8 @@ if [ $API -ge 28 ]; then
                 print "  Do you Want to update or use Old Backup?"
                 print "  Version: $LWVERSION"
                 print "  Size: $LWSIZE"
-                print "   Vol Up += Yes"
-                print "   Vol Down += No"
+                print "   Vol Up += Update"
+                print "   Vol Down += Use old backup"
                 ui_print ""
                 if $VKSEL; then
                     online
@@ -818,7 +816,7 @@ print "   Vol Down += No"
 if $VKSEL; then
     if [ ! -f /system/bin/themed_bootanimation ]; then
         rm -rf $MODPATH/system$product/media/bootanimation.zip
-        mv $MODPATH/system$product/media/bootanimation-dark.zip $MODPATH/system$product/media/bootanimation.zip
+        cp -f $MODPATH/system$product/media/bootanimation-dark.zip $MODPATH/system$product/media/bootanimation.zip
     fi
 else
     rm -rf $MODPATH/system$product/media/boot*.zip
@@ -899,7 +897,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     bool_patch generation $GBOARD
     bool_patch multiword $GBOARD
     bool_patch core_typing $GBOARD
-    if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/app_temp.txt | grep gboard)" ]; then
+    if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard as a system app"
@@ -946,6 +944,10 @@ if [ $API -eq 31 ]; then
 	fi
 fi
 
+if [ $API -le 30 ]; then
+	rm -rf $MODPATH/system$product/overlay/PixeliflyPixelS.apk
+fi
+
 if [ $API -le 29 ]; then
     sed -i -e "s/device_config/#device_config/g" $MODPATH/service.sh
     sed -i -e "s/sleep/#sleep/g" $MODPATH/service.sh
@@ -954,6 +956,7 @@ fi
 
 if [ $API -le 27 ]; then
     sed -i -e "s/bool_patch AdaptiveCharging__v1_enabled/#bool_patch AdaptiveCharging__v1_enabled/g" $MODPATH/service.sh
+	rm -rf $MODPATH/system/vendor/overlay/PixeliflyPixelS.apk
 fi
 
 rm -rf /sdcard/Pixelify/logs.txt

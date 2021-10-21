@@ -8,3 +8,4 @@ ro.product.locale=en-US
 ro.url.legal.android_privacy=http://www.google.com/intl/%s/mobile/android/basic/privacy.html
 ro.url.legal=http://www.google.com/intl/%s/mobile/android/basic/phone-legal.html
 ro.product.needs_model_edit=false
+ro.support_one_handed_mode=true

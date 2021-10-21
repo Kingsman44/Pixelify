@@ -114,7 +114,6 @@ haydnin
 sunny
 star
 pomelo
-lemon
 camellian
 camellia
 mido
@@ -122,7 +121,7 @@ bhima
 alioth
 aliothin
 ares
-redfin
+raven
 rosemary
 maltose
 biloba
