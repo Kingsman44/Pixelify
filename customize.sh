@@ -1,6 +1,3 @@
-s_inc="SD1A.210817.019.C2"
-s_id="7738411"
-s_change=0
 pixel_spoof=0
 
 if [ $ARCH != "arm64" ] && [ $API -le 23 ]; then
@@ -84,7 +81,7 @@ if [ $internet -eq 1 ]; then
     echo "$NGAVERSION" >> $pix/nga.txt
     echo "$LWVERSION" >> $pix/pixel.txt
     echo "$DPVERSION" >> $pix/dp.txt
-    NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk | grep -i Content-Length | cut -d':' -f2 | cut -c 2-4) Mb"
+    NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk | grep -i Content-Length | cut -d':' -f2 | cut -c 2-3) Mb"
     LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | cut -c 2-3) Mb"
     DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | cut -c 2-3) Mb"
 else
@@ -282,41 +279,6 @@ if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.mi
     done <$MODPATH/spoof.prop
 fi
 
-# if [ $API -eq 26 ]; then
-    # sed -i -e "s/:11/:8.0.0/g" $MODPATH/spoof.prop
-    # sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    # sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
-    # sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${id}/OPD1.170816.025/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${inc}/4424668/g" $MODPATH/spoof.prop
-# elif [ $API -eq 27 ]; then
-    # sed -i -e "s/:11/:8.1.0/g" $MODPATH/spoof.prop
-    # sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    # sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
-    # sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${id}/OPM2.171026.006.G1/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${inc}/4820017/g" $MODPATH/spoof.prop
-# elif [ $API -eq 28 ]; then
-    # sed -i -e "s/:11/:9/g" $MODPATH/spoof.prop
-    # sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
-	# sed -i -e "s/raven/blueline/g" $MODPATH/spoof.prop
-    # sed -i -e "s/Pixel 6 Pro/Pixel 3/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${id}/PQ3A.190801.002/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${inc}/5670241/g" $MODPATH/spoof.prop
-# elif [ $API -eq 29 ]; then
-    # sed -i -e "s/:11/:10/g" $MODPATH/spoof.prop
-    # sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
-    # sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
-# elif [ $API -eq 31 ]; then
-    # sed -i -e "s/:11/:12/g" $MODPATH/spoof.prop
-    # sed -i -e "s/redfin/raven/g" $MODPATH/spoof.prop
-    # if [ $s_change -eq 0 ]; then
-        # sed -i -e "s/${id}/${s_id}/g" $MODPATH/spoof.prop
-        # sed -i -e "s/${inc}/${s_inc}/g" $MODPATH/spoof.prop
-    # fi
-# fi
-
 print ""
 print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) $(grep ro.product.device $MODPATH/spoof.prop | cut -d'=' -f2 )?"
 print "   Vol Up += Yes"
@@ -434,7 +396,9 @@ else
 fi
 
 if [ -d /data/data/$DIALER ]; then
-    print "  Do you want to install Call Screening & Call Recording?"
+    print "  Do you want to install Google Dialer features?"
+	print "   - Includes Call Screening, Call Recording, Hold for Me, Direct My Call"
+	print "   (For all Countries)"
     print "    Vol Up += Yes"
     print "    Vol Down += No"
     print ""
@@ -443,7 +407,9 @@ if [ -d /data/data/$DIALER ]; then
         DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
         sed -i -e "s/CallScreening=0/CallScreening=1/g" $MODPATH/config.prop
         print "- Enabling Call Screening & Hold for me & Direct My Call"
-        print "- Please Use google Dialer apk for Direct my Call given in Pixelify github link"
+		print ""
+        print "- Please Use google Dialer apk for"
+		print "  Direct my Call given in Pixelify github link"
 		print " "
         print "- Enabling Call Recording (Working is device dependent)"
         setprop sys.persist.locale en-US
@@ -453,7 +419,12 @@ if [ -d /data/data/$DIALER ]; then
         print " "
         device="$(getprop ro.product.device)"
         device_len=${#device}
-
+		carr_coun1="$(getprop gsm.sim.operator.iso-country)"
+		carr_coun="$(getprop gsm.sim.operator.iso-country | tr '[:lower:]' '[:upper:]')"
+		if [ ! -z $carr_coun ]; then
+			sed -i -e "s/TI/${carr_coun}/g" $MODPATH/files/$DIALER
+			sed -i -e "s/xy/${carr_coun1}/g" $MODPATH/files/$DIALER
+		fi
         carr="$(getprop gsm.sim.operator.numeric)"
         carrier=${#carr}
         case $carrier in
@@ -530,13 +501,6 @@ if [ -d /data/data/$DIALER ]; then
         cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
         cp -Tf $MODPATH/files/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
         am force-stop $DIALER
-
-        bool_patch speak_easy $DIALER_PREF
-        bool_patch speakeasy $DIALER_PREF
-        bool_patch call_screen $DIALER_PREF
-        bool_patch revelio $DIALER_PREF
-        bool_patch record $DIALER_PREF
-        bool_patch atlas $DIALER_PREF
 
         if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
             print ""

@@ -12,6 +12,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ## ⭐ Features
 ### Pixel 6 Features Enables
 -   Pixel 6 Live Wallpapers *
+-   Magic Earser (<a href="https://t.me/google_nws/864">USE THIS APK</a>)(7+)
 -   Google Dialer Direct Call (<a href="https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/GoogleDialer.apk">USE THIS APK</a>)(7+)
 -   Live Transcript (Not working on my device)(12+)
 -   Google Quick Pharse*
@@ -60,6 +61,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ ChangeLogs
 ### Version 1.71
+- Attempt to enable Direct my Call and Call Recording to all countries
 - Dropped fingerprint spoof
 - Dropped SimpleDeviceConfig
 - Update Bootanim and media from pixel 6
