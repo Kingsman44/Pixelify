@@ -1,5 +1,5 @@
-s_inc="SD1A.210817.015.A4"
-s_id="7697517"
+s_inc="SD1A.210817.019.C2"
+s_id="7738411"
 s_change=0
 pixel_spoof=0
 
@@ -47,7 +47,7 @@ else
 fi
 
 DPVERSIONP=1
-NGAVERSIONP=1
+NGAVERSIONP=1.1
 LWVERSIONP=1.4
 NGASIZE="135 Mb"
 LWSIZE="87 Mb"
@@ -282,42 +282,43 @@ if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.mi
     done <$MODPATH/spoof.prop
 fi
 
-if [ $API -eq 26 ]; then
-    sed -i -e "s/:11/:8.0.0/g" $MODPATH/spoof.prop
-    sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
-    sed -i -e "s/${id}/OPD1.170816.025/g" $MODPATH/spoof.prop
-    sed -i -e "s/${inc}/4424668/g" $MODPATH/spoof.prop
-elif [ $API -eq 27 ]; then
-    sed -i -e "s/:11/:8.1.0/g" $MODPATH/spoof.prop
-    sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
-    sed -i -e "s/${id}/OPM2.171026.006.G1/g" $MODPATH/spoof.prop
-    sed -i -e "s/${inc}/4820017/g" $MODPATH/spoof.prop
-elif [ $API -eq 28 ]; then
-    sed -i -e "s/:11/:9/g" $MODPATH/spoof.prop
-    sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
-	sed -i -e "s/raven/blueline/g" $MODPATH/spoof.prop
-    sed -i -e "s/Pixel 6 Pro/Pixel 3/g" $MODPATH/spoof.prop
-    sed -i -e "s/${id}/PQ3A.190801.002/g" $MODPATH/spoof.prop
-    sed -i -e "s/${inc}/5670241/g" $MODPATH/spoof.prop
-elif [ $API -eq 29 ]; then
-    sed -i -e "s/:11/:10/g" $MODPATH/spoof.prop
-    sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
-    sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
-    sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
-elif [ $API -eq 31 ]; then
-    sed -i -e "s/:11/:12/g" $MODPATH/spoof.prop
-    if [ $s_change -eq 0 ]; then
-        sed -i -e "s/${id}/${s_id}/g" $MODPATH/spoof.prop
-        sed -i -e "s/${inc}/${s_inc}/g" $MODPATH/spoof.prop
-    fi
-fi
+# if [ $API -eq 26 ]; then
+    # sed -i -e "s/:11/:8.0.0/g" $MODPATH/spoof.prop
+    # sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
+    # sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
+    # sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${id}/OPD1.170816.025/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${inc}/4424668/g" $MODPATH/spoof.prop
+# elif [ $API -eq 27 ]; then
+    # sed -i -e "s/:11/:8.1.0/g" $MODPATH/spoof.prop
+    # sed -i -e "s/redfin/walleye/g" $MODPATH/spoof.prop
+    # sed -i -e "s/raven/walleye/g" $MODPATH/spoof.prop
+    # sed -i -e "s/Pixel 6 Pro/Pixel 2/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${id}/OPM2.171026.006.G1/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${inc}/4820017/g" $MODPATH/spoof.prop
+# elif [ $API -eq 28 ]; then
+    # sed -i -e "s/:11/:9/g" $MODPATH/spoof.prop
+    # sed -i -e "s/redfin/blueline/g" $MODPATH/spoof.prop
+	# sed -i -e "s/raven/blueline/g" $MODPATH/spoof.prop
+    # sed -i -e "s/Pixel 6 Pro/Pixel 3/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${id}/PQ3A.190801.002/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${inc}/5670241/g" $MODPATH/spoof.prop
+# elif [ $API -eq 29 ]; then
+    # sed -i -e "s/:11/:10/g" $MODPATH/spoof.prop
+    # sed -i -e "s/redfin/coral/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${id}/QQ3A.200805.001/g" $MODPATH/spoof.prop
+    # sed -i -e "s/${inc}/6578210/g" $MODPATH/spoof.prop
+# elif [ $API -eq 31 ]; then
+    # sed -i -e "s/:11/:12/g" $MODPATH/spoof.prop
+    # sed -i -e "s/redfin/raven/g" $MODPATH/spoof.prop
+    # if [ $s_change -eq 0 ]; then
+        # sed -i -e "s/${id}/${s_id}/g" $MODPATH/spoof.prop
+        # sed -i -e "s/${inc}/${s_inc}/g" $MODPATH/spoof.prop
+    # fi
+# fi
 
 print ""
-print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) $(grep ro.product.system.device $MODPATH/spoof.prop | cut -d'=' -f2 )?"
+print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) $(grep ro.product.device $MODPATH/spoof.prop | cut -d'=' -f2 )?"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 
@@ -661,7 +662,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
             mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
             rm -rf $MODPATH/system/product/priv-app/Velvet/oat
-            mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
+            #mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
         elif [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
             print "- Google is not installed as a system app !!"
             print "- Making Google as a system app"
@@ -669,7 +670,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
             mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
             rm -rf $MODPATH/system/product/priv-app/Velvet/oat
-            mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
+            #mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
         fi
     fi
 fi
@@ -904,16 +905,16 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
-        mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
+        #mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
         echo "gboard" >> $pix/app.txt
-    elif [ ! -z "$(cat $pix/app_temp.txt | grep gboard)" ]; then
+    elif [ ! -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard as a system app"
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
-        mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
+        #mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
         echo "gboard" >> $pix/app.txt
     fi
 fi
@@ -921,6 +922,36 @@ fi
 if [ -d /data/data/com.google.android.apps.wellbeing ]; then
     pm enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity > /dev/null 2>&1
 fi
+
+set_perm_app() {
+	out=$($MODPATH/addon/aapt d permissions $1)
+	path="$(echo "$1" | sed 's/\/priv-app.*//')"
+	name=$(echo $out | grep package: | cut -d' ' -f2)
+	perm="$(echo $out | grep uses-permission:)"
+	if [ ! -z "$perm" ]; then
+		mkdir -p $path/etc/permissions
+      		echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<!--
+	Generated by Pixelify Module
+-->
+<permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+		echo "    <privapp-permissions package=\"${name}\">" >> $path/etc/permissions/privapp_whitelist_$name.xml
+		for i in $perm; do
+			s=$(echo $i | grep name= | cut -d= -f2 | sed "s/'/\"/g")
+			if [ ! -z $s ]; then
+				echo "        <permission name=$s/>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+			fi
+		done
+		echo "    </privapp-permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+		echo " </permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+		chmod 0644 $path/etc/permissions/privapp_whitelist_$name.xml
+	fi
+}
+
+# Permissions for apps
+for j in $MODPATH/system/*/priv-app/*/*.apk; do
+	set_perm_app $j
+done
 
 REPLACE="$REMOVE"
 
