@@ -176,7 +176,25 @@ if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
     cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
     chmod 500 /data/data/com.google.android.dialer/files/phenotype
     am force-stop com.google.android.dialer
+else
+    chmod 755 /data/data/com.google.android.dialer/files/phenotype
 fi
+
+if [ $(grep Live $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
+     pm enable -n com.google.pixel.livewallpaper/com.google.pixel.livewallpaper.pokemon.wallpapers.PokemonWallpaper -a android.intent.action.MAIN
+fi
+
+while read p; do
+	if [ ! -z "$(echo $p)" ]; then
+		if [ "$(echo $p | head -c 1)" != "#" ]; then
+			name="$(echo $p | cut -d= -f1)"
+			namespace="$(echo $name | cut -d/ -f1)"
+			key="$(echo $name | cut -d/ -f2)"
+			value="$(echo $p | cut -d= -f2)"
+			device_config put $namespace $key $value
+		fi
+	fi
+done <$MODDIR/deviceconfig.txt
 
 flip_perm="android.permission.READ_DEVICE_CONFIG
 android.permission.SUSPEND_APPS
