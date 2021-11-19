@@ -142,6 +142,8 @@ bool_patch show_suggestions_for_selected_text_while_dictating $GBOARD_PREF
 #bool_patch enable_highlight_voice_reconversion_composing_text $GBOARD_PREF
 #bool_patch enable_handling_concepts_for_contextual_bitmoji $GBOARD_PREF
 bool_patch enable_preemptive_decode $GBOARD_PREF
+bool_patch translate $GBOARD_PREF
+bool_patch tflite $GBOARD_PREF
 bool_patch enable_show_inline_suggestions_in_popup_view $GBOARD_PREF
 bool_patch enable_nebulae_materializer_v2 $GBOARD_PREF
 #bool_patch use_scrollable_candidate_for_voice $GBOARD_PREF
