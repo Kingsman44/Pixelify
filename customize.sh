@@ -395,7 +395,7 @@ if [ $DPAS -eq 1 ]; then
         fi
         print "- Installing Device Personalisation Services"
         print ""
-        cp -f $MODPATH/files/PixeliflyDPS.apk $MODPATH/files/system/product/overlay/PixeliflyDPS.apk
+        cp -f $MODPATH/files/PixeliflyDPS.apk $MODPATH/system/product/overlay/PixeliflyDPS.apk
         tar -xf /sdcard/Pixelify/backup/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
         echo dp-$API > $pix/app.txt
     else
@@ -417,7 +417,7 @@ if [ $DPAS -eq 1 ]; then
                 cd /
                 print ""
                 print "- Installing Device Personalisation Services"
-                cp -f $MODPATH/files/PixeliflyDPS.apk $MODPATH/files/system/product/overlay/PixeliflyDPS.apk
+                cp -f $MODPATH/files/PixeliflyDPS.apk $MODPATH/system/product/overlay/PixeliflyDPS.apk
                 tar -xf $MODPATH/files/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
                 echo dp-$API > $pix/app.txt
                 REMOVE="$REMOVE $DP"
