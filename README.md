@@ -8,15 +8,15 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **Android Version: 7.0+**
 - **Arm64 device**
 - **Volume Keys**
-- **Internet for NGA Resources & Pixel Livewallpaper**
+- **Internet for NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
 
 ## ⭐ Features
 ### Pixel 6 Features Enables
 -   Pixel 6 Live Wallpapers *
 -   Magic Earser (<a href="https://t.me/google_nws/864">USE THIS APK</a>)(7+)
 -   Google Dialer Direct Call (<a href="https://www.apkmirror.com/apk/google-inc/google-phone/google-phone-72-0-407683083-publicbeta-pixel2021-release/">USE THIS APK</a>)(7+)
--   Live Transcript (Not working on my device)(12+)
--   Google Quick Pharse*
+-   Live Transcript(12+)
+-   Google Quick Pharse *
 -   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
 
 ### Other Features
@@ -49,12 +49,18 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 <br>
 * - Requires Spoofing to Pixel device
 
+## ⭐ How to Enable Features
+### 1) Google Photos Unlimited Backup (storage saver)
+- **Enable**:-  Clear Data Photos for first time installing Module<br>
+- **Note**:-  It won't show you Unlimited Text, but your backup photos won't be counted on storage, you can check total after upload photos it won't change or will be back to same storage after 5-10 mins<br>
+
 ## ⭐ Bugs and Fixes
 - **Call Screening**: caller can't hear your voice.<br>
 **Fix commit:** https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/0074cac9a4b098f8c4c996a4ef7ca44d00b158d9,https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/de2146fdd88771182a677aa94ccb8237479d793d (According to your qcom board)
 - **Call Screening**: can't able to download call screening files.<br>
 **Fix:** Set WIFI to unmetered connection. <br>
 - **Google**: Ok Google doesn't work without hotword with spoof to pixel.<br>
+- **Google**: For Continued Conversation and fix At a Glance in Android 12 (<a href="https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/Velvet.zip">USE THIS APK</a>) (Use Sai Installer to install this splits apk)
 
 ## ⭐ Credits
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
@@ -63,6 +69,16 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
+### Version 1.81
+- Fixed Downloading Apps in Play Store on spoofing
+- Fixed Downloading Live Caption on A12
+- Fixed Text Selection in recents pixel Launcher on A12
+- Update Device Personalisation Services (A12)
+- Switched to Pixel 6 Pro (Still Google Photos Unlimted storage saver will work)
+- Live Translate will work now on devices
+- Switched Online for Pixel Launcher
+- Fixes for Nga Voice Typing & Bloom section in Pixel Live Wallpapers
+
 ### Version 1.8
 - Introduced Installation Logs (/sdcard/Pixelify/logs.txt) 
 - New way for SimpleDeviceConfig
