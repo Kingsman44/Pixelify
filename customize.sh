@@ -745,9 +745,9 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
         done
 
         $sqlite $gms "UPDATE Flags SET stringVal='Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='17074'"
-        $sqlite $gms "UPDATE Flags SET stringVal='Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='45353661'"
+        $sqlite $gms "UPDATE Flags SET stringVal='Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='45353661'"
         $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '17074', 0, 'Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL', 0)"
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '45353661', 0, 'Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5', 0)"
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '45353661', 0, 'Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL', 0)"
 
         cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
 
