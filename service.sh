@@ -12,6 +12,8 @@ export DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phen
 export GBOARD_PREF=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
 export FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
 export TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
+sqlite=$MODDIR/addon/sqlite3
+gms=/data/user/0/com.google.android.gms/databases/phenotype.db
 
 temp=""
 
@@ -24,7 +26,7 @@ log() {
     date=$(date +%y/%m/%d)
     tim=$(date +%H:%M:%S)
     temp="$temp
- $date $tim: $@"
+$date $tim: $@"
 }
 
 set_prop() {
@@ -218,6 +220,14 @@ android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
 for i in $flip_perm; do
     pm grant com.google.android.flipendo $i
 done
+
+gboardflag="spellchecker_enable_language_trigger silk_on_all_pixel silk_on_all_devices nga_enable_undo_delete nga_enable_sticky_mic nga_enable_spoken_emoji_sticky_variant nga_enable_mic_onboarding_animation nga_enable_mic_button_when_dictation_eligible enable_next_generation_hwr_support enable_nga"
+for i in $gboardflag; do
+    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
+done
+$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '17074', 0, 'Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL', 0)"
+$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '45353661', 0, 'Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5', 0)"
+$sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.platform.device_personalization_services' AND name='adaptiveAudio__enable_adaptive_audio'"
 
 log "Service Finished"
 echo "$temp" >> /sdcard/Pixelify/logs.txt

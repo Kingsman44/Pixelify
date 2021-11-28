@@ -58,16 +58,16 @@ WNEED=0
 SEND_DPS=0
 
 if [ $API -eq 31 ]; then
-	if [ -f /Pixelify/backup/dp-net-$API.tar.xz ]; then
-		DPSIZE="24 Mb"
-	else
-		DPSIZE="28 Mb"
-	fi
+    if [ -f /Pixelify/backup/dp-net-$API.tar.xz ]; then
+        DPSIZE="24 Mb"
+    else
+        DPSIZE="28 Mb"
+    fi
     DPVERSIONP=1.4
     WSIZE="2.0 Mb"
     WNEED=1
-	PLVERSIONP=1
-	PLSIZE="8 Mb"
+    PLVERSIONP=1.1
+    PLSIZE="12 Mb"
 elif [ $API -eq 30 ]; then
     DPSIZE="20 Mb"
     DPVERSIONP=1.2
@@ -100,28 +100,28 @@ if [ $internet -eq 1 ]; then
     NGAVERSION=$(echo "$ver" | grep nga | cut -d'=' -f2)
     LWVERSION=$(echo "$ver" | grep wallpaper | cut -d'=' -f2)
     DPVERSION=$(echo "$ver" | grep dp-$API | cut -d'=' -f2)
-	PLVERSION=$(echo "$ver" | grep pl-$API | cut -d'=' -f2)
+    PLVERSION=$(echo "$ver" | grep pl-$API | cut -d'=' -f2)
     rm -rf $pix/nga.txt
     rm -rf $pix/pixel.txt
     rm -rf $pix/dp.txt
-	rm -rf $pix/pl-$API.txt
+    rm -rf $pix/pl-$API.txt
     echo "$NGAVERSION" >> $pix/nga.txt
     echo "$LWVERSION" >> $pix/pixel.txt
     echo "$DPVERSION" >> $pix/dp.txt
-	echo "$PLVERSION" >> $pix/pl-$API.txt
+    echo "$PLVERSION" >> $pix/pl-$API.txt
     NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
-	if [  $API -eq 31 ]; then
-		if [ -f /sdcard/Pixelify/backup/dp-net-$API.tar.xz ]; then
-			DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
-		else
-			DPSIZE="$(expr $($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) + $($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-net-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)) Mb"
-			SEND_DPS=1
-		fi
-	else
-		DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
-	fi
-	PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+    if [  $API -eq 31 ]; then
+        if [ -f /sdcard/Pixelify/backup/dp-net-$API.tar.xz ]; then
+            DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        else
+            DPSIZE="$(expr $($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) + $($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-net-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)) Mb"
+            SEND_DPS=1
+        fi
+    else
+        DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+    fi
+    PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
 else
     if [ ! -f $pix/nga.txt ]; then
         echo "$NGAVERSIONP" >> $pix/nga.txt
@@ -152,6 +152,8 @@ echo "
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
+sqlite=$MODPATH/addon/sqlite3
+gms=/data/user/0/com.google.android.gms/databases/phenotype.db
 
 if [ $API -le 28 ]; then
     cp -r $MODPATH/system/product/. $MODPATH/system
@@ -338,13 +340,24 @@ if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.mi
 fi
 
 print ""
-print "  Do you want to Spoof your device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) ($(grep ro.product.device $MODPATH/spoof.prop | cut -d'=' -f2 ))?"
+print "  Do you want to Spoof your device to Pixel 5/Pixel 6 Pro?"
 print "   Vol Up += Yes"
 print "   Vol Down += No"
 
 if $VKSEL; then
     pixel_spoof=1
-    echo " - Spoofing device to $(grep ro.product.system.model $MODPATH/spoof.prop | cut -d'=' -f2) ( $(grep ro.product.device $MODPATH/spoof.prop | cut -d'=' -f2 ) )" >> $logfile
+    print " ---------"
+    print "  Note: If your device have some problem with download in playstore"
+    print "  Please Select Pixel 6 Pro"
+    print "---------"
+    print ""
+    print "  Select Spoof to Pixel 5 (recommended) or Pixel 6 Pro?"
+    print "   Vol Up += Pixel 5"
+    print "   Vol Down += Pixel 6 Pro (Google Photos Unlimited backup may not work properly)"
+    if $VKSEL; then
+        sed -i -e "s/Pixel 6 Pro/Pixel 5/g" $file
+    fi
+    echo " - Spoofing device to $(grep ro.product.model $MODPATH/spoof.prop | cut -d'=' -f2) ( $(grep ro.product.device $MODPATH/spoof.prop | cut -d'=' -f2 ) )" >> $logfile
     cat $MODPATH/spoof.prop >> $MODPATH/system.prop
 else
     echo " - Ignoring spoofing device" >> $logfile
@@ -381,6 +394,9 @@ fi
 
 if [ $DPAS -eq 1 ]; then
     echo " - Installing Device Personalisation Services" >> $logfile
+    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='AdaptiveAudio__enable_adaptive_audio'"
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', 'AdaptiveAudio__enable_adaptive_audio', 0, 1, 0)"
+    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.platform.device_personalization_services' AND name='adaptiveAudio__enable_adaptive_audio'"
     if [ -f /sdcard/Pixelify/backup/dp-$API.tar.xz ]; then
         echo " - Backup Detected for Device Personalisation Services" >> $logfile
         REMOVE="$REMOVE $DP"
@@ -402,11 +418,11 @@ if [ $DPAS -eq 1 ]; then
                     rm -rf /sdcard/Pixelify/backup/dp-$API.tar.xz
                     rm -rf /sdcard/Pixelify/version/dp.txt
                     cd $MODPATH/files
-					if [ ! -f /sdcard/Pixelify/backup/dp-net-$API.tar.xz ] && [ $API -eq 31 ]; then
-						$MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-net-$API.tar.xz -O &> /proc/self/fd/$OUTFD
-						rm -rf /backup/dp-net-$API.tar.xz
-						cp -f $MODPATH/files/dp-net-$API.tar.xz /sdcard/Pixelify/backup/dp-net-$API.tar.xz
-					fi
+                    if [ ! -f /sdcard/Pixelify/backup/dp-net-$API.tar.xz ] && [ $API -eq 31 ]; then
+                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-net-$API.tar.xz -O &> /proc/self/fd/$OUTFD
+                        rm -rf /backup/dp-net-$API.tar.xz
+                        cp -f $MODPATH/files/dp-net-$API.tar.xz /sdcard/Pixelify/backup/dp-net-$API.tar.xz
+                    fi
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz -O &> /proc/self/fd/$OUTFD
                     cd /
                     print ""
@@ -429,14 +445,14 @@ if [ $DPAS -eq 1 ]; then
         fi
         print "- Installing Device Personalisation Services"
         print ""
-		if [ $API -eq 31 ] && [ -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel6) ]; then
-			rm -rf /data/app/*/*com.google.android.as*
-		fi
+        if [ $API -eq 31 ] && [ -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel6) ]; then
+            rm -rf /data/app/*/*com.google.android.as*
+        fi
         cp -f $MODPATH/files/PixeliflyDPS.apk $MODPATH/system/product/overlay/PixeliflyDPS.apk
-		if [ $API -eq 31 ] && [ -f /sdcard/Pixelify/backup/dp-net-$API.tar.xz ]; then
-			tar -xf /sdcard/Pixelify/backup/dp-net-$API.tar.xz -C $MODPATH/system$product/priv-app
-		fi
-		tar -xf /sdcard/Pixelify/backup/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
+        if [ $API -eq 31 ] && [ -f /sdcard/Pixelify/backup/dp-net-$API.tar.xz ]; then
+            tar -xf /sdcard/Pixelify/backup/dp-net-$API.tar.xz -C $MODPATH/system$product/priv-app
+        fi
+        tar -xf /sdcard/Pixelify/backup/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
         echo dp-$API > $pix/app.txt
     else
         ui_print ""
@@ -453,21 +469,21 @@ if [ $DPAS -eq 1 ]; then
                 echo " - Downloading and installing Device Personalisation Services" >> $logfile
                 ui_print ""
                 cd $MODPATH/files
-				if [ $API -eq 31 ]; then
-					$MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-net-$API.tar.xz -O &> /proc/self/fd/$OUTFD
-				fi
+                if [ $API -eq 31 ]; then
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-net-$API.tar.xz -O &> /proc/self/fd/$OUTFD
+                fi
                 $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz -O &> /proc/self/fd/$OUTFD
                 cd /
                 print ""
                 print "- Installing Device Personalisation Services"
                 cp -f $MODPATH/files/PixeliflyDPS.apk $MODPATH/system/product/overlay/PixeliflyDPS.apk
-				if [ $API -eq 31 ]; then
-					tar -xf $MODPATH/files/dp-net-$API.tar.xz -C $MODPATH/system$product/priv-app
-				fi
-				tar -xf $MODPATH/files/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
-				if [ $API -eq 31 ] && [ -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel6) ]; then
-					rm -rf /data/app/*/*com.google.android.as*
-				fi
+                if [ $API -eq 31 ]; then
+                    tar -xf $MODPATH/files/dp-net-$API.tar.xz -C $MODPATH/system$product/priv-app
+                fi
+                tar -xf $MODPATH/files/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
+                if [ $API -eq 31 ] && [ -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel6) ]; then
+                    rm -rf /data/app/*/*com.google.android.as*
+                fi
                 echo dp-$API > $pix/app.txt
                 REMOVE="$REMOVE $DP"
                 ui_print ""
@@ -480,10 +496,10 @@ if [ $DPAS -eq 1 ]; then
                     print "- Creating Backup"
                     mkdir -p /sdcard/Pixelify/backup
                     rm -rf /sdcard/Pixelify/backup/dp-$API.tar.xz
-					if [ -f $MODPATH/files/dp-net-$API.tar.xz ] && [ $API -eq 31 ]; then
-						rm -rf /sdcard/Pixelify/backup/dp-net-$API.tar.xz
-						cp -f $MODPATH/files/dp-net-$API.tar.xz /sdcard/Pixelify/backup/dp-net-$API.tar.xz
-					fi
+                    if [ -f $MODPATH/files/dp-net-$API.tar.xz ] && [ $API -eq 31 ]; then
+                        rm -rf /sdcard/Pixelify/backup/dp-net-$API.tar.xz
+                        cp -f $MODPATH/files/dp-net-$API.tar.xz /sdcard/Pixelify/backup/dp-net-$API.tar.xz
+                    fi
                     cp -f $MODPATH/files/dp-$API.tar.xz /sdcard/Pixelify/backup/dp-$API.tar.xz
                     print ""
                     mkdir /sdcard/Pixelify/version
@@ -531,7 +547,10 @@ if [ -d /data/data/$DIALER ]; then
         carr_coun="$(getprop gsm.sim.operator.iso-country | tr '[:lower:]' '[:upper:]')"
         if [ ! -z $carr_coun ]; then
             echo " - Adding Country ($carr_coun) patch for Call Recording and Hold for me, Direct My Call" >> $logfile
-            sed -i -e "s/TF/${carr_coun}/g" $MODPATH/files/$DIALER
+            sed -i -e "s/TX/${carr_coun}/g" $MODPATH/files/$DIALER
+            if [ -z $(echo "AU US JP" | grep $carr_coun) ]; then
+                sed -i -e "s/TF/${carr_coun}/g" $MODPATH/files/$DIALER
+            fi
             sed -i -e "s/xy/${carr_coun1}/g" $MODPATH/files/$DIALER
         fi
         if [ $pixel_spoof -eq 0 ]; then
@@ -719,7 +738,17 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             echo " - Spoofing to Pixel 6 Pro for Next Generation Assistant" >> $logfile
             echo "ro.product.model=Pixel 6 Pro" >> $MODPATH/spoof.prop
         fi
-		
+
+        google_flag="17074 45353661"
+        for i in $google_flag; do
+            $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox' AND name='$i'"
+        done
+
+        $sqlite $gms "UPDATE Flags SET stringVal='Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='17074'"
+        $sqlite $gms "UPDATE Flags SET stringVal='Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='45353661'"
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '17074', 0, 'Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL', 0)"
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '45353661', 0, 'Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5', 0)"
+
         cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
 
         if [ -z $(pm list packages -s com.google.android.googlequicksearchbox | grep -v nga) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
@@ -909,9 +938,9 @@ else
 fi
 
 if [ $API -ge 29 ]; then
-	PL=$(find /system -name *Launcher* | grep -v overlay | grep -v "\.")
-	TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v "\.")
-	QS=$(find /system -name *QuickStep* | grep -v overlay | grep -v "\.")
+    PL=$(find /system -name *Launcher* | grep -v overlay | grep -v "\.")
+    TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v "\.")
+    QS=$(find /system -name *QuickStep* | grep -v overlay | grep -v "\.")
     if [ -f /sdcard/Pixelify/backup/pl-$API.tar.xz ]; then
         echo " - Backup Detected for Pixel Launcher" >> $logfile
         print "  Do you want to install Pixel Launcher?"
@@ -941,7 +970,7 @@ if [ $API -ge 29 ]; then
                         cd /
                         print "- Creating Backup"
                         print ""
-                        cp -f $MODPATH/files/pixel.tar.xz /sdcard/Pixelify/backup/pixel.tar.xz
+                        cp -f $MODPATH/files/pl-$API.tar.xz /sdcard/Pixelify/backup/pl-$API.tar.xz
                         echo " - Creating Backup for Pixel Launcher" >> $logfile
                         echo "$PLVERSION" >> /sdcard/Pixelify/version/pl-$API.txt
                     else
@@ -958,14 +987,14 @@ if [ $API -ge 29 ]; then
             print ""
 
             if [ $API -eq 31 ]; then
-				tar -xf /sdcard/Pixelify/backup/pl-$API.tar.xz -C $MODPATH/system$product
-			else
-				tar -xf /sdcard/Pixelify/backup/pl-$API.tar.xz -C $MODPATH/system$product/priv-app
+                tar -xf /sdcard/Pixelify/backup/pl-$API.tar.xz -C $MODPATH/system$product
+            else
+                tar -xf /sdcard/Pixelify/backup/pl-$API.tar.xz -C $MODPATH/system$product/priv-app
             fi
 
         else
             echo " - Skipping Pixel Launcher" >> $logfile
-			rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
+            rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
         fi
     else
         print "  (Network Connection Needed)"
@@ -984,11 +1013,11 @@ if [ $API -ge 29 ]; then
                 cd /
                 print ""
                 print "- Installing Pixel Launcher"
-				if [ $API -eq 31 ]; then
-					tar -xf $MODPATH/files/pl-$API.tar.xz -C $MODPATH/system$product
-				else
-					tar -xf $MODPATH/files/pl-$API.tar.xz -C $MODPATH/system$product/priv-app
-				fi
+                if [ $API -eq 31 ]; then
+                    tar -xf $MODPATH/files/pl-$API.tar.xz -C $MODPATH/system$product
+                else
+                    tar -xf $MODPATH/files/pl-$API.tar.xz -C $MODPATH/system$product/priv-app
+                fi
 
                 REMOVE="$REMOVE $PL $TR $QS"
                 ui_print ""
@@ -1015,13 +1044,13 @@ if [ $API -ge 29 ]; then
                 print "- Skipping Pixel launcher"
                 print ""
                 echo " - Skipping Pixel Launcher due to no internet" >> $logfile
-				 rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
+                rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
             fi
         else
             echo " - Skipping Pixel Launcher" >> $logfile
-			rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
+            rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
         fi
-	fi
+    fi
 else
     echo " - Skipping Pixel Launcher" >> $logfile
     rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
@@ -1086,6 +1115,12 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     bool_patch generation $GBOARD
     bool_patch multiword $GBOARD
     bool_patch core_typing $GBOARD
+    gboardflag="spellchecker_enable_language_trigger silk_on_all_pixel silk_on_all_devices nga_enable_undo_delete nga_enable_sticky_mic nga_enable_spoken_emoji_sticky_variant nga_enable_mic_onboarding_animation nga_enable_mic_button_when_dictation_eligible enable_next_generation_hwr_support enable_nga"
+    for i in $gboardflag; do
+        $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', '$i', 0, 1, 0)"
+        $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
+    done
     echo " - Patching Google Keyboard's bools" >> $logfile
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
         print ""
@@ -1125,8 +1160,8 @@ set_perm_app() {
         echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>
 <!--
 	Generated by Pixelify Module
--->
-<permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+ -->" >> $path/etc/permissions/privapp_whitelist_$name.xml
+        echo "<permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
         echo "    <privapp-permissions package=\"${name}\">" >> $path/etc/permissions/privapp_whitelist_$name.xml
         for i in $perm; do
             s=$(echo $i | grep name= | cut -d= -f2 | sed "s/'/\"/g")

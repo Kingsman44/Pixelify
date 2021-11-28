@@ -70,14 +70,15 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ ChangeLogs
 ### Version 1.81
-- Fixed Downloading Apps in Play Store on spoofing
-- Fixed Downloading Live Caption on A12
+- Fixes for Downloading Live Caption on A12
 - Fixed Text Selection in recents pixel Launcher on A12
 - Update Device Personalisation Services (A12)
-- Switched to Pixel 6 Pro (Still Google Photos Unlimted storage saver will work)
-- Live Translate will work now on devices
+- Option to switch to Pixel 6 Pro or Pixel 5
+- some fixes for download Live Translate
 - Switched Online for Pixel Launcher
+- Android 12 Pixel Launcher now supports 450 themed icons.
 - Fixes for Nga Voice Typing & Bloom section in Pixel Live Wallpapers
+- Fixes for Quick Phrase
 
 ### Version 1.8
 - Introduced Installation Logs (/sdcard/Pixelify/logs.txt) 
