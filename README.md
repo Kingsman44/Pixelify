@@ -79,6 +79,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Android 12 Pixel Launcher now supports 450 themed icons.
 - Fixes for Nga Voice Typing & Bloom section in Pixel Live Wallpapers
 - Fixes for Quick Phrase
+- Reduced initial module size to 22 Mb
 
 ### Version 1.8
 - Introduced Installation Logs (/sdcard/Pixelify/logs.txt) 
