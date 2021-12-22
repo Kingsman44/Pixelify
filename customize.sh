@@ -42,10 +42,13 @@ fi
 
 if [ -f $pix/app.txt ]; then
     rm -rf $pix/apps_temp.txt
-    mv $pix/app.txt $pix/apps_temp.txt
+    cp -f $pix/app.txt $pix/apps_temp.txt
 else
     touch $pix/apps_temp.txt
 fi
+
+rm -rf $pix/app2.txt
+touch $pix/app2.txt
 
 DPVERSIONP=1
 NGAVERSIONP=1.1
@@ -339,6 +342,26 @@ if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.mi
     done <$MODPATH/spoof.prop
 fi
 
+GUNLIMITED=0
+print ""
+print "  Do you want to enable Google Photos Original Unlimited Backup?"
+print " -----------NOTE---------------"
+print " - Your device model will be set to Pixel 3 XL"
+print " - If Select 'No' here you can still get Unlimited Storage Saver Backup"
+print " - Next Generation Assistant Continued Conversation Won't Work"
+print " -----------END---------------"
+print "   Vol Up += Yes"
+print "   Vol Down += No"
+
+if $VKSEL; then
+	rm -rf $MODPATH/system/product/etc/sysconfig/pixel_experience_2020.xml
+	touch $MODPATH/system/product/etc/sysconfig/pixel_experience_2020.xml
+	GUNLIMITED=1
+	sed -i -e "s/Pixel 6 Pro/Pixel 3 XL/g" $MODPATH/spoof.prop
+	cat $MODPATH/spoof.prop >> $MODPATH/system.prop
+fi
+
+if [ $GUNLIMITED -eq 0 ]; then
 print ""
 print "  Do you want to Spoof your device to Pixel 5/Pixel 6 Pro?"
 print "   Vol Up += Yes"
@@ -347,7 +370,7 @@ print "   Vol Down += No"
 if $VKSEL; then
     pixel_spoof=1
     print " ---------"
-    print "  Note: If your device have some problem with download in playstore"
+    print "  Note: If your device have some problem with downloading in playstore"
     print "  Please Select Pixel 6 Pro"
     print "---------"
     print ""
@@ -355,12 +378,13 @@ if $VKSEL; then
     print "   Vol Up += Pixel 5"
     print "   Vol Down += Pixel 6 Pro (Google Photos Unlimited backup may not work properly)"
     if $VKSEL; then
-        sed -i -e "s/Pixel 6 Pro/Pixel 5/g" $file
+        sed -i -e "s/Pixel 6 Pro/Pixel 5/g" $MODPATH/spoof.prop
     fi
     echo " - Spoofing device to $(grep ro.product.model $MODPATH/spoof.prop | cut -d'=' -f2) ( $(grep ro.product.device $MODPATH/spoof.prop | cut -d'=' -f2 ) )" >> $logfile
     cat $MODPATH/spoof.prop >> $MODPATH/system.prop
 else
     echo " - Ignoring spoofing device" >> $logfile
+fi
 fi
 
 DPAS=1
@@ -453,7 +477,7 @@ if [ $DPAS -eq 1 ]; then
             tar -xf /sdcard/Pixelify/backup/dp-net-$API.tar.xz -C $MODPATH/system$product/priv-app
         fi
         tar -xf /sdcard/Pixelify/backup/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
-        echo dp-$API > $pix/app.txt
+        echo dp-$API > $pix/app2.txt
     else
         ui_print ""
         echo " - No backup Detected for Device Personalisation Services" >> $logfile
@@ -484,7 +508,7 @@ if [ $DPAS -eq 1 ]; then
                 if [ $API -eq 31 ] && [ -z $($MODPATH/addon/dumpsys package com.google.android.as | grep versionName | grep pixel6) ]; then
                     rm -rf /data/app/*/*com.google.android.as*
                 fi
-                echo dp-$API > $pix/app.txt
+                echo dp-$API > $pix/app2.txt
                 REMOVE="$REMOVE $DP"
                 ui_print ""
                 print "  Do you want to create backup of Device Personalisation Services?"
@@ -639,8 +663,10 @@ GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.
 if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ]; then
     print "  Google is installed."
     print "  Do you want to installed Next generation assistant?"
-    if [  $pixel_spoof -eq 0 ]; then
+    if [  $pixel_spoof -eq 0 ] && [ $GUNLIMITED -eq 0 ]; then
         print "Note: Your Model will be set to Pixel 6 Pro if YES"
+	elif [ $GUNLIMITED -eq 1 ]; then
+		print "Note: NGA assistant may not work due to Spoof to Pixel 3 XL"
     fi
     print "   Vol Up += Yes"
     print "   Vol Down += No"
@@ -734,9 +760,9 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             fi
         fi
 
-        if [  $pixel_spoof -eq 0 ]; then
+        if [  $pixel_spoof -eq 0 ] && [ $GUNLIMITED -eq 0 ]; then
             echo " - Spoofing to Pixel 6 Pro for Next Generation Assistant" >> $logfile
-            echo "ro.product.model=Pixel 6 Pro" >> $MODPATH/spoof.prop
+            echo "ro.product.model=Pixel 6 Pro" >> $MODPATH/system.prop
         fi
 
         google_flag="17074 45353661"
@@ -801,6 +827,7 @@ install_wallpaper() {
     fi
 }
 
+WALL_DID=0
 wall=$(find /system -name WallpaperPickerGoogle*.apk)
 if [ $API -ge 28 ]; then
     if [ -f /sdcard/Pixelify/backup/pixel.tar.xz ]; then
@@ -861,6 +888,7 @@ if [ $API -ge 28 ]; then
                 rm -rf $MODPATH/system/overlay
             fi
             install_wallpaper
+			WALL_DID=1
         else
             echo " - Using old backup Pixel Wallpapers" >> $logfile
         fi
@@ -908,6 +936,7 @@ if [ $API -ge 28 ]; then
                     print ""
                 fi
                 install_wallpaper
+				WALL_DID=1
             else
                 print "!! Warning !!"
                 print " No internet detected"
@@ -991,7 +1020,10 @@ if [ $API -ge 29 ]; then
             else
                 tar -xf /sdcard/Pixelify/backup/pl-$API.tar.xz -C $MODPATH/system$product/priv-app
             fi
-
+			
+			if [ $WALL_DID -eq 0 ]; then
+				install_wallpaper
+			fi
         else
             echo " - Skipping Pixel Launcher" >> $logfile
             rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
@@ -1037,6 +1069,10 @@ if [ $API -ge 29 ]; then
                     print " - Done"
                     print ""
                 fi
+				
+				if [ $WALL_DID -eq 0 ]; then
+					install_wallpaper
+				fi
             else
                 print "!! Warning !!"
                 print " No internet detected"
@@ -1118,7 +1154,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     gboardflag="spellchecker_enable_language_trigger silk_on_all_pixel silk_on_all_devices nga_enable_undo_delete nga_enable_sticky_mic nga_enable_spoken_emoji_sticky_variant nga_enable_mic_onboarding_animation nga_enable_mic_button_when_dictation_eligible enable_next_generation_hwr_support enable_nga"
     for i in $gboardflag; do
         $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', '$i', 0, 1, 0)"
+        #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', '$i', 0, 1, 0)"
         $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
     done
     echo " - Patching Google Keyboard's bools" >> $logfile
@@ -1131,7 +1167,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         #mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
-        echo "gboard" >> $pix/app.txt
+        echo "gboard" >> $pix/app2.txt
     elif [ ! -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
@@ -1141,7 +1177,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         #mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
-        echo "gboard" >> $pix/app.txt
+        echo "gboard" >> $pix/app2.txt
     fi
 fi
 
@@ -1177,6 +1213,10 @@ set_perm_app() {
 
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do
+    set_perm_app $j
+done
+
+for j in $MODPATH/system/priv-app/*/*.apk; do
     set_perm_app $j
 done
 
@@ -1218,6 +1258,7 @@ if [ $API -le 27 ]; then
 fi
 
 rm -rf $pix/apps_temp.txt
+mv $pix/app2.txt $pix/app.txt
 
 echo " ---- Installation Finished ----" >> $logfile
 
