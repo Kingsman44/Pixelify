@@ -98,7 +98,7 @@ apollo
 surya
 gauguin
 cannon
-karna
+raven
 gauguininpro
 citrus
 lime
@@ -114,14 +114,15 @@ haydnin
 sunny
 star
 pomelo
+lemon
 camellian
 camellia
-mido
+vayu
 bhima
 alioth
 aliothin
 ares
-raven
+aresin
 rosemary
 maltose
 biloba

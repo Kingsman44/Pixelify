@@ -169,7 +169,7 @@ pm_enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.wa
 
 while true; do
     boot=$(getprop sys.boot_completed)
-    if [ "$boot" == 1 ]; then
+    if [ "$boot" -eq 1 ]; then
         sleep 10
         break
     fi
@@ -180,8 +180,6 @@ if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
     cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
     chmod 500 /data/data/com.google.android.dialer/files/phenotype
     am force-stop com.google.android.dialer
-else
-    chmod 755 /data/data/com.google.android.dialer/files/phenotype
 fi
 
 if [ $(grep Live $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
@@ -220,14 +218,6 @@ android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
 for i in $flip_perm; do
     pm grant com.google.android.flipendo $i
 done
-
-gboardflag="spellchecker_enable_language_trigger silk_on_all_pixel silk_on_all_devices nga_enable_undo_delete nga_enable_sticky_mic nga_enable_spoken_emoji_sticky_variant nga_enable_mic_onboarding_animation nga_enable_mic_button_when_dictation_eligible enable_next_generation_hwr_support enable_nga"
-for i in $gboardflag; do
-    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
-done
-$sqlite $gms "UPDATE Flags SET stringVal='Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='17074'"
-$sqlite $gms "UPDATE Flags SET stringVal='Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='45353661'"
-$sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.platform.device_personalization_services' AND name='adaptiveAudio__enable_adaptive_audio'"
 
 log "Service Finished"
 echo "$temp" >> /sdcard/Pixelify/logs.txt

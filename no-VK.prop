@@ -1,0 +1,63 @@
+# 0 - Disable(No), 1 - Enable(Yes)
+
+# Google Photos Original Unlimited Backup
+# Your Device model will be set to Pixel 3
+# Next Generation Assistant won't work
+# Enabling it will disable Pixel Spoofing as it will be spoofed to pixel 3
+ENABLE_GPHOTOS_UNLIMITED=0
+
+# Pixel 5/6 Spoofing
+ENABLE_PIXEL_SPOOFING=0
+
+# 0 - spoof to pixel 5
+# 1 - spoof to pixel 6 pro
+TARGET_USES_PIXEL5_SPOOF=0
+
+# Install Device Personalistaion Services
+ENABLE_DPS=1
+
+# Download Install Device Personalistaion Services new backup if available
+UPDATE_DPS=1
+
+# Create Backup for Device Personalistaion Services
+BACKUP_DPS=1
+
+# Google Dialer Features
+# Includes Call Recording, Hold for Me, Direct My Call
+ENABLE_DIALER_FEATURES=1
+
+# Enable Next Generation Assistant
+ENABLE_NGA=1
+
+# Update NGA Resources if new version available
+UPDATE_NGA_RES=1
+
+# Download and install NGA Resources
+DOWNLOAD_NGA_RES=1
+
+# Download Styles and Wallpapers
+DOWN_WGA=0
+
+# Install/ Download Google LiveWallpapers
+ENABLE_LIVE_WALLPAPERS=1
+
+# Update Google LiveWallpapers if new version detected
+DOWNLOAD_LIVE_WALLPAPERS=1
+
+# Backup Live Wallpapers
+BACKUP_LIVE_WALLPAPERS=1
+
+# Enable Google Bootanimation
+ENABLE_BOOTANIMATION=0
+
+# Enable Pixel Launcher
+ENABLE_PIXEL_LAUNCHER=0
+
+# Update Pixel Launcher if available
+UPDATE_PIXEL_LAUNCHER=1
+
+# Backup Pixel Launcher
+BACKUP_PIXEL_LAUNCHER=1
+
+# Google Extreme Battery Saver
+ENABLE_EXTREME_BATTERY_SAVER=0
