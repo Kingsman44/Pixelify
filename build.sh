@@ -12,6 +12,6 @@ sed -i -e "s/DEVICE_USES_VOLUME_KEY=1/DEVICE_USES_VOLUME_KEY=0/g" module.prop
 7z a Pixelify-v$version-no_VK.zip $(ls | grep -v *.zip)
 mkdir -p out
 rm -rf out/*
-mv Pixelify-V$version.zip out
-mv Pixelify-V$version-no_VK.zip out
+mv Pixelify-v$version.zip out
+mv Pixelify-v$version-no_VK.zip out
 cp -f no-VK.prop out/no-VK.prop

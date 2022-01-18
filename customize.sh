@@ -51,7 +51,7 @@ rm -rf $pix/app2.txt
 touch $pix/app2.txt
 
 DPVERSIONP=1
-NGAVERSIONP=1.1
+NGAVERSIONP=1.2
 LWVERSIONP=1.4
 PLVERSIONP=1
 NGASIZE="13.6 Mb"
@@ -75,9 +75,9 @@ if [ $API -eq 31 ]; then
     WSIZE="2.0 Mb"
     WNEED=1
     if [ $NEW_PL -eq 1 ]; then
-        PLVERSIONP=1.2
+        PLVERSIONP=2.0
     else
-        PLVERSIONP=1.1
+        PLVERSIONP=1.2
     fi
     PLSIZE="12 Mb"
 elif [ $API -eq 30 ]; then
@@ -132,7 +132,7 @@ if [ $internet -eq 1 ]; then
     echo "$LWVERSION" >> $pix/pixel.txt
     echo "$DPVERSION" >> $pix/dp.txt
     echo "$PLVERSION" >> $pix/pl-$API.txt
-    NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+    NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     DPSSIZE1="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-net-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
     DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
@@ -359,6 +359,9 @@ no_vksel() {
 # Have user option to skip vol keys
 if [ "$(grep 'DEVICE_USES_VOLUME_KEY=' $MODPATH/module.prop | cut -d= -f2)" -eq 0 ]; then
     ui_print "- Skipping Vol Keys -"
+    print ""
+    print " Using config: $vk_loc"
+    print ""
     VKSEL=no_vksel
 else
     if keytest; then
@@ -651,8 +654,7 @@ if [ -d /data/data/$DIALER ]; then
         print " "
         print "- Enabling Call Recording (Working is device dependent)"
         lang=$(getprop persist.sys.locale | cut -d'-' -f1)
-        dialerflag="G__enable_call_recording G__force_within_call_recording_geofence_value G__use_call_recording_geofence_overrides G__force_within_crosby_geofence_value G__enable_atlas G__speak_easy_enabled G__enable_speakeasy_details G__speak_easy_bypass_locale_check G__speak_easy_enable_listen_in_button G__bypass_revelio_roaming_check G__enable_revelio G__enable_revelio_r_api enable_revelio_transcript enable_xatu enable_xatu_music_detection"
-        for i in $dialerflag; do
+        for i in "G__enable_call_recording" "G__force_within_call_recording_geofence_value" "G__use_call_recording_geofence_overrides" "G__force_within_crosby_geofence_value" "G__enable_atlas" "G__speak_easy_enabled" "G__enable_speakeasy_details" "G__speak_easy_bypass_locale_check" "G__speak_easy_enable_listen_in_button" "G__bypass_revelio_roaming_check" "G__enable_revelio" "G__enable_revelio_r_api" "enable_revelio_transcript" "enable_xatu" "enable_xatu_music_detection"; do
             $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer' AND name='$i'"
             $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.dialer', '', '$i', 0, 1, 0)"
             $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.dialer', '', '$i', 0, 1, 0)"
@@ -860,7 +862,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
     no_vk "ENABLE_NGA"
     if $VKSEL; then
         echo " - Installing Next generation assistant" >> $logfile
-        if [ -f /sdcard/Pixelify/backup/NgaResources.apk  ]; then
+        if [ -f /sdcard/Pixelify/backup/nga.tar.xz ] || [ -f /sdcard/Pixelify/backup/NgaResources.apk ]; then
             if [ "$(cat /sdcard/Pixelify/version/nga.txt)" != "$NGAVERSION" ]; then
                 echo " - New Version Detected for NGA Resources" >> $logfile
                 echo " - Installed version: $(cat /sdcard/Pixelify/version/nga.txt) , New Version: $NGAVERSION " >> $logfile
@@ -877,15 +879,15 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                     if [ $internet -eq 1 ]; then
                         echo " - Downloading, Installing and creating backup NGA Resources" >> $logfile
                         rm -rf /sdcard/Pixelify/backup/NgaResources.apk
+                        rm -rf /sdcard/Pixelify/backup/nga.tar.xz
                         rm -rf /sdcard/Pixelify/version/nga.txt
-                        mkdir $MODPATH/system/product/app/NgaResources
-                        cd $MODPATH/system/product/app/NgaResources
-                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk -O &> /proc/self/fd/$OUTFD
+                        cd $MODPATH/files
+                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga.tar.xz -O &> /proc/self/fd/$OUTFD
                         cd /
                         print ""
                         print "- Creating Backup"
                         print ""
-                        cp -Tf $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify/backup/NgaResources.apk
+                        cp -Tf $MODPATH/files/nga.tar.xz /sdcard/Pixelify/backup/nga.tar.xz
                         echo "$NGAVERSION" >> /sdcard/Pixelify/version/nga.txt
                     else
                         print "!! Warning !!"
@@ -901,8 +903,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             fi
             print "- Installing NgaResources from backups"
             print ""
-            mkdir $MODPATH/system/product/app/NgaResources
-            cp -f /sdcard/Pixelify/backup/NgaResources.apk $MODPATH/system/product/app/NgaResources/NgaResources.apk
+            tar -xf /sdcard/Pixelify/backup/nga.tar.xz -C $MODPATH/system/product
         else
             print "  (Network Connection Needed)"
             print "  Do you want to install and Download NGA Resources"
@@ -915,10 +916,10 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                 if [ $internet -eq 1 ]; then
                     echo " - Downloading and Installing NGA Resources" >> $logfile
                     print "  Downloading NGA Resources"
-                    mkdir $MODPATH/system/product/app/NgaResources
-                    cd $MODPATH/system/product/app/NgaResources
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/NgaResources.apk -O &> /proc/self/fd/$OUTFD
+                    cd $MODPATH/files
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga.tar.xz -O &> /proc/self/fd/$OUTFD
                     cd /
+                    tar -xf $MODPATH/files/nga.tar.xz -C $MODPATH/system/product
                     ui_print ""
                     print "  Do you want to create backup of NGA Resources"
                     print "  so that you don't need redownload it everytime."
@@ -927,11 +928,11 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                     if $VKSEL; then
                         echo " - Creating backup for NGA Resources" >> $logfile
                         print "- Creating Backup"
-                        mkdir /sdcard/Pixelify
-                        mkdir /sdcard/Pixelify/backup
+                        mkdir -p /sdcard/Pixelify/backup
                         rm -rf /sdcard/Pixelify/backup/NgaResources.apk
-                        cp -f $MODPATH/system/product/app/NgaResources/NgaResources.apk /sdcard/Pixelify/backup/NgaResources.apk
-                        mkdir /sdcard/Pixelify/version
+                        rm -rf /sdcard/Pixelify/backup/nga.tar.xz
+                        cp -f $MODPATH/files/nga.tar.xz /sdcard/Pixelify/backup/nga.tar.xz
+                        mkdir -p /sdcard/Pixelify/version
                         echo "$NGAVERSION" >> /sdcard/Pixelify/version/nga.txt
                         ui_print ""
                         print "- NGA Resources installation complete"
@@ -1012,6 +1013,11 @@ install_wallpaper() {
                 print "- Installing Styles and Wallpapers"
                 print ""
                 tar -xf $MODPATH/files/wpg-$API.tar.xz -C $MODPATH/system$product/priv-app
+	            if [ $API -ge 31 ]; then
+	            	mkdir -p $MODPATH/system/product/app/PixelThemesStub
+	                rm -rf $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+	                mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+	            fi
                 WREM=0
             fi
         fi
@@ -1068,11 +1074,6 @@ if [ $API -ge 28 ]; then
             print ""
             tar -xf /sdcard/Pixelify/backup/pixel.tar.xz -C $MODPATH/system$product
             pm install $MODPATH/system$product/priv-app/PixelLiveWallpaperPrebuilt/*.apk
-
-            if [ $API -ge 31 ]; then
-                rm -rf $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
-                mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
-            fi
 
             if [ $API -le 28 ]; then
                 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
@@ -1461,6 +1462,8 @@ if [ $API -le 27 ]; then
     sed -i -e "s/bool_patch AdaptiveCharging__v1_enabled/#bool_patch AdaptiveCharging__v1_enabled/g" $MODPATH/service.sh
     rm -rf $MODPATH/system/vendor/overlay/PixeliflyPixelS.apk
 fi
+
+rm -rf $MODPATH/system/product/data
 
 rm -rf $pix/apps_temp.txt
 mv $pix/app2.txt $pix/app.txt
