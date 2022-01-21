@@ -126,7 +126,7 @@ bool_patch enable_inline_suggestions_on_decoder_side $GBOARD_PREF
 bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD_PREF
 bool_patch enable_inline_suggestions_on_client_side $GBOARD_PREF
 bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD_PREF
-long_patch inline_suggestion_experiment_version 1 $GBOARD_PREF
+long_patch inline_suggestion_experiment_version 4 $GBOARD_PREF
 long_patch user_history_learning_strategies 1 $GBOARD_PREF
 long_patch crank_max_char_num_limit 100 $GBOARD_PREF
 long_patch crank_min_char_num_limit 5 $GBOARD_PREF
@@ -151,6 +151,7 @@ bool_patch enable_nebulae_materializer_v2 $GBOARD_PREF
 #bool_patch use_scrollable_candidate_for_voice $GBOARD_PREF
 string_patch crank_inline_suggestion_language_tags "ar,de,en,es,fr,hi-IN,hi-Latn,id,it,ja,ko,nl,pl,pt,ru,th,tr,zh-CN,zh-HK,zh-TW" $GBOARD_PREF
 bool_patch_false force_key_shadows $GBOARD_PREF
+bool_patch floating $GBOARD_PREF
 
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
@@ -218,6 +219,9 @@ android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
 for i in $flip_perm; do
     pm grant com.google.android.flipendo $i
 done
+
+rm -rf /data/data/com.google.android.tts/ccache/*
+am force-stop com.google.android.tts
 
 log "Service Finished"
 echo "$temp" >> /sdcard/Pixelify/logs.txt

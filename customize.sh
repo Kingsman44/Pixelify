@@ -968,7 +968,21 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
 
         cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
 
-        if [ -z $(pm list packages -s com.google.android.googlequicksearchbox | grep -v nga) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
+        FORCE_FILE="/sdcard/Pixelify/apps.txt"
+        is_velvet="$(grep velvet= $FORCE_FILE cut -d= -f2)"
+        if [ -f $FORCE_FILE ]; then
+        	if [ $is_velvet -eq 1 ]; then
+        		FORCE_VELVET=1
+        	elif [ $is_velvet -eq 0 ]; then
+        		FORCE_VELVET=0
+        	else
+        		FORCE_VELVET=2
+        	fi
+        else
+        	FORCE_VELVET=2
+        fi
+
+        if [ -z $(pm list packages -s com.google.android.googlequicksearchbox | grep -v nga) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ] || [ $FORCE_VELVET -eq 1 ]; then
             print "- Google is not installed as a system app !!"
             print "- Making Google as a system app"
             echo " - Making Google system app" >> $logfile
@@ -978,13 +992,15 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             rm -rf $MODPATH/system/product/priv-app/Velvet/oat
             #mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
         elif [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
-            print "- Google is not installed as a system app !!"
-            print "- Making Google as a system app"
-            echo " - Making Google system app" >> $logfile
-            print ""
-            cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
-            mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
-            rm -rf $MODPATH/system/product/priv-app/Velvet/oat
+        	if [ $FORCE_VELVET -eq 2 ]; then
+	            print "- Google is not installed as a system app !!"
+	            print "- Making Google as a system app"
+	            echo " - Making Google system app" >> $logfile
+	            print ""
+	            cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
+	            mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
+	            rm -rf $MODPATH/system/product/priv-app/Velvet/oat
+        	fi
             #mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
         fi
     fi
@@ -1360,12 +1376,16 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     bool_patch generation $GBOARD
     bool_patch multiword $GBOARD
     bool_patch core_typing $GBOARD
-    gboardflag="spellchecker_enable_language_trigger silk_on_all_pixel silk_on_all_devices nga_enable_undo_delete nga_enable_sticky_mic nga_enable_spoken_emoji_sticky_variant nga_enable_mic_onboarding_animation nga_enable_mic_button_when_dictation_eligible enable_next_generation_hwr_support enable_nga"
-    for i in $gboardflag; do
+    #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin'"
+    for i in "enable_email_provider_completion" "enable_inline_suggestions_tooltip_v2" "crank_trigger_decoder_inline_prediction_first" "enable_multiword_suggestions_as_inline_from_crank_cifg" "enable_floating_keyboard_v2" "enable_multiword_predictions_from_user_history" "enable_single_word_suggestions_as_inline_from_crank_cifg" "enable_matched_predictions_as_inline_from_crank_cifg" "enable_single_word_predictions_as_inline_from_crank_cifg" "enable_inline_suggestions_space_tooltip" "enable_multiword_predictions_as_inline_from_crank_cifg" "enable_user_history_predictions_as_inline_from_crank_cifg" "crank_trigger_decoder_inline_completion_first" "enable_inline_suggestions_on_decoder_side" "enable_core_typing_experience_indicator_on_composing_text" "enable_inline_suggestions_on_client_side" "enable_core_typing_experience_indicator_on_candidates" "spellchecker_enable_language_trigger" "silk_on_all_pixel" "silk_on_all_devices" "nga_enable_undo_delete" "nga_enable_sticky_mic" "nga_enable_spoken_emoji_sticky_variant" "nga_enable_mic_onboarding_animation" "nga_enable_mic_button_when_dictation_eligible" "enable_next_generation_hwr_support" "enable_nga"; do
         $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
-        #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', '$i', 0, 1, 0)"
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', '$i', 0, 1, 0)"
         $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
     done
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', 'inline_suggestion_dismiss_tooltip_delay_time_millis', 0, 2000, 0)"
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', 'inline_suggestion_experiment_version', 0, 4, 0)"
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', 'user_history_learning_strategies', 0, 1, 0)"
+
     echo " - Patching Google Keyboard's bools" >> $logfile
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
         print ""

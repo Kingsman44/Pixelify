@@ -10,12 +10,18 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **Volume Keys**
 - **Internet for NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
 
+### Installation without Volume Keys
+- Use packages with Pixelify-${verion}-no_VK.zip
+- Place no-Vk.prop to internal storage>Pixelify (/sdcard/Pixelify/no-VK.prop)
+- Edit prop according what you want to select
+- (If you have any problem placing no-VK.prop there then you also can extract and update no-VK.prop inside the packages it automatcally use it.) 
+
 ## ⭐ Features
 ### Pixel 6 Features Enables
 -   Pixel 6 Live Wallpapers *
 -   Magic Earser (<a href="https://t.me/google_nws/864">USE THIS APK</a>)(7+)
 -   Google Dialer Direct Call (<a href="https://www.apkmirror.com/apk/google-inc/google-phone/google-phone-72-0-407683083-publicbeta-pixel2021-release/">USE THIS APK</a>)(7+)
--   Live Transcript(12+)
+-   Live Transcript (12+)
 -   Google Quick Pharse *
 -   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
 
@@ -50,13 +56,18 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 * - Requires Spoofing to Pixel device
 
 ## ⭐ How to Enable Features
-### 1) Google Photos Unlimited Backup (storage saver)
+### 1) Google Photos Unlimited Backup
 - **Enable**:-  Clear Data Photos for first time installing Module<br>
-- **Note**:-  It won't show you Unlimited Text, but your backup photos won't be counted on storage, you can check total after upload photos it won't change or will be back to same storage after 5-10 mins<br>
+### 2) Call Screening
+- **Note**:-  Don't clear data of Google Dialer<br>
+### 3) Next Generation Assistant
+- **Install**:- Recommend to use this apk (Use sai Installer) https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/Velvet.zip and also make it system app.
+- **Note**:-  It depends on rom as some rom spoof internally to pixel 3 <br>
+<br>
 
 ## ⭐ Bugs and Fixes
 - **Call Screening**: caller can't hear your voice.<br>
-**Fix commit:** https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/0074cac9a4b098f8c4c996a4ef7ca44d00b158d9,https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/de2146fdd88771182a677aa94ccb8237479d793d (According to your qcom board)
+**Fix commit:** https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/0074cac9a4b098f8c4c996a4ef7ca44d00b158d9 https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/de2146fdd88771182a677aa94ccb8237479d793d (According to your qcom board)
 - **Call Screening**: can't able to download call screening files.<br>
 **Fix:** Set WIFI to unmetered connection. <br>
 - **Google**: Ok Google doesn't work without hotword with spoof to pixel.<br>
@@ -69,6 +80,17 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
+### Version 1.9
+- Fixed crash of Private compute app
+- Added option for Google Unlimted storage backup
+- Added Support without volume keys
+- Fixes for call screening, call recording
+- Fixed Pixel launcher crash
+- Fixed Smart Compose
+- Added more icons on Pixel Launcher A12
+- Lots of bug fixes
+- Removed intro voice for call recording for more devices
+
 ### Version 1.81
 - Fixes for Downloading Live Caption on A12
 - Update Device Personalisation Services (A12)
@@ -211,4 +233,3 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ### Beta 1.0
 - Initial repo
-
