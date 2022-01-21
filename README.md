@@ -51,7 +51,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Pokemon SideKick Live Wallpaper (Optional-Included with LiveWallpapers)
 -   Portrait Light (10+)
 -   Screen Attention Service
--   Unlimited Photos backup (Storage Saver)
+-   Unlimited Photos backup (original)
 <br>
 * - Requires Spoofing to Pixel device
 
@@ -82,7 +82,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ## ⭐ ChangeLogs
 ### Version 1.9
 - Fixed crash of Private compute app
-- Added option for Google Unlimted storage backup
+- Added option for Google Unlimited storage backup
 - Added Support without volume keys
 - Fixes for call screening, call recording
 - Fixed Pixel launcher crash
