@@ -896,9 +896,11 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             fi
         fi
 
-        google_flag="17074 45353661"
-        for i in $google_flag; do
+        for i in "15114" "45365987" "45357281" "10579" "45363261" "45363174" "45366053"; do
             $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox' AND name='$i'"
+            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '$i', 0, 0, 0)"
+            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '$i', 0, 0, 1)"
+            $sqlite $gms "UPDATE Flags SET boolVal='0' WHERE packageName='com.google.android.googlequicksearchbox' AND name='$i'"
         done
 
         $sqlite $gms "UPDATE Flags SET stringVal='Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='17074'"

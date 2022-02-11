@@ -9,12 +9,26 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **Arm64 device**
 - **Volume Keys**
 - **Internet for NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
+- **Zygisk (Recommended but not compulsary)** 
+
+### Installation
+- Recommend to use magisk v24 or above from Pixelify v2
+- If Volume keys are working then ignore no_vk files otherwise check Installation without Volume Keys
+- Enable zygisk
+- Flash Module
+- Enjoy
 
 ### Installation without Volume Keys
 - Use packages with Pixelify-${verion}-no_VK.zip
 - Place no-Vk.prop to internal storage>Pixelify (/sdcard/Pixelify/no-VK.prop)
 - Edit prop according what you want to select
 - (If you have any problem placing no-VK.prop there then you also can extract and update no-VK.prop inside the packages it automatcally use it.) 
+
+### Zygisk spoofing configuration
+- Pixel 5:- Google TTS, Google Recorder, Play services, Google app
+- Pixel XL:- Google Photos
+- Pixel 6 Pro:- Rest Google apps except (all Google camera package)
+<br><br>**Note** :- Zygisk spoofing can't overide PixelProp Utils.
 
 ## ⭐ Features
 ### Pixel 6 Features Enables
@@ -24,6 +38,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Live Transcript (12+)
 -   Google Quick Pharse *
 -   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
+-   At a Glance Features. 
 
 ### Other Features
 -   Adaptive Charging (Google SystemUI)
@@ -32,7 +47,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Call Captions (11+)(Depends on Rom)
 -   Enables Nexus, Pixel, and Android One app support
 -   Extreme Battery Saver (11+) [ Settings > Battery > Extreme Battery Saver - 11 | Settings > Battery > Battery Saver > Extreme Battery Saver -12 ]
--   Google Dialer Call Screening Latest
+-   Google Dialer Call Screening
 -   Google Dialer Hold for me
 -   Google Dialer Call Recording (Device depended for working)
 -   Google Digital Wellbeing Heads up
@@ -51,16 +66,23 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Pokemon SideKick Live Wallpaper (Optional-Included with LiveWallpapers)
 -   Portrait Light (10+)
 -   Screen Attention Service
--   Unlimited Photos backup (original)
+-   Unlimited Photos backup (Storage saver)
+-   Unlimited Photos backup (original) (needs Zygisk magisk 24+)
 <br>
 * - Requires Spoofing to Pixel device
+
+### Call Screening Supported languages other than English US <br>
+**(Needs to set same language as default before installation and needs carrier to be of same country)**
+<br> **Note: Automatic call screening aren't supported by these languages**
+- Italian (IT)
+- Japanese (JP)
+- Spain (ES)
+- France (FR)
 
 ## ⭐ How to Enable Features
 ### 1) Google Photos Unlimited Backup
 - **Enable**:-  Clear Data Photos for first time installing Module<br>
-### 2) Call Screening
-- **Note**:-  Don't clear data of Google Dialer<br>
-### 3) Next Generation Assistant
+### 2) Next Generation Assistant
 - **Install**:- Recommend to use this apk (Use sai Installer) https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/Velvet.zip and also make it system app.
 - **Note**:-  It depends on rom as some rom spoof internally to pixel 3 <br>
 <br>
@@ -80,6 +102,34 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
+
+### Version 2.0
+- Bug Fixes & lots of improvements
+- Fixed Google Assistant bug
+- Spoofing via Zygisk (Magisk v24 or v24+ is required)
+- Call screening support for Italian (IT), Japanese (JP), Spain (ES), France (FR)
+- Fixes for Android System Intelligence installation.
+- Rename Device Personalisation services to Android System Intelligence
+- Module will auto detect and install Bootanimation according your resolution.
+<br>  Supported are:- 720p, 1080p, 1440p
+<br>  Other resolution will use 1080p
+- Fixed opposite installation via No volume key problem
+- Enable All options in At a glance
+- Forcely Enabled Android S notification style dialer notification for Android S
+- Fixed Removal of some fonts on installing Pixelify module
+- Added more fixes to enable Nga voice typing
+- Fixed Pixel Launcher Crash due to missing PACKAGE_USAGE permission
+- Added and optimise Nexus launcher 3rd party icons
+- Updated Android System Intelligence (12) to S11
+- Some more fixes for Call screening
+- Fixed Wrong detection for using Nov patch or December Patch Pixel Launcher
+- Fixed removal of system app on uninstalling Pixelify module
+- Made dialer popup less annoyed (it will come if using pixel2021 version
+- Removed option to spoof Pixel 3XL as Google removed Unlimited for Pixel 3 XL (You can still get Unlimited via Zygisk)
+- Added missing NGA_BACKUP tag for No volume keys
+- Fixes for Google recorder
+- Fixed Search Bar background color in A12
+
 ### Version 1.9
 - Fixed crash of Private compute app
 - Added option for Google Unlimited storage backup
