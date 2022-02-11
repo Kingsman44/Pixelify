@@ -99,17 +99,16 @@ mkdir -p /sdcard/Pixelify
 
 log "Service Started"
 
-if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
-    # Call Screening
-    bool_patch speak_easy $DIALER_PREF
-    bool_patch speakeasy $DIALER_PREF
-    bool_patch call_screen $DIALER_PREF
-    bool_patch revelio $DIALER_PREF
-    bool_patch record $DIALER_PREF
-    bool_patch atlas $DIALER_PREF
-    bool_patch transript $DIALER_PREF
-    cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
-fi
+
+# Call Screening
+bool_patch speak_easy $DIALER_PREF
+bool_patch speakeasy $DIALER_PREF
+bool_patch call_screen $DIALER_PREF
+bool_patch revelio $DIALER_PREF
+bool_patch record $DIALER_PREF
+bool_patch atlas $DIALER_PREF
+bool_patch transript $DIALER_PREF
+cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
 
 # GBoard
 bool_patch nga $GBOARD_PREF
@@ -168,6 +167,12 @@ bool_patch AdaptiveCharging__v1_enabled $TURBO
 # Wellbeing
 pm_enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity
 
+# Increase system's smoothness and launcher's smoothness by increasing priority of some specified processes
+for pid in $(pidof -s surfaceflinger) $(pidof -s system_server) $(pgrep -f com.android.systemui) $(pgrep -f com.google.android.apps.nexuslauncher); do
+  echo "-17" > "/proc/${pid}/oom_adj"
+  renice -n "-18" -p "$pid"
+done
+
 while true; do
     boot=$(getprop sys.boot_completed)
     if [ "$boot" -eq 1 ]; then
@@ -198,30 +203,6 @@ while read p; do
         fi
     fi
 done <$MODDIR/deviceconfig.txt
-
-flip_perm="android.permission.READ_DEVICE_CONFIG
-android.permission.SUSPEND_APPS
-android.permission.QUERY_ALL_PACKAGES
-android.permission.RECEIVE_BOOT_COMPLETED
-android.permission.FOREGROUND_SERVICE
-android.permission.SYSTEM_ALERT_WINDOW
-android.permission.WRITE_SECURE_SETTINGS
-android.permission.WRITE_SETTINGS
-android.permission.REAL_GET_TASKS
-android.permission.INTERACT_ACROSS_USERS_FULL
-android.permission.KILL_BACKGROUND_PROCESSES
-android.permission.MODIFY_QUIET_MODE
-android.permission.INTERACT_ACROSS_PROFILES
-android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS
-android.permission.TETHER_PRIVILEGED
-android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"
-
-for i in $flip_perm; do
-    pm grant com.google.android.flipendo $i
-done
-
-rm -rf /data/data/com.google.android.tts/ccache/*
-am force-stop com.google.android.tts
 
 log "Service Finished"
 echo "$temp" >> /sdcard/Pixelify/logs.txt

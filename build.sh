@@ -1,6 +1,6 @@
 files=$(ls *.sh)
 files2=$(ls *.prop)
-for i in $files $files2; do
+for i in $files $files2 "deviceconfig.txt"; do
 	dos2unix $i
 done
 version=$(cat module.prop | grep version= | cut -d= -f2)

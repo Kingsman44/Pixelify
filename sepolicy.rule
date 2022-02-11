@@ -19,6 +19,9 @@ allow servicemanager flipendo binder { call transfer }
 allow servicemanager flipendo dir { search }
 allow servicemanager flipendo file { read open }
 allow servicemanager flipendo process { getattr }
+allow flipendo flipendo dir search
+allow flipendo flipendo process { fork getsched }
+allow flipendo flipendo unix_dgram_socket create
 
 allow untrusted_app app_api_service service_manager find
 allow untrusted_app fwk_stats_hwservice hwservice_manager find

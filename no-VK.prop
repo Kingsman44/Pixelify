@@ -35,6 +35,9 @@ UPDATE_NGA_RES=1
 # Download and install NGA Resources
 DOWNLOAD_NGA_RES=1
 
+# Backup NGA Resources
+BACKUP_NGA=1
+
 # Download Styles and Wallpapers
 DOWN_WGA=0
 
