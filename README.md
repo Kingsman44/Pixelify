@@ -97,6 +97,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ Credits
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
+- #TeamFiles for many icons for Pixel Launcher android 12
 - [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
 - [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
