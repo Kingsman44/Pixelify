@@ -12,8 +12,73 @@ export DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phen
 export GBOARD_PREF=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
 export FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
 export TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
+export GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
 sqlite=$MODDIR/addon/sqlite3
+chmod 0755 $sqlite3
 gms=/data/user/0/com.google.android.gms/databases/phenotype.db
+
+ASI_PERM="android.permission.CAPTURE_MEDIA_OUTPUT
+android.permission.MODIFY_AUDIO_ROUTING
+android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT
+android.permission.CAPTURE_AUDIO_OUTPUT
+android.permission.MODIFY_AUDIO_SETTINGS
+android.permission.RECORD_AUDIO
+android.permission.START_ACTIVITIES_FROM_BACKGROUND
+android.permission.WRITE_SECURE_SETTINGS
+android.permission.CAMERA
+android.permission.READ_DEVICE_CONFIG
+android.permission.UPDATE_DEVICE_STATS
+android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME
+android.permission.SYSTEM_CAMERA
+android.permission.FOREGROUND_SERVICE
+android.permission.MODIFY_PHONE_STATE
+android.permission.CONTROL_INCALL_EXPERIENCE
+android.permission.READ_PHONE_STATE
+android.permission.SYSTEM_APPLICATION_OVERLAY
+android.permission.QUERY_ALL_PACKAGES
+android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE
+android.permission.ACCESS_COARSE_LOCATION
+android.permission.ACCESS_BACKGROUND_LOCATION
+android.permission.BLUETOOTH_ADMIN
+android.permission.MANAGE_APP_PREDICTIONS
+android.permission.ACCESS_WIFI_STATE
+android.permission.ACCESS_FINE_LOCATION
+android.permission.PACKAGE_USAGE_STATS
+android.permission.ACCESS_SHORTCUTS
+android.permission.UNLIMITED_SHORTCUTS_API_CALLS
+android.permission.READ_CALL_LOG
+android.permission.READ_CONTACTS
+android.permission.READ_SMS
+com.google.android.apps.nexuslauncher.permission.HOTSEAT_EDU
+android.permission.MANAGE_SEARCH_UI
+android.permission.MANAGE_SMARTSPACE
+android.permission.WAKE_LOCK
+android.permission.READ_PEOPLE_DATA
+android.permission.READ_GLOBAL_APP_SEARCH_DATA
+android.permission.BLUETOOTH_CONNECT
+android.permission.BLUETOOTH_SCAN
+android.permission.MANAGE_MUSIC_RECOGNITION
+android.permission.VIBRATE
+android.permission.OBSERVE_SENSOR_PRIVACY
+android.permission.RECEIVE_BOOT_COMPLETED
+com.google.android.ambientindication.permission.AMBIENT_INDICATION
+android.permission.CAPTURE_AUDIO_HOTWORD
+android.permission.MANAGE_SOUND_TRIGGER
+android.permission.ACCESS_NETWORK_STATE
+android.permission.LOCATION_HARDWARE
+android.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS
+com.google.android.setupwizard.SETUP_COMPAT_SERVICE
+android.permission.READ_EXTERNAL_STORAGE
+com.android.alarm.permission.SET_ALARM
+android.permission.MANAGE_UI_TRANSLATION
+android.permission.READ_OEM_UNLOCK_STATE"
+
+ASI_OS_PERM="android.permission.INTERNET
+android.permission.READ_DEVICE_CONFIG
+android.permission.RECEIVE_BOOT_COMPLETED
+android.permission.ACCESS_NETWORK_STATE
+android.permission.ACCESS_WIFI_STATE
+android.permission.CHANGE_WIFI_STATE"
 
 temp=""
 
@@ -148,9 +213,11 @@ bool_patch tflite $GBOARD_PREF
 bool_patch enable_show_inline_suggestions_in_popup_view $GBOARD_PREF
 bool_patch enable_nebulae_materializer_v2 $GBOARD_PREF
 #bool_patch use_scrollable_candidate_for_voice $GBOARD_PREF
-string_patch crank_inline_suggestion_language_tags "ar,de,en,es,fr,hi-IN,hi-Latn,id,it,ja,ko,nl,pl,pt,ru,th,tr,zh-CN,zh-HK,zh-TW" $GBOARD_PREF
 bool_patch_false force_key_shadows $GBOARD_PREF
 bool_patch floating $GBOARD_PREF
+bool_patch split $GBOARD_PREF
+bool_patch grammar $GBOARD_PREF
+bool_patch spell_checker $GBOARD_PREF
 
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
@@ -167,16 +234,10 @@ bool_patch AdaptiveCharging__v1_enabled $TURBO
 # Wellbeing
 pm_enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity
 
-# Increase system's smoothness and launcher's smoothness by increasing priority of some specified processes
-for pid in $(pidof -s surfaceflinger) $(pidof -s system_server) $(pgrep -f com.android.systemui) $(pgrep -f com.google.android.apps.nexuslauncher); do
-  echo "-17" > "/proc/${pid}/oom_adj"
-  renice -n "-18" -p "$pid"
-done
-
 while true; do
     boot=$(getprop sys.boot_completed)
     if [ "$boot" -eq 1 ]; then
-        sleep 10
+        sleep 5
         break
     fi
 done
@@ -192,6 +253,25 @@ if [ $(grep Live $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
     pm enable -n com.google.pixel.livewallpaper/com.google.pixel.livewallpaper.pokemon.wallpapers.PokemonWallpaper -a android.intent.action.MAIN
 fi
 
+# pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.battery.impl.usage.BootBroadcastReceiver -a android.intent.action.MAIN
+# pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.battery.impl.usage.DataInjectorReceiver -a android.intent.action.MAIN
+# pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryWidgetBootBroadcastReceiver -a android.intent.action.MAIN
+# pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryWidgetUpdateBroadcastReceiver -a android.intent.action.MAIN
+# pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryWidgetUpdateReceiver -a android.intent.action.MAIN
+# sleep .5
+# pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryAppWidgetProvider -a android.intent.action.MAIN
+# adb shell am start -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryAppWidgetProvider
+
+if [ -f $MODDIR/install/asi.apk ]; then
+    for i in $ASI_OS_PERM; do
+        pm grant com.google.android.as.oss $i
+    done
+    for i in $ASI_PERM; do
+        pm grant com.google.android.as $i
+    done
+    pm install $MODDIR/install/asi.apk
+    rm -rf $MODDIR/install/asi.apk
+fi
 while read p; do
     if [ ! -z "$(echo $p)" ]; then
         if [ "$(echo $p | head -c 1)" != "#" ]; then

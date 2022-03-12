@@ -1,10 +1,8 @@
 # 0 - Disable(No), 1 - Enable(Yes)
 
 # Google Photos Original Unlimited Backup
-# Your Device model will be set to Pixel 3
-# Next Generation Assistant won't work
-# Enabling it will disable Pixel Spoofing as it will be spoofed to pixel 3
-ENABLE_GPHOTOS_UNLIMITED=0
+# Only for Tensor chip devices
+ENABLE_TENSOR_UNLIMITED=1
 
 # Pixel 5/6 Spoofing
 ENABLE_PIXEL_SPOOFING=0
@@ -25,6 +23,12 @@ BACKUP_DPS=1
 # Google Dialer Features
 # Includes Call Recording, Hold for Me, Direct My Call
 ENABLE_DIALER_FEATURES=1
+
+# Donwload lang Specific files for Call Screenining in DE,JP,IT,FR..
+ADD_CALL_SCREENING_FILES=1
+
+# BAckup Lang Specific files for Call Screenining in DE,JP,IT,FR..
+BACKUP_CALL_SCREENING_FILES=1
 
 # Enable Next Generation Assistant
 ENABLE_NGA=1

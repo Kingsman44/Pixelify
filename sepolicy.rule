@@ -39,3 +39,17 @@ allow servicemanager untrusted_app binder { call transfer }
 allow servicemanager untrusted_app dir { search }
 allow servicemanager untrusted_app file { read open }
 allow servicemanager untrusted_app process { getattr }
+
+allow platform app_api_service service_manager find
+allow platform fwk_stats_hwservice hwservice_manager find
+allow platform color_display_service service_manager find
+allow platform hal_power_service service_manager find
+allow platform hal_power_default binder { call transfer }
+allow platform hal_power_client binder { receive call }
+allow platform statsd binder { receive call }
+allow platform gpuservice binder { receive call }
+allow platform stats_service_server binder { receive call }
+allow platform platform_userfaultfd anon_inode { ioctl read create }
+allow platform appdomain_tmpfs file { read write getattr map execute }
+allow platform servicemanager binder { call transfer }
+allow platform_app hal_power_service service_manager { find }
