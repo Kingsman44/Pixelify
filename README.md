@@ -5,11 +5,25 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 <a href="https://t.me/pixelifysupport"><img src="https://img.shields.io/badge/Telegram-Support_Group-blue.svg"></a>
 
 ## ⭐ Requirements
-- **Android Version: 7.0+**
+- **Android Version: Android 7.0 to Android 13**
 - **Arm64 device**
 - **Volume Keys**
 - **Internet for NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
-- **Zygisk (Recommended but not compulsary)** 
+- **Zygisk (Recommended but not compulsary)**
+
+### Supported Roms
+- OneUi
+- Custom Roms
+- Pixel Stock
+- Android One
+- MiUI
+- FunTouchOS
+- Oxygen OS (Android 11 and below)
+- Color Os (Android 11 and below)
+
+### Unsupported Roms
+- Oxygen os Android 12
+- Color Os Android 12
 
 ### Installation
 - Recommend to use magisk v24 or above from Pixelify v2
@@ -19,7 +33,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Enjoy
 
 ### Installation without Volume Keys
-- Use packages with Pixelify-${verion}-no_VK.zip
+- Use packages with Pixelify-${version}-no_VK.zip
 - Place no-Vk.prop to internal storage>Pixelify (/sdcard/Pixelify/no-VK.prop)
 - Edit prop according what you want to select
 - (If you have any problem placing no-VK.prop there then you also can extract and update no-VK.prop inside the packages it automatcally use it.) 
@@ -34,8 +48,9 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ### Pixel 6 Features Enables
 -   Pixel 6 Live Wallpapers *
 -   Magic Earser (<a href="https://t.me/google_nws/864">USE THIS APK</a>)(7+)
--   Google Dialer Direct Call (<a href="https://www.apkmirror.com/apk/google-inc/google-phone/google-phone-72-0-407683083-publicbeta-pixel2021-release/">USE THIS APK</a>)(7+)
+-   Google Dialer Direct Call (12+)
 -   Live Transcript (12+)
+-   New At a Glance feature (12+ & Dec+ Patch) 
 -   Google Quick Pharse *
 -   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
 -   At a Glance Features. 
@@ -72,28 +87,27 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 * - Requires Spoofing to Pixel device
 
 ### Call Screening Supported languages other than English US <br>
-**(Needs to set same language as default before installation and needs carrier to be of same country)**
+**(Before you install the module, your country's language needs to be set as default system language and your SIM card needs to be from the same country.)**
 <br> **Note: Automatic call screening aren't supported by these languages**
 - Italian (IT)
 - Japanese (JP)
 - Spain (ES)
 - France (FR)
+- Germany (DE)
 
-## ⭐ How to Enable Features
-### 1) Google Photos Unlimited Backup
-- **Enable**:-  Clear Data Photos for first time installing Module<br>
-### 2) Next Generation Assistant
-- **Install**:- Recommend to use this apk (Use sai Installer) https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/Velvet.zip and also make it system app.
-- **Note**:-  It depends on rom as some rom spoof internally to pixel 3 <br>
-<br>
+## ⭐ Guide to enable / Faqs / Troubleshooting
+- [https://telegra.ph/Pixelify-Troubleshooting-guide-03-12](https://telegra.ph/Pixelify-Troubleshooting-guide-03-12)
 
-## ⭐ Bugs and Fixes
-- **Call Screening**: caller can't hear your voice.<br>
-**Fix commit:** https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/0074cac9a4b098f8c4c996a4ef7ca44d00b158d9 https://github.com/Redmi-note-4x/android_hardware_qcom-caf_audio/commit/de2146fdd88771182a677aa94ccb8237479d793d (According to your qcom board)
-- **Call Screening**: can't able to download call screening files.<br>
-**Fix:** Set WIFI to unmetered connection. <br>
-- **Google**: Ok Google doesn't work without hotword with spoof to pixel.<br>
-- **Google**: For Continued Conversation and fix At a Glance in Android 12 (<a href="https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/Velvet.zip">USE THIS APK</a>) (Use Sai Installer to install this splits apk)
+## Contribute to project
+- Reporting bugs with logs
+- Feature Requests
+- Supporting other persons on issues or telegram group
+- Creating pull request to enable new feature or code improvements
+- Donation
+
+### Donation link
+- **Paypal link** - [https://paypal.me/shivan999?country.x=IN&locale.x=en_GB](https://telegra.ph/Pixelify-Troubleshooting-guide-03-12)
+- **UPI id (India only)** - shivan.0972@okhdfcbank
 
 ## ⭐ Credits
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
@@ -103,6 +117,25 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
+
+### Version 2.01
+- Fixed Safety net issues
+- Fixed blank call screen when Google Dialer not installed or not selected Google Dialer features for other Dialers
+- Added support for German call screening lang support
+- Spoofed Snapchat to pixel 6
+- Enabled Battery Widget (March Security patch+)
+- Fixed Precise Location
+- Fixes for Play Store downloading
+- Enable Wellbeing widget
+- Fixed crashes of extreme saver mode on custom rom
+- Call voice issue for some people had been fixed.
+- Attempt to fix Pixel Launcher on stock roms like MiUi, OneUi....
+- Updated Android System Intelligence to latest version
+- Initial support for Android 12L and Android 13
+- Fixed for battery drain issue
+- Better support for tensor chip
+- Pixel 6 user now will have option to choose magic eraser or unlimited storage
+- Some minor improvements.
 
 ### Version 2.0
 - Bug Fixes & lots of improvements

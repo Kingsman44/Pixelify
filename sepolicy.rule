@@ -40,16 +40,44 @@ allow servicemanager untrusted_app dir { search }
 allow servicemanager untrusted_app file { read open }
 allow servicemanager untrusted_app process { getattr }
 
-allow platform app_api_service service_manager find
-allow platform fwk_stats_hwservice hwservice_manager find
-allow platform color_display_service service_manager find
-allow platform hal_power_service service_manager find
-allow platform hal_power_default binder { call transfer }
-allow platform hal_power_client binder { receive call }
-allow platform statsd binder { receive call }
-allow platform gpuservice binder { receive call }
-allow platform stats_service_server binder { receive call }
-allow platform platform_userfaultfd anon_inode { ioctl read create }
-allow platform appdomain_tmpfs file { read write getattr map execute }
-allow platform servicemanager binder { call transfer }
+allow platform_app app_api_service service_manager find
+allow platform_app fwk_stats_hwservice hwservice_manager find
+allow platform_app color_display_service service_manager find
+allow platform_app hal_power_service service_manager find
+allow platform_app hal_power_default binder { call transfer }
+allow platform_app hal_power_client binder { receive call }
+allow platform_app statsd binder { receive call }
+allow platform_app gpuservice binder { receive call }
+allow platform_app stats_service_server binder { receive call }
+allow platform_app platform_userfaultfd anon_inode { ioctl read create }
+allow platform_app appdomain_tmpfs file { read write getattr map execute }
+allow platform_app servicemanager binder { call transfer }
 allow platform_app hal_power_service service_manager { find }
+
+allow priv_app app_api_service service_manager find
+allow priv_app fwk_stats_hwservice hwservice_manager find
+allow priv_app color_display_service service_manager find
+allow priv_app hal_power_service service_manager find
+allow priv_app hal_power_default binder { call transfer }
+allow priv_app hal_power_client binder { receive call }
+allow priv_app statsd binder { receive call }
+allow priv_app gpuservice binder { receive call }
+allow priv_app stats_service_server binder { receive call }
+allow priv_app priv_userfaultfd anon_inode { ioctl read create }
+allow priv_app appdomain_tmpfs file { read write getattr map execute }
+allow priv_app servicemanager binder { call transfer }
+allow priv_app hal_power_service service_manager { find }
+
+allow gmscore_app app_api_service service_manager find
+allow gmscore_app fwk_stats_hwservice hwservice_manager find
+allow gmscore_app color_display_service service_manager find
+allow gmscore_app hal_power_service service_manager find
+allow gmscore_app hal_power_default binder { call transfer }
+allow gmscore_app hal_power_client binder { receive call }
+allow gmscore_app statsd binder { receive call }
+allow gmscore_app gpuservice binder { receive call }
+allow gmscore_app stats_service_server binder { receive call }
+allow gmscore_app gmscore_userfaultfd anon_inode { ioctl read create }
+allow gmscore_app appdomain_tmpfs file { read write getattr map execute }
+allow gmscore_app servicemanager binder { call transfer }
+allow gmscore_app hal_power_service service_manager { find }

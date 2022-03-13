@@ -7,6 +7,69 @@ if [ $ARCH != "arm64" ] && [ $API -le 23 ]; then
     exit 1
 fi
 
+ASI_PERM="android.permission.CAPTURE_MEDIA_OUTPUT
+android.permission.MODIFY_AUDIO_ROUTING
+android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT
+android.permission.CAPTURE_AUDIO_OUTPUT
+android.permission.MODIFY_AUDIO_SETTINGS
+android.permission.RECORD_AUDIO
+android.permission.START_ACTIVITIES_FROM_BACKGROUND
+android.permission.WRITE_SECURE_SETTINGS
+android.permission.CAMERA
+android.permission.READ_DEVICE_CONFIG
+android.permission.UPDATE_DEVICE_STATS
+android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME
+android.permission.SYSTEM_CAMERA
+android.permission.FOREGROUND_SERVICE
+android.permission.MODIFY_PHONE_STATE
+android.permission.CONTROL_INCALL_EXPERIENCE
+android.permission.READ_PHONE_STATE
+android.permission.SYSTEM_APPLICATION_OVERLAY
+android.permission.QUERY_ALL_PACKAGES
+android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE
+android.permission.ACCESS_COARSE_LOCATION
+android.permission.ACCESS_BACKGROUND_LOCATION
+android.permission.BLUETOOTH_ADMIN
+android.permission.MANAGE_APP_PREDICTIONS
+android.permission.ACCESS_WIFI_STATE
+android.permission.ACCESS_FINE_LOCATION
+android.permission.PACKAGE_USAGE_STATS
+android.permission.ACCESS_SHORTCUTS
+android.permission.UNLIMITED_SHORTCUTS_API_CALLS
+android.permission.READ_CALL_LOG
+android.permission.READ_CONTACTS
+android.permission.READ_SMS
+com.google.android.apps.nexuslauncher.permission.HOTSEAT_EDU
+android.permission.MANAGE_SEARCH_UI
+android.permission.MANAGE_SMARTSPACE
+android.permission.WAKE_LOCK
+android.permission.READ_PEOPLE_DATA
+android.permission.READ_GLOBAL_APP_SEARCH_DATA
+android.permission.BLUETOOTH_CONNECT
+android.permission.BLUETOOTH_SCAN
+android.permission.MANAGE_MUSIC_RECOGNITION
+android.permission.VIBRATE
+android.permission.OBSERVE_SENSOR_PRIVACY
+android.permission.RECEIVE_BOOT_COMPLETED
+com.google.android.ambientindication.permission.AMBIENT_INDICATION
+android.permission.CAPTURE_AUDIO_HOTWORD
+android.permission.MANAGE_SOUND_TRIGGER
+android.permission.ACCESS_NETWORK_STATE
+android.permission.LOCATION_HARDWARE
+android.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS
+com.google.android.setupwizard.SETUP_COMPAT_SERVICE
+android.permission.READ_EXTERNAL_STORAGE
+com.android.alarm.permission.SET_ALARM
+android.permission.MANAGE_UI_TRANSLATION
+android.permission.READ_OEM_UNLOCK_STATE"
+
+ASI_OS_PERM="android.permission.INTERNET
+android.permission.READ_DEVICE_CONFIG
+android.permission.RECEIVE_BOOT_COMPLETED
+android.permission.ACCESS_NETWORK_STATE
+android.permission.ACCESS_WIFI_STATE
+android.permission.CHANGE_WIFI_STATE"
+
 logfile=/sdcard/Pixelify/logs.txt
 rm -rf $logfile
 
@@ -16,6 +79,8 @@ echo "=============
 =============
 ---- Installation Logs Started ----
 " >> $logfile
+
+touch $MODPATH/grant
 
 tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
@@ -190,14 +255,16 @@ PLVERSION=$(cat $pix/pl-$NEWAPI.txt)
 if [ "$(getprop ro.soc.model)" == "Tensor" ]; then
 	echo "- Tensor chip Detected !" >> $logfile
 	TENSOR=1
-	touch $MODPATH/tensor
+    rm -rf $MODPATH/zygisk
+    mv $MODPATH/zygisk_1 $MODPATH/zygisk
 else
 	TENSOR=0
 fi
 
-if [ "$(getprop ro.product.vendor.name)" == "coral" || "$(getprop ro.product.vendor.name)" == "coral" ]; then
+if [ "$(getprop ro.product.vendor.name)" == "coral" ] || [ "$(getprop ro.product.vendor.name)" == "flame" ]; then
 	echo "- Pixel 4/XL Detected !"
-	touch $MODPATH/coral
+	rm -rf $MODPATH/zygisk
+    mv $MODPATH/zygisk_1 $MODPATH/zygisk
 fi
 
 echo "
@@ -468,7 +535,7 @@ if [ $TENSOR -eq 1 ]; then
     	drop_sys
     else
     	echo "- Disabling Unlimited storage in this Tensor chipset device" >> $logfile
-    	rm -rf $MODPATH/zygisk
+    	rm -rf $MODPATH/zygisk $MODPATH/zygisk_1
     fi
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
     print ""
@@ -534,9 +601,10 @@ if [ "$(getprop ro.product.vendor.manufacturer)" == "samsung" ]; then
     fi
 fi
 
-[ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware
+NOT_REQ_SOUND_PATCH=0
+[ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware && NOT_REQ_SOUND_PATCH=1
 
-for i in "InterestsModel__enable_interests_model" "Captions__enable_text_transform" "Translate__translation_service_enabled" "Translate__replace_auto_translate_copied_text_enabled" "Translate__copy_to_translate_enabled" "Translate__blue_chip_translate_enabled" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor"; do
+for i in "Captions__enable_text_transform" "Translate__translation_service_enabled" "Translate__replace_auto_translate_copied_text_enabled" "Translate__copy_to_translate_enabled" "Translate__blue_chip_translate_enabled" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor"; do
     $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='$i'"
     $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', '$i', 0, 1, 0)"
     $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.platform.device_personalization_services' AND name='$i'"
@@ -663,12 +731,15 @@ if [ $DPAS -eq 1 ]; then
             fi
         fi
     fi
-    if [ $NEWAPI -ge 31 ]; then
-    	mkdir -p $MODPATH/install
-    	mv $MODPATH/system/product/priv-app/asi_up.apk $MODPATH/install/asi.apk
-    fi
-    #pm install $MODPATH/system$product/priv-app/DevicePersonalizationPrebuiltPixel*/*.apk &>/dev/null
-    #[ $API -ge 31 ] && pm install $MODPATH/system/product/priv-app/DeviceIntelligenceNetworkPrebuilt/*.apk &>/dev/null
+    pm install --user 0 $MODPATH/system/product/priv-app/asi_up.apk &>/dev/null
+    [ $API -ge 31 ] && pm install --user 0 $MODPATH/system/product/priv-app/DeviceIntelligenceNetworkPrebuilt/*.apk &>/dev/null
+    for i in $ASI_OS_PERM; do
+        pm grant com.google.android.as.oss $i
+    done
+    for i in $ASI_PERM; do
+        pm grant com.google.android.as $i
+    done
+    rm -rf $MODPATH/system/product/priv-app/asi_up.apk
 else
     print ""
 fi
@@ -823,66 +894,11 @@ if [ -d /data/data/$DIALER ]; then
 
         device="$(getprop ro.product.device)"
         device_len=${#device}
-        carr_coun1="$(getprop gsm.sim.operator.iso-country)"
         carr_coun="$(getprop gsm.sim.operator.iso-country | tr '[:lower:]' '[:upper:]')"
         if [ ! -z $carr_coun ]; then
             echo " - Adding Country ($carr_coun) patch for Call Recording and Hold for me, Direct My Call" >> $logfile
-            sed -i -e "s/TX/${carr_coun}/g" $MODPATH/files/$DIALER
             if [ -z $(echo "AU US JP" | grep $carr_coun) ]; then
                 sed -i -e "s/XY/${carr_coun}/g" $MODPATH/files/$DIALER
-            fi
-            sed -i -e "s/xy/${carr_coun1}/g" $MODPATH/files/$DIALER
-        fi
-        if [ $pixel_spoof -eq 0 ]; then
-            if [ -z "$(cat $MODPATH/recording.txt | grep $device)" ]; then
-                echo " - Adding Call Recording patch" >> $logfile
-                case $device_len in
-                    3)
-                        sed -i -e "s/lmi/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    4)
-                        sed -i -e "s/ares/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    5)
-                        sed -i -e "s/bhima/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    6)
-                        sed -i -e "s/ginkgo/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    7)
-                        sed -i -e "s/gauguin/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    8)
-                        sed -i -e "s/camellia/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    9)
-                        sed -i -e "s/camellian/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    11)
-                        sed -i -e "s/OnePlusN200/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    12)
-                        sed -i -e "s/Infinix-X692/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    13)
-                        sed -i -e "s/gauguininpro/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    14)
-                        sed -i -e "s/Infinix-X687BR/${device}/g" $MODPATH/files/$DIALER
-                        ;;
-                    *)
-                        print ""
-                        print "  Warning !!"
-                        print "  For Call Recording your ro.product.device"
-                        print "  needs to set (raven)"
-                        print "  Do you Wish to Install Google Dialer Call Recording?"
-                        print "    Vol Up += Yes"
-                        print "    Vol Down += No (Call recording won't be installed)"
-                        if $VKSEL; then
-                            echo "ro.product.device=raven" >> $MODPATH/system.prop
-                        fi
-                        ;;
-                esac
             fi
         fi
 
@@ -895,12 +911,13 @@ if [ -d /data/data/$DIALER ]; then
         	chmod 0500 /data/data/com.google.android.dialer/files/phenotype
         	cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
         	cp -Tf $MODPATH/files/$DIALER-custom $MODPATH/$DIALER-1
+            cp -Tf $MODPATH/files/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
+            am force-stop $DIALER
     	else
+            rm -rf $MODPATH/$DIALER
     		sed -i -e "s/cp -Tf $MODDIR\/com.google.android.dialer/#cp -Tf $MODDIR\/com.google.android.dialer/g" $MODPATH/service.sh
     		sed -i -e "s/chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/#chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/g" $MODPATH/service.sh
     	fi
-        cp -Tf $MODPATH/files/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
-        am force-stop $DIALER
 
         if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
@@ -1134,6 +1151,7 @@ install_wallpaper() {
 
 WALL_DID=0
 if [ $API -ge 28 ]; then
+    PLW=$(find /system -name *PixelWallpapers2021* | grep -v overlay | grep -v "\.")
     if [ -f /sdcard/Pixelify/backup/pixel.tar.xz ]; then
         echo " - Backup Detected for Pixel Wallpapers" >> $logfile
         print "  Do you want to install Pixel Live Wallpapers?"
@@ -1187,6 +1205,7 @@ if [ $API -ge 28 ]; then
                 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                 rm -rf $MODPATH/system/overlay
             fi
+            REMOVE="$REMOVE $PLW"
             install_wallpaper
             WALL_DID=1
         else
@@ -1236,6 +1255,7 @@ if [ $API -ge 28 ]; then
                     print " - Done"
                     print ""
                 fi
+                REMOVE="$REMOVE $PLW"
                 install_wallpaper
                 WALL_DID=1
             else
@@ -1541,6 +1561,20 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     fi
 fi
 
+if [ $API -ge 28 ]; then
+    SI=$(find /system -name *SettingsIntelligence* | grep -v overlay | grep -v "\.")
+    tar -xf $MODPATH/files/sig.tar.xz -C $MODPATH/system$product/priv-app
+    cp -f $MODPATH/files/PixelifySettingsIntelligenceGoogleOverlay.apk $MODPATH/system/product/overlay/PixelifySettingsIntelligenceGoogleOverlay.apk
+    REMOVE="$REMOVE $SI"
+
+for i in "BatteryUsage__is_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"; do
+    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.settings.intelligence' AND name='$i'"
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.settings.intelligence', '', '$i', 0, 1, 0)"
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.settings.intelligence', '', '$i', 0, 1, 1)"
+    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.settings.intelligence' AND name='$i'"
+done
+fi
+
 install_tts() {
     print ""
     print "- Google TTS is not installed as a system app !!"
@@ -1570,12 +1604,6 @@ else
     print " - Then Install GoogleTTS via playstore"
     print " - Reinstall module to make it system app"
 fi
-
-for i in "BatteryUsage__is_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"; do
-    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.settings.intelligence' AND name='$i'"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.settings.intelligence', '', '$i', 0, 1, 0)"
-    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.settings.intelligence' AND name='$i'"
-done
 
 if [ $TENSOR -eq 0 ]; then
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder'"
@@ -1614,27 +1642,27 @@ set_perm_app() {
     if [ ! -z "$perm" ]; then
         echo " - Generatings permission for package: $name" >> $logfile
         mkdir -p $path/etc/permissions
-        echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>" >> $path/etc/permissions/privapp_whitelist_$name.xml
-        echo "<!-- " >> $path/etc/permissions/privapp_whitelist_$name.xml
-        echo " Generated by Pixelify Module " >> $path/etc/permissions/privapp_whitelist_$name.xml
-        echo "-->" >> $path/etc/permissions/privapp_whitelist_$name.xml
-        echo "<permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
-        echo "    <privapp-permissions package=\"${name}\">" >> $path/etc/permissions/privapp_whitelist_$name.xml
+        echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>" >> $path/etc/permissions/privapp-permissions-$name.xml
+        echo "<!-- " >> $path/etc/permissions/privapp-permissions-$name.xml
+        echo " Generated by Pixelify Module " >> $path/etc/permissions/privapp-permissions-$name.xml
+        echo "-->" >> $path/etc/permissions/privapp-permissions-$name.xml
+        echo "<permissions>" >> $path/etc/permissions/privapp-permissions-$name.xml
+        echo "    <privapp-permissions package=\"${name}\">" >> $path/etc/permissions/privapp-permissions-$name.xml
         for i in $perm; do
             s=$(echo $i | grep name= | cut -d= -f2 | sed "s/'/\"/g")
             if [ ! -z $s ]; then
-                echo "        <permission name=$s/>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+                echo "        <permission name=$s/>" >> $path/etc/permissions/privapp-permissions-$name.xml
             fi
         done
         if [ "$name" == "com.google.android.apps.nexuslauncher" ]; then
-            echo "        <permission name=\"android.permission.PACKAGE_USAGE_STATS\"/>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+            echo "        <permission name=\"android.permission.PACKAGE_USAGE_STATS\"/>" >> $path/etc/permissions/privapp-permissions-$name.xml
         elif [ "$name" == "com.google.android.as.oss" ]; then
-            echo "        <permission name=\"android.permission.ACCESS_WIFI_STATE\"/>" >> $path/etc/permissions/privapp_whitelist_$name.xml
-            echo "        <permission name=\"android.permission.CHANGE_WIFI_STATE\"/>" >> $path/etc/permissions/privapp_whitelist_$name.xml
+            echo "        <permission name=\"android.permission.ACCESS_WIFI_STATE\"/>" >> $path/etc/permissions/privapp-permissions-$name.xml
+            echo "        <permission name=\"android.permission.CHANGE_WIFI_STATE\"/>" >> $path/etc/permissions/privapp-permissions-$name.xml
         fi
-        echo "    </privapp-permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
-        echo "</permissions>" >> $path/etc/permissions/privapp_whitelist_$name.xml
-        chmod 0644 $path/etc/permissions/privapp_whitelist_$name.xml
+        echo "    </privapp-permissions>" >> $path/etc/permissions/privapp-permissions-$name.xml
+        echo "</permissions>" >> $path/etc/permissions/privapp-permissions-$name.xml
+        chmod 0644 $path/etc/permissions/privapp-permissions-$name.xml
     fi
 }
 
@@ -1809,6 +1837,79 @@ if [ -f /system$product/etc/fonts_customization.xml ]; then
     add_font google-sans-text-bold-italic "$font9"
 fi
 
+
+sound_patch='    <!-- Multiple sound_model_config tags can be listed, each with unique
+         vendor_uuid. -->
+    <sound_model_config>
+        <param vendor_uuid="7038ddc8-30f2-11e6-b0ac-40a8f03d3f15" />
+        <param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
+        <param library="none" />
+        <param max_cpe_phrases="1" />
+        <param max_cpe_users="1" />
+        <gcs_usecase>
+            <param uid="0x1" />
+            <param load_sound_model_ids="0x18000001, 0x1, 0x18000100" />
+            <param start_engine_ids="0x18000001, 0x1, 0x18000101" />
+            <param request_detection_ids="0x18000001, 0x4, 0x18000106" />
+            <param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
+            <param read_cmd_ids="0x00020013, 0x1, 0x00020015" />
+            <param read_rsp_ids="0x00020013, 0x1, 0x00020016" />
+        </gcs_usecase>
+        <!--  kw_duration is in milli seconds. It is valid only for FTRT
+            transfer mode -->
+        <param capture_keyword="PCM_raw, FTRT, 2000" />
+        <param client_capture_read_delay="2000" />
+    </sound_model_config>
+
+    <!-- music -->
+    <sound_model_config>
+        <param vendor_uuid="9f6ad62a-1f0b-11e7-87c5-40a8f03d3f15" />
+        <param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
+        <param library="none" />
+        <gcs_usecase>
+            <param uid="0x2" />
+            <param load_sound_model_ids="0x18000001, 0x1, 0x18000102" />
+            <param start_engine_ids="0x18000001, 0x1, 0x18000103" />
+            <param request_detection_ids="0x18000001, 0x4, 0x18000107" />
+            <param custom_config_ids="0x18000001, 0x1, 0x18000106" />
+            <param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
+            <param read_cmd_ids="0x00020013, 0x2, 0x00020015" />
+            <param read_rsp_ids="0x00020013, 0x2, 0x00020016" />
+        </gcs_usecase>
+        <!--  kw_duration is in milli seconds. It is valid only for FTRT
+            transfer mode -->
+        <param capture_keyword="MULAW_raw, FTRT, 4000" />
+        <param client_capture_read_delay="2000" />
+    </sound_model_config>
+
+    <sound_model_config>
+        <param vendor_uuid="2fc815fa-4a42-11e7-99bd-40a8f03d3f15" />
+        <param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
+        <param library="none" />
+        <gcs_usecase>
+            <param uid="0x3" />
+            <param load_sound_model_ids="0x18000001, 0x1, 0x18000104" />
+            <param start_engine_ids="0x18000001, 0x1, 0x18000105" />
+            <param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
+        </gcs_usecase>
+        <!--  kw_duration is in milli seconds. It is valid only for FTRT
+            transfer mode -->
+        <param capture_keyword="PCM_raw, FTRT, 0" />
+        <param client_capture_read_delay="0" />
+    </sound_model_config>'
+
+
+if [ $NOT_REQ_SOUND_PATCH -eq 0 ] && [  -f /vendor/etc/sound_trigger_platform_info.xml ]; then
+    mkdir -p $MODPATH/system/vendor/etc
+    cp -f $MODPATH/files/sound_trigger_configuration.xml $MODPATH/system/vendor/etc/sound_trigger_configuration.xml
+    cp -f /vendor/etc/sound_trigger_platform_info.xml $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+    if [ -z "$(grep \"9f6ad62a-1f0b-11e7-87c5-40a8f03d3f15\" $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml)" ]; then
+        sed -i -e 's/<\/sound_trigger_platform_info>//g' $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+        echo "$sound_patch" >>  $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+        echo "</sound_trigger_platform_info>" >> $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+    fi
+fi
+
 REMOVE="$(echo "$REMOVE" | tr ' ' '\n' | sort -u)"
 REPLACE="$REMOVE"
 
@@ -1850,7 +1951,7 @@ fi
 
 rm -rf $MODPATH/system/product/data
 
-rm -rf $pix/apps_temp.txt
+rm -rf $pix/apps_temp.txt $MODPATH/zygisk_1
 mv $pix/app2.txt $pix/app.txt
 
 echo " 
