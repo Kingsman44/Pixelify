@@ -1,5 +1,11 @@
 # 0 - Disable(No), 1 - Enable(Yes)
 
+# If module doesn't able to detect internet even it is turn on, then enable it will fix your internet issue
+FORCE_ENABLE_ONLINE=1
+
+# Disable Internal spoofing of particular rom
+DISABLE_INTERNAL_SPOOFING=0
+
 # Google Photos Original Unlimited Backup
 # Only for Tensor chip devices
 ENABLE_TENSOR_UNLIMITED=1
@@ -65,6 +71,21 @@ UPDATE_PIXEL_LAUNCHER=1
 
 # Backup Pixel Launcher
 BACKUP_PIXEL_LAUNCHER=1
+
+# Pixel camera services
+ENABLE_PCS=0
+
+# Download updates of Pixel camera services.
+UPDATE_PCS=1
+
+# Pixel camera services backup
+BACKUP_PCS=1
+
+# Enable installation of Google settings intelligence
+ENABLE_GSI=0
+
+# Disable GMS overide flags for Rboard user for Gboard
+DISABLE_GBOARD_GMS_OVERRIDE=0
 
 # Google Extreme Battery Saver
 ENABLE_EXTREME_BATTERY_SAVER=0

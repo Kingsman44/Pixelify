@@ -70,6 +70,26 @@ android.permission.ACCESS_NETWORK_STATE
 android.permission.ACCESS_WIFI_STATE
 android.permission.CHANGE_WIFI_STATE"
 
+overide_spoof="org.pixelexperience.device
+org.evolution.device
+ro.bliss.device
+ro.cherish.device
+ro.lighthouse.device
+ro.ssos.device
+ro.spark.device"
+
+exact_prop=""
+
+for i in $overide_spoof; do
+    if [ ! -z $i ]; then
+        kkk="$(getprop $i)"
+        if [ ! -z $kkk ] || [ $kkk == "redfin" ]; then
+            exact_prop="$i"
+            break
+        fi
+    fi
+done
+
 logfile=/sdcard/Pixelify/logs.txt
 rm -rf $logfile
 
@@ -86,11 +106,33 @@ tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
 chmod 0755 $MODPATH/addon/*
 
+FIRST_ONLINE_TIME=0
+FORCED_ONLINE=0
+
 online() {
     s=$($MODPATH/addon/curl -s -I http://www.google.com --connect-timeout 5 | grep "ok")
     if [ ! -z "$s" ]; then
         internet=1
         echo " - Network is Online" >> $logfile
+    elif [ $FORCED_ONLINE -eq 1 ]; then
+        internet=1
+        echo " - Network is forced to be online" >> $logfile
+    elif [ $FIRST_ONLINE_TIME -eq 1 ]; then
+        FIRST_ONLINE_TIME=0
+        print ""
+        print "(INTERNET NOT DETECTED)"
+        print "  If you think this is error of module, you force enable to detect"
+        print "  internet is on."
+        print ""
+        print "  Note: If your not connected to internet please"
+        print "        don't force enable it."
+        print "   Vol Up += Force Enable internet"
+        print "   Vol Down += Default settings"
+        no_vk "FORCE_ENABLE_ONLINE"
+        if $VKSEL; then
+            FORCED_ONLINE=1
+            internet=1
+        fi
     else
         internet=0
         echo "- Network is Offline" >> $logfile
@@ -143,6 +185,9 @@ Codename: $(getprop ro.product.vendor.name)
 Model: $(getprop ro.product.vendor.model)
 security patch: $sec_patch
 Magisk version: $MAGISK_VER_CODE" >> $logfile
+
+PCSSIZE="15 Mb"
+PCSVERSION=1
 
 if [ $API -eq 32 && "$(getprop ro.build.version.security_patch)" == "Tiramisu" ]; then
 	echo "Android version: 13" >> $logfile
@@ -208,6 +253,8 @@ if [ $internet -eq 1 ]; then
     NGAVERSION=$(echo "$ver" | grep nga | cut -d'=' -f2)
     LWVERSION=$(echo "$ver" | grep wallpaper | cut -d'=' -f2)
     DPVERSION=$(echo "$ver" | grep dp-$API | cut -d'=' -f2)
+    PCSVERSION=$(echo "$ver" | grep pcs | cut -d'=' -f2)
+    PCSSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
     if [ $API -ge 31 ]; then
         DPVERSION=$(echo "$ver" | grep asi-new-31 | cut -d'=' -f2)
@@ -224,6 +271,7 @@ if [ $internet -eq 1 ]; then
     rm -rf $pix/pixel.txt
     rm -rf $pix/dp.txt
     rm -rf $pix/pl-$NEWAPI.txt
+    echo "$PCSVERSION" >> $pix/pcs.txt
     echo "$NGAVERSION" >> $pix/nga.txt
     echo "$LWVERSION" >> $pix/pixel.txt
     echo "$DPVERSION" >> $pix/dp.txt
@@ -234,6 +282,9 @@ else
 	echo "- Warning, Cannot able to fetch package version, using saved version instead" >> $logfile
     if [ ! -f $pix/nga.txt ]; then
         echo "$NGAVERSIONP" >> $pix/nga.txt
+    fi
+    if [ ! -f $pix/pcs.txt ]; then
+        echo "$PCSVERSIONP" >> $pix/pcs.txt
     fi
     if [ ! -f $pix/pixel.txt ]; then
         echo "$LWVERSIONP" >> $pix/pixel.txt
@@ -250,6 +301,7 @@ NGAVERSION=$(cat $pix/nga.txt)
 LWVERSION=$(cat $pix/pixel.txt)
 DPVERSION=$(cat $pix/dp.txt)
 DPSVERSION=$(cat $pix/dps.txt)
+PCSVERSION=$(cat $pix/pcs.txt)
 PLVERSION=$(cat $pix/pl-$NEWAPI.txt)
 
 if [ "$(getprop ro.soc.model)" == "Tensor" ]; then
@@ -263,8 +315,9 @@ fi
 
 if [ "$(getprop ro.product.vendor.name)" == "coral" ] || [ "$(getprop ro.product.vendor.name)" == "flame" ]; then
 	echo "- Pixel 4/XL Detected !"
-	rm -rf $MODPATH/zygisk
-    mv $MODPATH/zygisk_1 $MODPATH/zygisk
+	for i in $MODPATH/zygisk/*; do
+        sed -i -e "s/com.google.android.xx/com.google.android.as/g" $i
+    done
 fi
 
 echo "
@@ -278,8 +331,11 @@ chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 alias keycheck="$MODPATH/addon/keycheck"
 sqlite=$MODPATH/addon/sqlite3
-gms=/data/user/0/com.google.android.gms/databases/phenotype.db
+gms=/data/data/com.google.android.gms/databases/phenotype.db
 gser=/data/data/com.google.android.gsf/databases/gservices.db
+gah=/data/data/com.google.android.gms/databases/google_account_history.db
+
+gacc="$("$sqlite" "$gah" "SELECT account_name FROM AccountHistory;")"
 
 if [ $API -le 28 ]; then
     cp -r $MODPATH/system/product/. $MODPATH/system
@@ -344,23 +400,61 @@ fi
 
 bool_patch() {
     file=$2
-    line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
-    for i in $line; do
-        val_false='value="false"'
-        val_true='value="true"'
-        write="${i} $val_true"
-        find="${i} $val_false"
-        sed -i -e "s/${find}/${write}/g" $file
-    done
+    if [ -f $file ]; then
+        line=$(grep $1 $2 | grep false | cut -c 16- | cut -d' ' -f1)
+        for i in $line; do
+            val_false='value="false"'
+            val_true='value="true"'
+            write="${i} $val_true"
+            find="${i} $val_false"
+            sed -i -e "s/${find}/${write}/g" $file
+        done
+    fi
+}
+
+bool_patch_false() {
+    file=$2
+    if [ -f $file ]; then
+        line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
+        for i in $line; do
+            val_false='value="true"'
+            val_true='value="false"'
+            write="${i} $val_true"
+            find="${i} $val_false"
+            sed -i -e "s/${find}/${write}/g" $file
+        done
+    fi
 }
 
 string_patch() {
     file=$3
-    str=$(grep $1 $3 | grep string | cut -c 14- | cut -d'<' -f1)
-    str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
-    add="$str1>$2"
-    sed -i -e "s/${str}/${add}/g" $file
+    if [ -f $file ]; then
+        str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
+        for i in $str1; do
+            str2=$(grep $i $3 | grep string | cut -c 14- | cut -d'<' -f1)
+            add="$i>$2"
+            if [ ! "$add" == "$str2" ]; then
+                sed -i -e "s/${str2}/${add}/g" $file
+            fi
+        done
+    fi
 }
+
+long_patch() {
+    file=$3
+    if [ -f $file ]; then
+        lon=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1)
+        for i in $lon; do
+            str=$(grep $i $3 | grep long | cut -c 17-  | cut -d'"' -f1-2)
+            str1=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
+            add="$str\"$2"
+            if [ ! "$add" == "$str1" ]; then
+                sed -i -e "s/${str1}/${add}/g" $file
+            fi
+        done
+    fi
+}
+
 
 abort1() {
     echo "Installation Failed: $1" >> $logfile
@@ -495,8 +589,10 @@ if [ $API -ge 28 ]; then
     tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
 fi
 
+SHOW_GSS=1
 if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.miui.ui.version.code)" ] || [ "$(getprop ro.product.vendor.manufacturer)" == "samsung" ]; then
     echo " - Oxygen OS or MiUI or One Ui Rom Detected" >> $logfile
+    SHOW_GSS=0
     echo " - Dropping ro.product.vendor.name, ro.product.vendor.device, ro.product.vendor.model, ro.product.vendor.brand prop from spoof.prop" >> $logfile
     while read p; do
         if [ ! -z "$(echo $p | grep vendor)" ]; then
@@ -504,6 +600,8 @@ if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.mi
         fi
     done <$MODPATH/spoof.prop
 fi
+
+FIRST_ONLINE_TIME=1
 
 drop_sys() {
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
@@ -519,6 +617,42 @@ drop_sys() {
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
 }
+
+db_edit() {
+	type=$2
+	val=$3
+	name=$1
+	shift
+	shift
+	shift
+	echo "- $name paching started" >> $logfile
+	for i in $@; do
+		echo "Patching $i to $val" >> $logfile
+	    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'"
+	    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)"
+	    $sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
+	    for j in $gacc; do
+	    	$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
+	    done
+	done
+	echo "- $name paching done" >> $logfile
+}
+
+if [ ! -z $exact_prop ]; then
+    print ""
+    print "  (BETA FEATURE)"
+    print "  - This may not not work for all devices."
+    print "  Do you want to disable Internal spoofing of rom?"
+    print "  Note: This may break ota update of your rom"
+    print ""
+    print "   Vol Up += Yes"
+    print "   Vol Down += No"
+    no_vk "DISABLE_INTERNAL_SPOOFING"
+    if $VKSEL; then
+        echo " " >> $MODPATH/system.prop
+        echo "$exact_prop=redfin" >> $MODPATH/system.prop
+    fi   
+fi
 
 ZYGISK_P=0
 if [ $TENSOR -eq 1 ]; then
@@ -540,13 +674,11 @@ if [ $TENSOR -eq 1 ]; then
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
     print ""
     print "- Magisk v24 and above detected "
-    print "- Please enable Zygisk in order to Pixelify to work"
+    print "- Zygisk must be enabled inorder Pixelify module to work"
     print ""
     print "- Spoofing Google apps according to there best configuration."
     print ""
     drop_sys
-    magisk --denylist add com.google.android.gms
-    magisk --denylist add com.google.android.gms.unstable
     ZYGISK_P=1
 else
     print ""
@@ -604,28 +736,15 @@ fi
 NOT_REQ_SOUND_PATCH=0
 [ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware && NOT_REQ_SOUND_PATCH=1
 
-for i in "Captions__enable_text_transform" "Translate__translation_service_enabled" "Translate__replace_auto_translate_copied_text_enabled" "Translate__copy_to_translate_enabled" "Translate__blue_chip_translate_enabled" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor"; do
-    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='$i'"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', '$i', 0, 1, 0)"
-    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.platform.device_personalization_services' AND name='$i'"
-done
-
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='Captions__new_model_version_advanced'"
-$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', 'Captions__new_model_version_advanced', 0, 20211104, 0)"
-$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', 'Captions__new_model_version_advanced', 0, 20211104, 1)"
-$sqlite $gms "UPDATE Flags SET intVal='20211104' WHERE packageName='com.google.android.platform.device_personalization_services' AND name='Captions__new_model_version_advanced'"
-
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='SmartSelect__enable_smart_select_locked_bootloader_check'"
-$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.platform.launcher', '', 'SmartSelect__enable_smart_select_locked_bootloader_check', 0, 0, 0)"
-$sqlite $gms "UPDATE Flags SET boolVal='0' WHERE packageName='com.google.android.platform.device_personalization_services' AND name='SmartSelect__enable_smart_select_locked_bootloader_check'"
-
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.launcher' AND name='ENABLE_SMARTSPACE_ENHANCED'"
-$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.platform.launcher', '', 'ENABLE_SMARTSPACE_ENHANCED', 0, 1, 0)"
-$sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.platform.launcher' AND name='ENABLE_SMARTSPACE_ENHANCED'"
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
+db_edit com.google.android.platform.device_personalization_services boolVal 1 "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input"" Translate__copy_to_translate_enabled" "Translate__blue_chip_translate_enabled" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor"
+db_edit com.google.android.platform.device_personalization_services boolVal 0 "SmartSelect__enable_smart_select_locked_bootloader_check"
+# db_edit com.google.android.platform.device_personalization_services stringVal "en-US;en-GB;en-CA;en-IE;en-AU;en-SG;fr-FR;fr-CA;it-IT;de-DE;ja-JP;es-ES" "Captions__available_for_download"
+# db_edit com.google.android.platform.device_personalization_services stringVal "en-US;es-SG;fr-FR;fr-CA;it-IT;de-DE;ja-JP" "Captions__supported_languages"
+db_edit com.google.android.platform.launcher boolVal "ENABLE_SMARTSPACE_ENHANCED"
 
 if [ $DPAS -eq 1 ]; then
     echo " - Installing Android System Intelligence" >> $logfile
-    [ $API -ge 31 ] && tar -xf $MODPATH/files/asp.tar.xz -C $MODPATH/system/product/priv-app
     if [ -f /sdcard/Pixelify/backup/dp-$NEWAPI.tar.xz ]; then
         echo " - Backup Detected for Android System Intelligence" >> $logfile
         REMOVE="$REMOVE $DP"
@@ -756,12 +875,10 @@ if [ -d /data/data/$DIALER ]; then
         DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
         sed -i -e "s/CallScreening=0/CallScreening=1/g" $MODPATH/config.prop
         print "- Enabling Call Screening & Hold for me & Direct My Call"
-        print ""
-        print "- Please Use google Dialer apk for"
-        print "  Direct my Call given in Pixelify github link"
         print " "
         print "- Enabling Call Recording (Working is device dependent)"
         lang=$(getprop persist.sys.locale | cut -d'-' -f1)
+        full_lang=$(getprop persist.sys.locale)
         CUSTOM_CALL_SCREEN=0
         for i in "es" "fr" "it" "ja" "de"; do
             if [ "$i" == "$lang" ]; then
@@ -781,7 +898,6 @@ if [ -d /data/data/$DIALER ]; then
         enable_theme_pushing
         enable_precall_dialpad_v2
         enable_call_screen_hats
-        enable_presence_check
         enable_hats_proof_mode
         enable_time_keeper
         enable_time_keeper_histogram
@@ -806,11 +922,9 @@ if [ -d /data/data/$DIALER ]; then
         enable_xatu_music_detection
         enable_dialer_hold_handling
         enable_hold_detection
-        enable_sigil
-        enable_qresampler
-        enable_fides
         enable_video_calling_screen
-        enable_tincan
+        enable_video_type_picker
+        enable_video_call_type_chooser
         G__new_voicemail_fragment_enabled"
 
         for i in $DIALERFLAGS; do
@@ -886,7 +1000,7 @@ if [ -d /data/data/$DIALER ]; then
         bool_patch speak_easy $DIALER_PREF
         bool_patch speakeasy $DIALER_PREF
         bool_patch call_screen $DIALER_PREF
-        bool_patch revelio $DIALER_PREF
+        # bool_patch revelio $DIALER_PREF
         bool_patch record $DIALER_PREF
         bool_patch atlas $DIALER_PREF
         bool_patch xatu $DIALER_PREF
@@ -894,31 +1008,49 @@ if [ -d /data/data/$DIALER ]; then
 
         device="$(getprop ro.product.device)"
         device_len=${#device}
-        carr_coun="$(getprop gsm.sim.operator.iso-country | tr '[:lower:]' '[:upper:]')"
+        carr_coun_small="$(getprop gsm.sim.operator.iso-country)"
+        if [ ! -z $(echo $carr_coun_small | grep ',') ]; then
+            carr_coun_small="$(getprop gsm.sim.operator.iso-country | cut -d, -f1)"
+            if [ -z $carr_coun_small ]; then
+                carr_coun_small="$(getprop gsm.sim.operator.iso-country | cut -d, -f2)"
+                if [ -z $carr_coun_small ]; then
+                    carr_coun_small="us"
+                fi
+            fi
+        fi
+        carr_coun="$(echo $carr_coun_small | tr '[:lower:]' '[:upper:]')"
+
         if [ ! -z $carr_coun ]; then
             echo " - Adding Country ($carr_coun) patch for Call Recording and Hold for me, Direct My Call" >> $logfile
             if [ -z $(echo "AU US JP" | grep $carr_coun) ]; then
-                sed -i -e "s/XY/${carr_coun}/g" $MODPATH/files/$DIALER
+                sed -i -e "s/YY/${carr_coun}/g" $MODPATH/files/phenotype/com.google.android.dialer
+                sed -i -e "s/YY/${carr_coun}/g" $MODPATH/files/com.google.android.dialer-custom
             fi
+        fi
+
+        if [ -z $(echo "GB IE JP US DE IT FR ES" | grep $carr_coun) ]; then
+            sed -i -e "s/kk-YT/${full_lang}/g" $MODPATH/files/com.google.android.dialer-custom
+            sed -i -e "s/kk/${carr_coun_small}/g" $MODPATH/files/com.google.android.dialer-custom
         fi
 
         # Remove old prompt to replace to use within overlay
         rm -rf /data/data/com.google.android.dialer/files/callrecordingprompt/*
         mkdir -p /data/data/com.google.android.dialer/files/callrecordingprompt
         cp -r $MODPATH/files/callrec/* /data/data/com.google.android.dialer/files/callrecordingprompt
-        chmod 755 /data/data/com.google.android.dialer/files/phenotype
+        chmod 0755 /data/data/com.google.android.dialer/files/phenotype
         if [ $CUSTOM_CALL_SCREEN -eq 0 ]; then
-        	chmod 0500 /data/data/com.google.android.dialer/files/phenotype
-        	cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
-        	cp -Tf $MODPATH/files/$DIALER-custom $MODPATH/$DIALER-1
+            chmod 0500 /data/data/com.google.android.dialer/files/phenotype
+            cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
+            cp -Tf $MODPATH/files/$DIALER-custom $MODPATH/$DIALER-1
             cp -Tf $MODPATH/files/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
             am force-stop $DIALER
-    	else
+        else
             rm -rf $MODPATH/$DIALER
-    		sed -i -e "s/cp -Tf $MODDIR\/com.google.android.dialer/#cp -Tf $MODDIR\/com.google.android.dialer/g" $MODPATH/service.sh
-    		sed -i -e "s/chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/#chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/g" $MODPATH/service.sh
-    	fi
+            sed -i -e "s/cp -Tf $MODDIR\/com.google.android.dialer/#cp -Tf $MODDIR\/com.google.android.dialer/g" $MODPATH/service.sh
+            sed -i -e "s/chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/#chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/g" $MODPATH/service.sh
+        fi
 
+        chmod 0600 /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
         if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
             print "- Google Dialer is not installed as a system app !!"
@@ -1051,23 +1183,12 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
         fi
 
         $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox'"
-
-        for i in "45359819"; do
-            $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox' AND name='$i'"
-            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '$i', 0, 1, 0)"
-            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '$i', 0, 1, 1)"
-            $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.googlequicksearchbox' AND name='$i'"
-        done
-        # $sqlite $gms "UPDATE Flags SET stringVal='Raven' WHERE packageName='com.google.android.googlequicksearchbox' AND name='13477'"
-        $sqlite $gms "UPDATE Flags SET stringVal='Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='17074'"
-        $sqlite $gms "UPDATE Flags SET stringVal='Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL' WHERE packageName='com.google.android.googlequicksearchbox' AND name='45353661'"
-        $sqlite $gms "UPDATE Flags SET stringVal=',96,99,115,135,138,100,101,115,142' WHERE packageName='com.google.android.googlequicksearchbox' AND name='GsaPrefs.Bisto__enabled_features'"
-        # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '13477', 0, 'Raven', 0)"
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '17074', 0, 'Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL', 0)"
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '45353661', 0, 'Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL', 0)"
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.googlequicksearchbox', '', 'GsaPrefs.Bisto__enabled_features', 0, ',96,99,115,135,138,100,101,115,142', 0)"
+        # db_edit com.google.android.googlequicksearchbox boolVal 0 "45351541" "9670" "8888" "15052" "45363987" "45363985" "45359819"
+        db_edit com.google.android.googlequicksearchbox stringVal "Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL" "17074"
+        db_edit com.google.android.googlequicksearchbox stringVal "Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL" "45353661"
 
         cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
+        cp -f $MODPATH/files/PixeliflyGA.apk $MODPATH/system/product/overlay/PixeliflyGA.apk
 
         FORCE_FILE="/sdcard/Pixelify/apps.txt"
         is_velvet="$(grep velvet= $FORCE_FILE cut -d= -f2)"
@@ -1152,6 +1273,7 @@ install_wallpaper() {
 WALL_DID=0
 if [ $API -ge 28 ]; then
     PLW=$(find /system -name *PixelWallpapers2021* | grep -v overlay | grep -v "\.")
+    PLW1=$(find /system -name *WallpapersBreel2* | grep -v overlay | grep -v "\.")
     if [ -f /sdcard/Pixelify/backup/pixel.tar.xz ]; then
         echo " - Backup Detected for Pixel Wallpapers" >> $logfile
         print "  Do you want to install Pixel Live Wallpapers?"
@@ -1205,7 +1327,10 @@ if [ $API -ge 28 ]; then
                 mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
                 rm -rf $MODPATH/system/overlay
             fi
-            REMOVE="$REMOVE $PLW"
+            REMOVE="$REMOVE $PLW $PLW1"
+            pm enable -n com.google.pixel.livewallpaper/com.google.pixel.livewallpaper.pokemon.wallpapers.PokemonWallpaper -a android.intent.action.MAIN &>/dev/null
+            mkdir -p $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64
+            cp -f $MODPATH/system$product/lib64/libgdx.so $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64/libgdx.so
             install_wallpaper
             WALL_DID=1
         else
@@ -1255,7 +1380,10 @@ if [ $API -ge 28 ]; then
                     print " - Done"
                     print ""
                 fi
-                REMOVE="$REMOVE $PLW"
+                REMOVE="$REMOVE $PLW $PLW1"
+                pm enable -n com.google.pixel.livewallpaper/com.google.pixel.livewallpaper.pokemon.wallpapers.PokemonWallpaper -a android.intent.action.MAIN &>/dev/null
+                mkdir -p $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64
+                cp -f $MODPATH/system$product/lib64/libgdx.so $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64/libgdx.so
                 install_wallpaper
                 WALL_DID=1
             else
@@ -1270,6 +1398,13 @@ if [ $API -ge 28 ]; then
             echo " - Skipping Pixel Wallpapers" >> $logfile
         fi
     fi
+fi
+
+MONET_BOOTANIMATION=0
+
+if [ ! -z $(getprop persist.bootanim.color1) ]; then
+    MONET_BOOTANIMATION=1
+    print "  (Monet bootanimation rom detected)"
 fi
 
 print "  Do you want to install Pixel Bootanimation?"
@@ -1291,25 +1426,39 @@ if $VKSEL; then
     fi
     print ""
     mkdir -p $MODPATH/$MEDIA_PATH
-    case "$boot_res" in
-        720)
-            tar -xf $MODPATH/files/bootanimation-720.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 720p resolution pixel Bootanimation"
-            ;;
-        1440)
-            tar -xf $MODPATH/files/bootanimation-1440.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 1440p resolution pixel Bootanimation"
-            ;;
-        *)
-            tar -xf $MODPATH/files/bootanimation.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 1080p resolution pixel Bootanimation"
-            ;;
-    esac
-    print ""
-    if [ ! -f /system/bin/themed_bootanimation ]; then
-        rm -rf $MODPATH/$MEDIA_PATH/bootanimation.zip
-        cp -f $MODPATH/$MEDIA_PATH/bootanimation-dark.zip $MODPATH/$MEDIA_PATH/bootanimation.zip
-        echo " - Themed Animation not detected, using dark animation as default" >> $logfile
+    if [ $MONET_BOOTANIMATION -eq 0 ]; then
+        case "$boot_res" in
+            720)
+                tar -xf $MODPATH/files/bootanimation-720.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 720p resolution pixel Bootanimation"
+                ;;
+            1440)
+                tar -xf $MODPATH/files/bootanimation-1440.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1440p resolution pixel Bootanimation"
+                ;;
+            *)
+                tar -xf $MODPATH/files/bootanimation.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1080p resolution pixel Bootanimation"
+                ;;
+        esac
+        print ""
+        if [ ! -f /system/bin/themed_bootanimation ]; then
+            rm -rf $MODPATH/$MEDIA_PATH/bootanimation.zip
+            cp -f $MODPATH/$MEDIA_PATH/bootanimation-dark.zip $MODPATH/$MEDIA_PATH/bootanimation.zip
+            echo " - Themed Animation not detected, using dark animation as default" >> $logfile
+        fi
+    else
+        case "$boot_res" in
+            1440)
+                tar -xf $MODPATH/files/bootanimation-m-1440.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1440p resolution pixel monet Bootanimation"
+                ;;
+            *)
+                tar -xf $MODPATH/files/bootanimation-m.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1080p resolution pixel monet Bootanimation"
+                ;;
+        esac
+        cp -f $MODPATH/$MODPATH/bootanimation.zip $MODPATH/$MODPATH/bootanimation-dark.zip
     fi
 else
     echo " - Skipping Pixel Bootanimation" >> $logfile
@@ -1460,6 +1609,137 @@ else
     rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
 fi
 
+if [ $API -ge 10000 ]; then
+    PCS=$(find /system -name *PixelCameraServices* | grep -v overlay | grep -v "\.")
+
+    if [ -f /sdcard/Pixelify/backup/pcs.tar.xz ]; then
+        echo " - Backup Detected for Pixel Camera Services" >> $logfile
+        print "  Do you want to install Pixel Camera Services?"
+        print "  (Backup detected, no internet needed)"
+        print "   Vol Up += Yes"
+        print "   Vol Down += No"
+        no_vk "ENABLE_PCS"
+        if $VKSEL; then
+            REMOVE="$REMOVE $PCS"
+            if [ "$(cat /sdcard/Pixelify/version/pcs.txt)" != "$PCSVERSION" ]; then
+                echo " - New Version Backup Detected forPixel Camera Services" >> $logfile
+                echo " - Old version:$(cat /sdcard/Pixelify/version/pl-$NEWAPI.txt), New Version:  $PCSVERSION " >> $logfile
+                print "  (Network Connection Needed)"
+                print "  New version Detected "
+                print "  Do you Want to update or use Old Backup?"
+                print "  Version: $PCSVERSION"
+                print "  Size: $PCSSIZE"
+                print "   Vol Up += Update"
+                print "   Vol Down += Use old backup"
+                no_vk "UPDATE_PCS"
+                if $VKSEL; then
+                    online
+                    if [ $internet -eq 1 ]; then
+                        echo " - Downloading and Installing New Backup for Pixel Camera Services" >> $logfile
+                        rm -rf /sdcard/Pixelify/backup/pcs.tar.xz
+                        rm -rf /sdcard/Pixelify/version/pcs.txt
+                        cd $MODPATH/files
+                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz -O &> /proc/self/fd/$OUTFD
+                        cd /
+                        print "- Creating Backup"
+                        print ""
+                        cp -f $MODPATH/files/pcs.tar.xz /sdcard/Pixelify/backup/pcs.tar.xz
+                        echo " - Creating Backup for Pixel Camera Services" >> $logfile
+                        echo "$PCSVERSION" >> /sdcard/Pixelify/version/pcs.txt
+                    else
+                        print "!! Warning !!"
+                        print " No internet detected"
+                        print ""
+                        print "- Using Old backup for now."
+                        print ""
+                        echo " - Using old Backup for Pixel Launcher due to no internet" >> $logfile
+                    fi
+                fi
+            fi
+            print "- Installing Pixel Camera Services"
+            print ""
+
+            tar -xf /sdcard/Pixelify/backup/pcs.tar.xz -C $MODPATH/system
+            echo "ro.vendor.camera.extensions.package=com.google.android.apps.camera.services" >> $MODPATH/system.prop
+            echo "ro.vendor.camera.extensions.service=com.google.android.apps.camera.services.extensions.service.PixelExtensions" >> $MODPATH/system.prop
+
+        else
+            echo " - Skipping Pixel Camera Services" >> $logfile
+        fi
+    else
+        print "  (Network Connection Needed)"
+        print "  Do you want to install and Download Pixel Camera Services?"
+        print "  Size: $PCSSIZE"
+        print "   Vol Up += Yes"
+        print "   Vol Down += No"
+        no_vk "ENABLE_PCS"
+        if $VKSEL; then
+            online
+            if [ $internet -eq 1 ]; then
+                print "- Downloading Pixel Camera Services"
+                echo " - Downloading and Installing Pixel Camera Services" >> $logfile
+                print ""
+                cd $MODPATH/files
+                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz -O &> /proc/self/fd/$OUTFD
+                cd /
+                print ""
+                print "- Installing Pixel Camera Services"
+                tar -xf $MODPATH/files/pcs.tar.xz -C $MODPATH/system
+           	 	echo "ro.vendor.camera.extensions.package=com.google.android.apps.camera.services" >> $MODPATH/system.prop
+            	echo "ro.vendor.camera.extensions.service=com.google.android.apps.camera.services.extensions.service.PixelExtensions" >> $MODPATH/system.prop
+
+                REMOVE="$REMOVE $PCS"
+                print ""
+                print "  Do you want to create backup of Pixel Camera Services?"
+                print "  so that you don't need redownload it everytime."
+                print "   Vol Up += Yes"
+                print "   Vol Down += No"
+                no_vk "BACKUP_PCS"
+                if $VKSEL; then
+                    print "- Creating Backup"
+                    mkdir -p /sdcard/Pixelify/backup
+                    rm -rf /sdcard/Pixelify/backup/pcs.tar.xz
+                    cp -f $MODPATH/files/pcs.tar.xz /sdcard/Pixelify/backup/pcs.tar.xz
+                    print ""
+                    mkdir -p /sdcard/Pixelify/version
+                    echo " - Creating Backup for Pixel Camera Services" >> $logfile
+                    echo "$PCSVERSION" >> /sdcard/Pixelify/version/pcs.txt
+                    print " - Done"
+                    print ""
+                fi
+            else
+                print "!! Warning !!"
+                print " No internet detected"
+                print ""
+                print "- Skipping Pixel Camera Services"
+                print ""
+                echo " - Skipping Pixel Camera Services due to no internet" >> $logfile
+            fi
+        else
+            echo " - Skipping Pixel Camera Services" >> $logfile
+        fi
+    fi
+else
+    echo " - Skipping Pixel Camera Services" >> $logfile
+fi
+
+if [ $API -ge 28 ] && [ $SHOW_GSS -eq 1 ]; then
+    print "  Do you want to install Google settings intelligence?"
+    # print "  (Battery Widget)"
+    print "    Vol Up += Yes"
+    print "    Vol Down += No"
+    no_vk "ENABLE_GSI"
+    if $VKSEL; then
+        SI=$(find /system -name *SettingsIntelligence* | grep -v overlay | grep -v "\.")
+        db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__enable_wifi_driven_bootstrap" "RoutinesPrototype__is_action_notifications_enabled" "RoutinesPrototype__is_activities_enabled" "RoutinesPrototype__is_module_enabled" "RoutinesPrototype__is_manual_location_rule_adding_enabled" "RoutinesPrototype__is_routine_inference_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"
+        tar -xf $MODPATH/files/sig.tar.xz -C $MODPATH/system$product/priv-app
+        # cp -f $MODPATH/files/PixelifySettingsIntelligenceGoogleOverlay.apk $MODPATH/system/product/overlay/PixelifySettingsIntelligenceGoogleOverlay.apk
+        # REMOVE="$REMOVE $SI"
+    else
+        echo " - Skipping Google settings intelligence" >> $logfile
+    fi
+fi
+
 if [ $API -ge 30 ]; then
     print "  Do you want to install Extreme Battery Saver (Flipendo)?"
     print "    Vol Up += Yes"
@@ -1468,7 +1748,7 @@ if [ $API -ge 30 ]; then
     if $VKSEL; then
         print "- Installing Extreme Battery Saver (Flipendo)"
         echo " - Installing Extreme Battery Saver (Flipendo)" >> $logfile
-        tar -xf $MODPATH/files/flip.tar.xz -C $MODPATH/system
+        cp -f $MODPATH/files/PixelifyFilpendo.apk $MODPATH/system/product/overlay/PixelifyFilpendo.apk
         if [ $NEWAPI -ge 31 ]; then
         	tar -xf $MODPATH/files/flip-31.tar.xz -C $MODPATH/system
     	else
@@ -1481,6 +1761,23 @@ if [ $API -ge 30 ]; then
     fi
 fi
 
+DISABLE_GBOARD_GMS=0
+
+if [ ! -z "$(pm list packages | grep de.dertyp7214.rboardthememanager)" ]; then
+    print ""
+    print "- Rboard app is installed !!"
+    print ""
+    print "  Do you want to apply fix for Rboard by disabling GMS overriding flags?"
+    print "  Note: Pixelify will still try to patch other method"
+    print "    Vol Up += Yes"
+    print "    Vol Down += No"
+    no_vk "DISABLE_GBOARD_GMS_OVERRIDE"
+    if $VKSEL; then
+        DISABLE_GBOARD_GMS=1
+    fi
+fi
+
+
 GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
 if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; then
     print ""
@@ -1490,52 +1787,63 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     # print "- Enabling Lens for Gboard"
     print "- Enabling NGA Voice typing (If Nga is installed)"
     
-	bool_patch nga $GBOARD
-	bool_patch redesign $GBOARD
-	bool_patch lens $GBOARD
-	bool_patch generation $GBOARD
-	bool_patch multiword $GBOARD
-	bool_patch voice_promo $GBOARD
-	bool_patch silk $GBOARD
-	bool_patch enable_email_provider_completion $GBOARD
-	bool_patch enable_multiword_predictions $GBOARD
-	bool_patch enable_inline_suggestions_on_decoder_side $GBOARD
-	bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD
-	bool_patch enable_inline_suggestions_on_client_side $GBOARD
-	bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD
-	bool_patch fast_access_bar $GBOARD
-	bool_patch tiresias $GBOARD
-	bool_patch agsa $GBOARD
-	bool_patch enable_voice $GBOARD
-	bool_patch personalization $GBOARD
-	bool_patch lm $GBOARD
-	bool_patch feature_cards $GBOARD
-	bool_patch dynamic_art $GBOARD
-	bool_patch multilingual $GBOARD
-	bool_patch show_suggestions_for_selected_text_while_dictating $GBOARD
-	bool_patch enable_preemptive_decode $GBOARD
-	bool_patch translate $GBOARD
-	bool_patch tflite $GBOARD
-	bool_patch enable_show_inline_suggestions_in_popup_view $GBOARD
-	bool_patch enable_nebulae_materializer_v2 $GBOARD
-	bool_patch floating $GBOARD
-	bool_patch split $GBOARD
-	bool_patch spell_checker $GBOARD
+    bool_patch nga $GBOARD
+    bool_patch redesign $GBOARD
+    bool_patch lens $GBOARD
+    bool_patch generation $GBOARD
+    bool_patch multiword $GBOARD
+    bool_patch voice_promo $GBOARD
+    bool_patch silk $GBOARD
+    bool_patch enable_email_provider_completion $GBOARD
+    bool_patch enable_multiword_predictions $GBOARD
+    bool_patch_false disable_multiword_autocompletion $GBOARD
+    bool_patch enable_inline_suggestions_on_decoder_side $GBOARD
+    bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD
+    bool_patch enable_inline_suggestions_on_client_side $GBOARD
+    bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD
+    long_patch inline_suggestion_experiment_version 4 $GBOARD
+    long_patch user_history_learning_strategies 1 $GBOARD
+    long_patch crank_max_char_num_limit 100 $GBOARD
+    long_patch crank_min_char_num_limit 5 $GBOARD
+    long_patch keyboard_redesign 1 $GBOARD
+    bool_patch fast_access_bar $GBOARD
+    bool_patch tiresias $GBOARD
+    bool_patch agsa $GBOARD
+    bool_patch enable_voice $GBOARD
+    bool_patch personalization $GBOARD
+    bool_patch lm $GBOARD
+    bool_patch feature_cards $GBOARD
+    bool_patch dynamic_art $GBOARD
+    bool_patch multilingual $GBOARD
+    bool_patch show_suggestions_for_selected_text_while_dictating $GBOARD
+    #bool_patch enable_highlight_voice_reconversion_composing_text $GBOARD
+    #bool_patch enable_handling_concepts_for_contextual_bitmoji $GBOARD
+    bool_patch enable_preemptive_decode $GBOARD
+    bool_patch translate $GBOARD
+    bool_patch tflite $GBOARD
+    bool_patch enable_show_inline_suggestions_in_popup_view $GBOARD
+    bool_patch enable_nebulae_materializer_v2 $GBOARD
+    #bool_patch use_scrollable_candidate_for_voice $GBOARD
+    bool_patch_false force_key_shadows $GBOARD
+    bool_patch floating $GBOARD
+    bool_patch split $GBOARD
+    bool_patch grammar $GBOARD
+    bool_patch spell_checker $GBOARD
+    bool_patch deprecate_search $GBOARD
+    bool_patch hide_composing_underline $GBOARD
+    bool_patch emojify $GBOARD
+    string_patch enable_emojify_language_tags "en" $GBOARD
+    string_patch emojify_app_allowlist "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger" $GBOARD
 
     $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin'"
-    for i in "enable_lens" "enable_trigger_spell_check_in_composing" "enable_spellchecker_chips_ui" "enable_trigger_spell_check_in_sentence" "enable_spell_checker_extension" "enable_nga_ime_api" "show_feature_split_debug_activity" "enable_feature_split" "enable_feature_split_brella" "enable_email_provider_completion" "enable_inline_suggestions_tooltip_v2" "crank_trigger_decoder_inline_prediction_first" "enable_multiword_suggestions_as_inline_from_crank_cifg" "enable_floating_keyboard_v2" "enable_multiword_predictions_from_user_history" "enable_single_word_suggestions_as_inline_from_crank_cifg" "enable_matched_predictions_as_inline_from_crank_cifg" "enable_single_word_predictions_as_inline_from_crank_cifg" "enable_inline_suggestions_space_tooltip" "enable_multiword_predictions_as_inline_from_crank_cifg" "enable_user_history_predictions_as_inline_from_crank_cifg" "crank_trigger_decoder_inline_completion_first" "enable_inline_suggestions_on_decoder_side" "enable_core_typing_experience_indicator_on_composing_text" "enable_inline_suggestions_on_client_side" "enable_core_typing_experience_indicator_on_candidates" "spellchecker_enable_language_trigger" "silk_on_all_pixel" "silk_on_all_devices" "nga_enable_undo_delete" "nga_enable_sticky_mic" "nga_enable_spoken_emoji_sticky_variant" "nga_enable_mic_onboarding_animation" "nga_enable_mic_button_when_dictation_eligible" "enable_nga"; do
-        $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', '$i', 0, 1, 0)"
-        # $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
-    done
-    for i in "disable_spell_checker_without_chips"; do
-        $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', '$i', 0, 0, 0)"
-        $sqlite $gms "UPDATE Flags SET boolVal='0' WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin' AND name='$i'"
-    done
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', 'inline_suggestion_dismiss_tooltip_delay_time_millis', 0, 2000, 0)"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', 'inline_suggestion_experiment_version', 0, 4, 0)"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, intVal, committed) VALUES('com.google.android.inputmethod.latin#com.google.android.inputmethod.latin', '', 'user_history_learning_strategies', 0, 1, 0)"
+    if [ $DISABLE_GBOARD_GMS -eq 0 ]; then
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal 1 "emojify_enable_fallback_pattern" "enable_emojify_settings_option" "notify_emoji_candidate_availability" "enable_emojify_settings_option" "nga_enable_spoken_emoji_sticky_variant" "enable_emoji_predictor_tflite_engine" "enable_personalization_tracer" "enable_twiddler_multiword_engine" "enable_voice_ellipsis" "hide_composing_underline" "lm_personalization_enabled" "notify_emoji_candidate_availability" "enable_feature_split_brella" "tiresias_enabled" "enable_p13n_on_nwp_tflite_engine" "show_suggestions_for_selected_text_while_dictating" "enable_handle_emoticon_for_expression_candidates" "enable_expressive_concept_model" "show_contextual_emoji_kitchen_in_expression_moment" "enable_text_to_one_tap_expressions" "enable_expression_candidate_precaching_for_bitmoji" "enable_expression_content_cache" "enable_handle_bitmoji_for_expression_candidates" "enable_emoji_to_expression_tappable_ui" "enable_expression_moment_push_up_animation" "enable_handle_expression_moment_standard_emoji_kitchen" "enable_trigger_spell_check_in_composing" "enable_trigger_spell_check_in_sentence" "translate_new_ui" "auto_show_translate" "offline_translate" "enable_nga_ime_api" "enable_email_provider_completion" "enable_inline_suggestions_tooltip_v2" "crank_trigger_decoder_inline_prediction_first" "enable_multiword_suggestions_as_inline_from_crank_cifg" "enable_floating_keyboard_v2" "enable_multiword_predictions_from_user_history" "enable_single_word_suggestions_as_inline_from_crank_cifg" "enable_matched_predictions_as_inline_from_crank_cifg" "enable_single_word_predictions_as_inline_from_crank_cifg" "enable_inline_suggestions_space_tooltip" "enable_multiword_predictions_as_inline_from_crank_cifg" "enable_user_history_predictions_as_inline_from_crank_cifg" "crank_trigger_decoder_inline_completion_first" "enable_inline_suggestions_on_decoder_side" "enable_core_typing_experience_indicator_on_composing_text" "enable_inline_suggestions_on_client_side" "enable_core_typing_experience_indicator_on_candidates" "nga_enable_undo_delete" "nga_enable_sticky_mic" "nga_enable_spoken_emoji_sticky_variant" "nga_enable_mic_onboarding_animation" "nga_enable_mic_button_when_dictation_eligible" "enable_nga"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 2000 "inline_suggestion_dismiss_tooltip_delay_time_millis"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 4 "inline_suggestion_experiment_version"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "en" "enable_emojify_language_tags"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger" "emojify_app_allowlist"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
+    fi
 
     echo " - Patching Google Keyboard's bools" >> $logfile
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
@@ -1561,20 +1869,6 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     fi
 fi
 
-if [ $API -ge 28 ]; then
-    SI=$(find /system -name *SettingsIntelligence* | grep -v overlay | grep -v "\.")
-    tar -xf $MODPATH/files/sig.tar.xz -C $MODPATH/system$product/priv-app
-    cp -f $MODPATH/files/PixelifySettingsIntelligenceGoogleOverlay.apk $MODPATH/system/product/overlay/PixelifySettingsIntelligenceGoogleOverlay.apk
-    REMOVE="$REMOVE $SI"
-
-for i in "BatteryUsage__is_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"; do
-    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.settings.intelligence' AND name='$i'"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.settings.intelligence', '', '$i', 0, 1, 0)"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.settings.intelligence', '', '$i', 0, 1, 1)"
-    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.settings.intelligence' AND name='$i'"
-done
-fi
-
 install_tts() {
     print ""
     print "- Google TTS is not installed as a system app !!"
@@ -1588,6 +1882,8 @@ install_tts() {
     	cp -r ~/data/adb/modules/Pixelify/system/product/app/GoogleTTS/. $MODPATH/system$product/app/GoogleTTS
     fi
     rm -rf $MODPATH/system$product/app/GoogleTTS/oat
+    cp -f $MODPATH/files/PixeliflyTTS.apk $MODPATH/system/product/overlay/PixeliflyTTS.apk
+    
 }
 
 if [ ! -z $(pm list packages com.google.android.tts) ]; then
@@ -1603,34 +1899,25 @@ else
     print " - If you face any problem regarding call screening or call recording"
     print " - Then Install GoogleTTS via playstore"
     print " - Reinstall module to make it system app"
+    print ""
 fi
 
 if [ $TENSOR -eq 0 ]; then
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder'"
-for i in "Experiment__soda_transcriber"; do
-    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder'"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.apps.recorder', '', '$i', 0, 0, 0)"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.apps.recorder', '', '$i', 0, 0, 1)"
-    $sqlite $gms "UPDATE Flags SET boolVal='0' WHERE packageName='com.google.android.apps.recorder' AND name='$i'"
-done
+db_edit com.google.android.apps.recorder boolVal 0 "Experiment__soda_transcriber"
 fi
 
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
-for i in "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget"; do
-    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing', '', '$i', 0, 1, 0)"
-    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing', '', '$i', 0, 1, 1)"
-    $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing' AND name='$i'"
-done
+db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget"
 
 if [ -f $gser ]; then
 for i in "fitness.micro.show_fitness_promo" "fitness.micro.enable_active_mode_heart_rate" "fitness.micro.enable_active_mode_media_control" "photos:enable_backup_promo" "search_allow_voice_search_hints" "googletts:use_lstm"; do
     $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
-    $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', 'true')"
+    # $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', 'true')"
 done
 for i in "voice_search:advanced_features_enabled"; do
     $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
-    $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', '1')"
+    # $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', '1')"
 done
 fi
 
@@ -1899,16 +2186,16 @@ sound_patch='    <!-- Multiple sound_model_config tags can be listed, each with 
     </sound_model_config>'
 
 
-if [ $NOT_REQ_SOUND_PATCH -eq 0 ] && [  -f /vendor/etc/sound_trigger_platform_info.xml ]; then
-    mkdir -p $MODPATH/system/vendor/etc
-    cp -f $MODPATH/files/sound_trigger_configuration.xml $MODPATH/system/vendor/etc/sound_trigger_configuration.xml
-    cp -f /vendor/etc/sound_trigger_platform_info.xml $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
-    if [ -z "$(grep \"9f6ad62a-1f0b-11e7-87c5-40a8f03d3f15\" $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml)" ]; then
-        sed -i -e 's/<\/sound_trigger_platform_info>//g' $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
-        echo "$sound_patch" >>  $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
-        echo "</sound_trigger_platform_info>" >> $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
-    fi
-fi
+# if [ $NOT_REQ_SOUND_PATCH -eq 0 ] && [  -f /vendor/etc/sound_trigger_platform_info.xml ]; then
+#     mkdir -p $MODPATH/system/vendor/etc
+#     cp -f $MODPATH/files/sound_trigger_configuration.xml $MODPATH/system/vendor/etc/sound_trigger_configuration.xml
+#     cp -f /vendor/etc/sound_trigger_platform_info.xml $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+#     if [ -z "$(grep \"9f6ad62a-1f0b-11e7-87c5-40a8f03d3f15\" $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml)" ]; then
+#         sed -i -e 's/<\/sound_trigger_platform_info>//g' $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+#         echo "$sound_patch" >>  $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+#         echo "</sound_trigger_platform_info>" >> $MODPATH/system/vendor/etc/sound_trigger_platform_info.xml
+#     fi
+# fi
 
 REMOVE="$(echo "$REMOVE" | tr ' ' '\n' | sort -u)"
 REPLACE="$REMOVE"
@@ -1950,6 +2237,8 @@ if [ $API -le 27 ]; then
 fi
 
 rm -rf $MODPATH/system/product/data
+rm -rf /data/davik-cache/*
+rm -rf /data/resources-cache/*
 
 rm -rf $pix/apps_temp.txt $MODPATH/zygisk_1
 mv $pix/app2.txt $pix/app.txt

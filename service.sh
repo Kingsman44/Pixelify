@@ -136,6 +136,30 @@ android.permission.SUBSTITUTE_SHARE_TARGET_APP_NAME_AND_ICON
 com.google.android.gms.permission.AD_ID
 com.google.android.apps.nest.DOCK_MANAGER_SERVICE"
 
+SET_PERM="android.permission.ACCESS_NETWORK_STATE
+android.permission.GET_PACKAGE_SIZE
+android.permission.READ_SEARCH_INDEXABLES
+android.permission.MODIFY_PHONE_STATE
+android.permission.MANAGE_FINGERPRINT
+android.permission.RECEIVE_BOOT_COMPLETED
+com.google.android.providers.gsf.permission.READ_GSERVICES
+android.permission.SCHEDULE_EXACT_ALARM
+com.google.android.settings.fuelgauge.BATTERY_SETTING
+android.permission.WRITE_SETTINGS_HOMEPAGE_DATA
+android.permission.ACCESS_WIFI_STATE
+android.permission.BLUETOOTH
+android.permission.INTERNET
+android.permission.ACCESS_BACKGROUND_LOCATION
+android.permission.ACCESS_FINE_LOCATION
+android.permission.ACCESS_NOTIFICATION_POLICY
+android.permission.READ_PHONE_STATE
+android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+Manifest.permission.RECEIVE_BOOT_COMPLETED
+com.google.android.settings.routines.ROUTINES_ACTIONS
+android.permission.READ_DEVICE_CONFIG
+android.permission.WRITE_SECURE_SETTINGS
+android.permission.START_ACTIVITIES_FROM_BACKGROUND"
+
 ASI_PERM="android.permission.CAPTURE_MEDIA_OUTPUT
 android.permission.MODIFY_AUDIO_ROUTING
 android.permission.CAPTURE_VOICE_COMMUNICATION_OUTPUT
@@ -337,6 +361,11 @@ bool_patch floating $GBOARD_PREF
 bool_patch split $GBOARD_PREF
 bool_patch grammar $GBOARD_PREF
 bool_patch spell_checker $GBOARD_PREF
+bool_patch deprecate_search $GBOARD_PREF
+bool_patch hide_composing_underline $GBOARD_PREF
+bool_patch emojify $GBOARD_PREF
+string_patch enable_emojify_language_tags "en" $GBOARD_PREF
+string_patch emojify_app_allowlist "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger" $GBOARD_PREF
 
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
@@ -380,6 +409,8 @@ pm enable -n com.google.android.settings.intelligence/com.google.android.setting
 sleep .5
 pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryAppWidgetProvider -a android.intent.action.MAIN
 
+am force-stop com.google.android.settings.intelligence
+
 if [ -f $MODDIR/grant ]; then
     for i in $ASI_OS_PERM; do
         pm grant com.google.android.as.oss $i
@@ -387,6 +418,11 @@ if [ -f $MODDIR/grant ]; then
     for i in $ASI_PERM; do
         pm grant com.google.android.as $i
     done
+    for i in $SET_PERM; do
+        pm grant com.google.android.settings.intelligence $i
+    done
+    sed -i -e "s/gsm.sim.operator.iso-country/#gsm.sim.operator.iso-country/g" $MODDIR/system.prop
+    am force-stop com.google.android.as
     rm -rf $MODDIR/grant
 fi
 

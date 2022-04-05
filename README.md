@@ -11,6 +11,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **Volume Keys**
 - **Internet for NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
 - **Zygisk (Recommended but not compulsary)**
+- **Note: flash zip on magisk only not twrp**
 
 ### Supported Roms
 - OneUi

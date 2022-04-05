@@ -81,3 +81,6 @@ allow gmscore_app gmscore_userfaultfd anon_inode { ioctl read create }
 allow gmscore_app appdomain_tmpfs file { read write getattr map execute }
 allow gmscore_app servicemanager binder { call transfer }
 allow gmscore_app hal_power_service service_manager { find }
+
+allow priv_app gmscore_app { read write }
+
