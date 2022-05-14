@@ -113,12 +113,29 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ## ⭐ Credits
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
-- #TeamFiles for many icons for Pixel Launcher android 12
+- [#TeamFiles](https://t.me/modulesrepo) for so many themed icons for Pixel Launcher android 12
 - [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
 - [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 
 ## ⭐ ChangeLogs
+
+### Version 2.02
+- Fixes for Quick phrase
+- Option to disable internal spoofing for some rom ( might break ota | please read FAQ)
+- Added optional fix for Rboard
+- Fixed monet themeing of notification of google dialer
+- Support for monet bootanimation ( only supported rom only )
+- Fixes for Pixel live wallpaper crashing
+- made Google Settings service as an optional
+- Fixed app search on pixel launcher
+- Enabled Call caption typing
+- Added option to force download online pack if internet is not detected
+- Fixed Select in Pixel launcher recent on some roms
+- Fixes for offline translation in Gboard
+- Enabled Emoji Stickers in Gboard
+- Completly removed cts dependency on Pixelify module
+- more features enabled and bug fixes..
 
 ### Version 2.01
 - Fixed Safety net issues

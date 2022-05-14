@@ -26,6 +26,9 @@ UPDATE_DPS=1
 # Create Backup for Device Personalistaion Services
 BACKUP_DPS=1
 
+# Enable Google Now playing
+ENABLE_NOW_PLAYING=0
+
 # Google Dialer Features
 # Includes Call Recording, Hold for Me, Direct My Call
 ENABLE_DIALER_FEATURES=1
@@ -47,6 +50,15 @@ DOWNLOAD_NGA_RES=1
 
 # Backup NGA Resources
 BACKUP_NGA=1
+
+# Download Google offline speech recogonition
+DOWNLOAD_OSR=0
+
+# Update Google offline speech recogonition
+UPDATE_OSR=1
+
+# Backup Google offline speech recogonition
+BACKUP_OSR=1
 
 # Download Styles and Wallpapers
 DOWN_WGA=0

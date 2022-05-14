@@ -16,6 +16,7 @@ export GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_pre
 sqlite=$MODDIR/addon/sqlite3
 chmod 0755 $sqlite3
 gms=/data/user/0/com.google.android.gms/databases/phenotype.db
+SPDB="/data/data/com.google.android.as/databases/superpacks.db"
 
 G_PERM="com.google.android.googlequicksearchbox.permission.FINISH_GEL_ACTIVITY
 com.google.android.apps.now.CURRENT_ACCOUNT_ACCESS
@@ -365,7 +366,10 @@ bool_patch deprecate_search $GBOARD_PREF
 bool_patch hide_composing_underline $GBOARD_PREF
 bool_patch emojify $GBOARD_PREF
 string_patch enable_emojify_language_tags "en" $GBOARD_PREF
-string_patch emojify_app_allowlist "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger" $GBOARD_PREF
+string_patch emojify_app_allowlist "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger,tw.nekomimi.nekogram,org.telegram.BifToGram" $GBOARD_PREF
+bool_patch enable_grammar_checker $GBOARD_PREF
+long_patch grammar_checker_min_sentence_length 3 $GBOARD_PREF
+string_patch grammar_checker_manifest_uri "https://www.gstatic.com/android/keyboard/spell_checker/experiment/memory_fix/metadata_cpu_2021102041.json" $GBOARD_PREF
 
 # GoogleFit
 bool_patch DeviceStateFeature $FIT
@@ -389,6 +393,11 @@ while true; do
         break
     fi
 done
+
+# if [ -f $SPDB ]; then
+#     $sqlite $SPDB "UPDATE pending_downloads SET requires_unmetered_network='0' WHERE superpack_name='spelling_correction'"
+#     $sqlite $SPDB "UPDATE pending_downloads SET requires_idle='0' WHERE superpack_name='spelling_correction'"
+# fi
 
 if [ $(grep CallScreen $MODDIR/config.prop | cut -d'=' -f2) -eq 1 ]; then
     mkdir -p /data/data/com.google.android.dialer/files/phenotype
