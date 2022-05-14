@@ -660,7 +660,7 @@ if [ $TENSOR -eq 1 ]; then
     print ""
     print "(TENSOR CHIPSET DETECTED)"
     print "  Do you want to enable Google Photos Unlimited Backup?"
-    print "  Note: Magic Earser will only work on Photos app given in Github page"
+    print "  Note: Magic Eraser will only work on the Photos app provided on my GitHub page"
     print "   Vol Up += Yes"
     print "   Vol Down += No"
     no_vk "ENABLE_TENSOR_UNLIMITED"
@@ -674,7 +674,7 @@ if [ $TENSOR -eq 1 ]; then
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
     print ""
     print "- Magisk v24 and above detected "
-    print "- Zygisk must be enabled inorder Pixelify module to work"
+    print "- Zygisk must be enabled in order Pixelify module to work"
     print ""
     print "- Spoofing Google apps according to there best configuration."
     print ""
@@ -1054,8 +1054,8 @@ if [ -d /data/data/$DIALER ]; then
         if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
             print "- Google Dialer is not installed as a system app !!"
-            print "- Making Google Dialer as a system app"
-            echo " - Making Google Dialer system app" >> $logfile
+            print "- Making Google Dialer a system app"
+            echo " - Making Google Dialer a system app" >> $logfile
             print ""
             cp -r ~/$app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
@@ -1063,8 +1063,8 @@ if [ -d /data/data/$DIALER ]; then
         elif [ -f /data/adb/modules/Pixelify/system/product/app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
             print "- Google Dialer is not installed as a system app !!"
-            print "- Making Google Dialer as a system app"
-            echo " - Making Google Dialer system app" >> $logfile
+            print "- Making Google Dialer a system app"
+            echo " - Making Google Dialer a system app" >> $logfile
             print ""
             cp -r ~/$app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
@@ -1206,8 +1206,8 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
 
         if [ -z $(pm list packages -s com.google.android.googlequicksearchbox | grep -v nga) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ] || [ $FORCE_VELVET -eq 1 ]; then
             print "- Google is not installed as a system app !!"
-            print "- Making Google as a system app"
-            echo " - Making Google system app" >> $logfile
+            print "- Making Google a system app"
+            echo " - Making Google a system app" >> $logfile
             print ""
             if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
             	cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
@@ -1220,8 +1220,8 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
         elif [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
             if [ $FORCE_VELVET -eq 2 ]; then
                 print "- Google is not installed as a system app !!"
-                print "- Making Google as a system app"
-                echo " - Making Google system app" >> $logfile
+                print "- Making Google a system app"
+                echo " - Making Google a system app" >> $logfile
                 print ""
 	            if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
 	            	cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
@@ -1849,8 +1849,8 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
-        print "- Making Gboard as a system app"
-        echo " - Making Google Keyboard as system app" >> $logfile
+        print "- Making Gboard a system app"
+        echo " - Making Google Keyboard a system app" >> $logfile
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
@@ -1860,7 +1860,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         print ""
         print "- GBoard is not installed as a system app !!"
         echo " - Making Google Keyboard as system app" >> $logfile
-        print "- Making Gboard as a system app"
+        print "- Making Gboard a system app"
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
@@ -1872,8 +1872,8 @@ fi
 install_tts() {
     print ""
     print "- Google TTS is not installed as a system app !!"
-    print "- Making Google TTS as a system app"
-    echo " - Making Google TTS system app" >> $logfile
+    print "- Making Google TTS a system app"
+    echo " - Making Google TTS a system app" >> $logfile
     mkdir -p $MODPATH/system$product/app/GoogleTTS
     if [ -f /$app/com.google.android.tts*/base.apk ]; then
 	    cp -r ~/$app/com.google.android.tts*/. $MODPATH/system$product/app/GoogleTTS
