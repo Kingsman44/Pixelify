@@ -674,9 +674,9 @@ if [ $TENSOR -eq 1 ]; then
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
     print ""
     print "- Magisk v24 and above detected "
-    print "- Zygisk must be enabled in order Pixelify module to work"
+    print "- Zygisk must be enabled in order for the Pixelify Module to work"
     print ""
-    print "- Spoofing Google apps according to there best configuration."
+    print "- Spoofing Google apps according to their best configuration."
     print ""
     drop_sys
     ZYGISK_P=1
@@ -689,7 +689,7 @@ else
     if $VKSEL; then
         pixel_spoof=1
         print " ---------"
-        print "  Note: If your device have some problem with downloading in playstore"
+        print "  Note: If your device has any problems with downloading in the Play Store, "
         print "  Please Select Pixel 6 Pro"
         print "---------"
         print ""
