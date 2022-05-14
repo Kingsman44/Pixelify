@@ -305,7 +305,7 @@ PCSVERSION=$(cat $pix/pcs.txt)
 PLVERSION=$(cat $pix/pl-$NEWAPI.txt)
 
 if [ "$(getprop ro.soc.model)" == "Tensor" ]; then
-	echo "- Tensor chip Detected !" >> $logfile
+	echo "- Tensor chip Detected..." >> $logfile
 	TENSOR=1
     rm -rf $MODPATH/zygisk
     mv $MODPATH/zygisk_1 $MODPATH/zygisk
@@ -485,7 +485,7 @@ chooseport() {
     done
     if (`cat $TMPDIR/events 2>/dev/null | /system/bin/grep VOLUMEUP >/dev/null`); then
         print ""
-        print "  Selected: Volume UP"
+        print "  Selected: Volume Up"
         print ""
         return 0
     else
@@ -510,7 +510,7 @@ chooseportold() {
             break
         elif [ $SEL -eq $UP ]; then
             print ""
-            print "  Selected: Volume UP"
+            print "  Selected: Volume Up"
             print ""
             return 0
         elif [ $SEL -eq $DOWN ]; then
@@ -551,7 +551,7 @@ no_vksel() {
         return 0
     else
         print ""
-        print "  Selected: Volume down"
+        print "  Selected: Volume Down"
         print ""
         return 1
     fi
@@ -660,7 +660,7 @@ if [ $TENSOR -eq 1 ]; then
     print ""
     print "(TENSOR CHIPSET DETECTED)"
     print "  Do you want to enable Google Photos Unlimited Backup?"
-    print "  Note: Magic Earser will only work on Photos app given in Github page"
+    print "  Note: Magic Eraser will only work on the Photos app provided through my GitHub page!"
     print "   Vol Up += Yes"
     print "   Vol Down += No"
     no_vk "ENABLE_TENSOR_UNLIMITED"
@@ -674,9 +674,9 @@ if [ $TENSOR -eq 1 ]; then
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
     print ""
     print "- Magisk v24 and above detected "
-    print "- Zygisk must be enabled inorder Pixelify module to work"
+    print "- Zygisk must be enabled in order for the Pixelify Module to work"
     print ""
-    print "- Spoofing Google apps according to there best configuration."
+    print "- Spoofing Google apps according to their best configuration."
     print ""
     drop_sys
     ZYGISK_P=1
@@ -689,7 +689,7 @@ else
     if $VKSEL; then
         pixel_spoof=1
         print " ---------"
-        print "  Note: If your device have some problem with downloading in playstore"
+        print "  Note: If your device has any problems with downloading in the Play Store, "
         print "  Please Select Pixel 6 Pro"
         print "---------"
         print ""
@@ -722,7 +722,7 @@ if [ ! -z $(pm list packages -s | grep com.google.android.as) ]; then
 fi
 
 if [ $API -le 27 ]; then
-    echo " - Disabling Device Personalisation Services installation due to api not supported" >> $logfile
+    echo " - Disabling Device Personalisation Services installation due to the api not supported" >> $logfile
     DPAS=0
 fi
 
@@ -825,7 +825,7 @@ if [ $DPAS -eq 1 ]; then
                 REMOVE="$REMOVE $DP"
                 print ""
                 print "  Do you want to create backup of Android System Intelligence?"
-                print "  so that you don't need redownload it everytime."
+                print "  so that you don't need redownload it every time."
                 print "   Vol Up += Yes"
                 print "   Vol Down += No"
                 no_vk "BACKUP_DPS"
@@ -941,8 +941,8 @@ if [ -d /data/data/$DIALER ]; then
         done
         if [ $CUSTOM_CALL_SCREEN -eq 0 ]; then
             print " "
-            print "- Please set your launguage to"
-            print "  English (United States) for call screening"
+            print "- Please set your language to"
+            print "  English (United States) for call screening to work"
             print " "
         else
         	print " "
@@ -954,7 +954,7 @@ if [ -d /data/data/$DIALER ]; then
             else
                 CRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/callscreen-$lang.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
                 print "  (Network Connection Needed)"
-                print "  Do you want to Download CallScreening files for '$lang' launguage"
+                print "  Do you want to Download Call Screening files for '$lang' language"
                 print "  Size: $CRSIZE"
                 print "   Vol Up += Yes"
                 print "   Vol Down += No"
@@ -971,7 +971,7 @@ if [ -d /data/data/$DIALER ]; then
                         tar -xf $MODPATH/files/callscreen-$lang.tar.xz -C $MODPATH/system/product/tts/google
                         print ""
                         print "  Do you want to create backup of CallScreening files for '$lang'"
-                        print "  so that you don't need redownload it everytime."
+                        print "  so that you don't need redownload it every time."
                         print "   Vol Up += Yes"
                         print "   Vol Down += No"
                         no_vk "BACKUP_CALL_SCREENING_FILES"
@@ -1054,8 +1054,8 @@ if [ -d /data/data/$DIALER ]; then
         if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
             print "- Google Dialer is not installed as a system app !!"
-            print "- Making Google Dialer as a system app"
-            echo " - Making Google Dialer system app" >> $logfile
+            print "- Making Google Dialer a system app"
+            echo " - Making Google Dialer a system app" >> $logfile
             print ""
             cp -r ~/$app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
@@ -1063,8 +1063,8 @@ if [ -d /data/data/$DIALER ]; then
         elif [ -f /data/adb/modules/Pixelify/system/product/app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
             print "- Google Dialer is not installed as a system app !!"
-            print "- Making Google Dialer as a system app"
-            echo " - Making Google Dialer system app" >> $logfile
+            print "- Making Google Dialer a system app"
+            echo " - Making Google Dialer a system app" >> $logfile
             print ""
             cp -r ~/$app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
@@ -1152,7 +1152,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                     tar -xf $MODPATH/files/nga.tar.xz -C $MODPATH/system/product
                     print ""
                     print "  Do you want to create backup of NGA Resources"
-                    print "  so that you don't need redownload it everytime."
+                    print "  so that you don't need redownload it every time."
                     print "   Vol Up += Yes"
                     print "   Vol Down += No"
                     no_vk "BACKUP_NGA"
@@ -1206,8 +1206,8 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
 
         if [ -z $(pm list packages -s com.google.android.googlequicksearchbox | grep -v nga) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ] || [ $FORCE_VELVET -eq 1 ]; then
             print "- Google is not installed as a system app !!"
-            print "- Making Google as a system app"
-            echo " - Making Google system app" >> $logfile
+            print "- Making Google a system app"
+            echo " - Making Google a system app" >> $logfile
             print ""
             if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
             	cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
@@ -1220,8 +1220,8 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
         elif [ -f /data/adb/modules/Pixelify/system/product/priv-app/Velvet/Velvet.apk ]; then
             if [ $FORCE_VELVET -eq 2 ]; then
                 print "- Google is not installed as a system app !!"
-                print "- Making Google as a system app"
-                echo " - Making Google system app" >> $logfile
+                print "- Making Google a system app"
+                echo " - Making Google a system app" >> $logfile
                 print ""
 	            if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
 	            	cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
@@ -1364,7 +1364,7 @@ if [ $API -ge 28 ]; then
                 fi
                 print ""
                 print "  Do you want to create backup of Pixel LiveWallpapers?"
-                print "  so that you don't need redownload it everytime."
+                print "  so that you don't need redownload it every time."
                 print "   Vol Up += Yes"
                 print "   Vol Down += No"
                 no_vk "BACKUP_LIVE_WALLPAPERS"
@@ -1570,7 +1570,7 @@ if [ $API -ge 29 ]; then
                 REMOVE="$REMOVE $PL $TR $QS $LW $TW $KW"
                 print ""
                 print "  Do you want to create backup of Pixel Launcher?"
-                print "  so that you don't need redownload it everytime."
+                print "  so that you don't need redownload it every time."
                 print "   Vol Up += Yes"
                 print "   Vol Down += No"
                 no_vk "BACKUP_PIXEL_LAUNCHER"
@@ -1691,7 +1691,7 @@ if [ $API -ge 10000 ]; then
                 REMOVE="$REMOVE $PCS"
                 print ""
                 print "  Do you want to create backup of Pixel Camera Services?"
-                print "  so that you don't need redownload it everytime."
+                print "  so that you don't need redownload it every time."
                 print "   Vol Up += Yes"
                 print "   Vol Down += No"
                 no_vk "BACKUP_PCS"
@@ -1849,8 +1849,8 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
         print ""
         print "- GBoard is not installed as a system app !!"
-        print "- Making Gboard as a system app"
-        echo " - Making Google Keyboard as system app" >> $logfile
+        print "- Making Gboard a system app"
+        echo " - Making Google Keyboard a system app" >> $logfile
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
@@ -1860,7 +1860,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         print ""
         print "- GBoard is not installed as a system app !!"
         echo " - Making Google Keyboard as system app" >> $logfile
-        print "- Making Gboard as a system app"
+        print "- Making Gboard a system app"
         cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
@@ -1872,8 +1872,8 @@ fi
 install_tts() {
     print ""
     print "- Google TTS is not installed as a system app !!"
-    print "- Making Google TTS as a system app"
-    echo " - Making Google TTS system app" >> $logfile
+    print "- Making Google TTS a system app"
+    echo " - Making Google TTS a system app" >> $logfile
     mkdir -p $MODPATH/system$product/app/GoogleTTS
     if [ -f /$app/com.google.android.tts*/base.apk ]; then
 	    cp -r ~/$app/com.google.android.tts*/. $MODPATH/system$product/app/GoogleTTS
