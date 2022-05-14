@@ -305,7 +305,7 @@ PCSVERSION=$(cat $pix/pcs.txt)
 PLVERSION=$(cat $pix/pl-$NEWAPI.txt)
 
 if [ "$(getprop ro.soc.model)" == "Tensor" ]; then
-	echo "- Tensor chip Detected !" >> $logfile
+	echo "- Tensor chip Detected..." >> $logfile
 	TENSOR=1
     rm -rf $MODPATH/zygisk
     mv $MODPATH/zygisk_1 $MODPATH/zygisk
@@ -485,7 +485,7 @@ chooseport() {
     done
     if (`cat $TMPDIR/events 2>/dev/null | /system/bin/grep VOLUMEUP >/dev/null`); then
         print ""
-        print "  Selected: Volume UP"
+        print "  Selected: Volume Up"
         print ""
         return 0
     else
@@ -510,7 +510,7 @@ chooseportold() {
             break
         elif [ $SEL -eq $UP ]; then
             print ""
-            print "  Selected: Volume UP"
+            print "  Selected: Volume Up"
             print ""
             return 0
         elif [ $SEL -eq $DOWN ]; then
@@ -551,7 +551,7 @@ no_vksel() {
         return 0
     else
         print ""
-        print "  Selected: Volume down"
+        print "  Selected: Volume Down"
         print ""
         return 1
     fi
@@ -941,7 +941,7 @@ if [ -d /data/data/$DIALER ]; then
         done
         if [ $CUSTOM_CALL_SCREEN -eq 0 ]; then
             print " "
-            print "- Please set your launguage to"
+            print "- Please set your language to"
             print "  English (United States) for call screening"
             print " "
         else
@@ -954,7 +954,7 @@ if [ -d /data/data/$DIALER ]; then
             else
                 CRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/callscreen-$lang.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
                 print "  (Network Connection Needed)"
-                print "  Do you want to Download CallScreening files for '$lang' launguage"
+                print "  Do you want to Download CallScreening files for '$lang' language"
                 print "  Size: $CRSIZE"
                 print "   Vol Up += Yes"
                 print "   Vol Down += No"
