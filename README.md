@@ -1,6 +1,8 @@
 # PIXELIFY MAGISK MODULE
 Enables Pixel Ui and Some Exclusive Features.<br>
 
+<a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.02-brown.svg" width="150"></a>
+<br><br>
 <a href="https://forum.xda-developers.com/t/magisk-pixelify.4415387/"><img src="https://img.shields.io/badge/XDA_Thread-brown.svg"></a>
 <a href="https://photos.app.goo.gl/jBPm3zTHHhc67Pdy7"><img src="https://img.shields.io/badge/Screenshots-red.svg"></a>
 <a href="https://t.me/pixelifysupport"><img src="https://img.shields.io/badge/Telegram-Support_Group-blue.svg"></a>
@@ -41,7 +43,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - (If you have any problem placing no-VK.prop there then you also can extract and update no-VK.prop inside the packages it automatcally use it.) 
 
 ### Zygisk spoofing configuration
-- Pixel 5:- Google TTS, Google Recorder, Play services, Google app
+- Pixel 5:- Google TTS, Google Play services, Pixel Buds
 - Pixel XL:- Google Photos
 - Pixel 6 Pro:- Rest Google apps except (all Google camera package)
 <br><br>**Note** :- Zygisk spoofing can't overide PixelProp Utils.
@@ -54,8 +56,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Live Transcript (12+)
 -   New At a Glance feature (12+ & Dec+ Patch) 
 -   Google Quick Pharse *
--   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
--   At a Glance Features. 
+-   Google Next Generation Assistant Typing (Next Generation Assistant Required)* 
 
 ### Other Features
 -   Adaptive Charging (Google SystemUI)
@@ -98,7 +99,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Germany (DE)
 
 ## ⭐ Guide to enable / Faqs / Troubleshooting
-- [https://telegra.ph/Pixelify-Troubleshooting-guide-03-12](https://telegra.ph/Pixelify-Troubleshooting-guide-03-12)
+- [https://telegra.ph/Pixelify-Troubleshooting-and-FAQ-05-08)
 
 ## Contribute to project
 - Reporting bugs with logs
@@ -133,8 +134,14 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Added option to force download online pack if internet is not detected
 - Fixed Select in Pixel launcher recent on some roms
 - Fixes for offline translation in Gboard
-- Enabled Emoji Stickers in Gboard
+- Enabled Emoji Stickers and Emojify in Gboard
 - Completly removed cts dependency on Pixelify module
+- Enabled At a Store, and Doorbell extras in at a Glance.
+- Improved Pixel Launcher search
+- Updated Android system intelligence to pixel6.s18
+- Enabled G logo in gboard
+- added Google offline speech 5011 version (optional to install)
+- Enabled Recents rounded corners
 - more features enabled and bug fixes..
 
 ### Version 2.01

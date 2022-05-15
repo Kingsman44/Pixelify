@@ -680,6 +680,7 @@ db_edit() {
 }
 
 if [ ! -z $exact_prop ]  && [ $NEWAPI -ge 31 ] && [ $BETA_BUILD -eq 1 ]; then
+    print ""
     print "  Disclaimer: This Feature is in BETA"
     print "  This features is only intended to Quick Phrase."
     print "  Disabling Internal Spoofing can break OTA Update (rom dependent)"
@@ -792,11 +793,11 @@ NOT_REQ_SOUND_PATCH=0
 [ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware && NOT_REQ_SOUND_PATCH=1
 
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
-db_edit com.google.android.platform.device_personalization_services boolVal 1 "Translate__characterset_lang_detection_enabled" "Overview__enable_lens_r_overview_translate_action" "Captions__enable_language_detection" "Echo__search_enable_application_header_type" "Echo__search_enable_app_search_tips" "Echo__search_enable_appsearch_tips_ranking_improvement" "Echo__search_enable_mdp_play_results" "Echo__search_enable_search_in_app_icon" "Echo__search_enable_static_shortcuts" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_app_fetcher_v2" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input"" Translate__copy_to_translate_enabled" "Translate__blue_chip_translate_enabled" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor"
+db_edit com.google.android.platform.device_personalization_services boolVal 1 "Captions__enable_language_detection" "Echo__search_enable_app_search_tips" "Echo__search_enable_appsearch_tips_ranking_improvement" "Echo__search_enable_mdp_play_results" "Echo__search_enable_search_in_app_icon" "Echo__search_enable_static_shortcuts" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_app_fetcher_v2" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input"" Translate__copy_to_translate_enabled" "Translate__blue_chip_translate_enabled" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor" "Echo__smartspace_enable_echo_unified_settings" "Echo__smartspace_enable_dark_launch_outlook_events" "Echo__smartspace_enable_step_predictor" "Echo__smartspace_enable_nap" "Echo__smartspace_enable_paired_device_connections" "Echo__smartspace_dedupe_fast_pair_notification" "Echo__smartspace_enable_nudge" "Echo__smartspace_enable_package_delivery" "Echo__smartspace_enable_outlook_events"
 db_edit com.google.android.platform.device_personalization_services boolVal 0 "SmartSelect__enable_smart_select_locked_bootloader_check"
 # db_edit com.google.android.platform.device_personalization_services stringVal "en-US;en-GB;en-CA;en-IE;en-AU;en-SG;fr-FR;fr-CA;it-IT;de-DE;ja-JP;es-ES" "Captions__available_for_download"
 # db_edit com.google.android.platform.device_personalization_services stringVal "en-US;es-SG;fr-FR;fr-CA;it-IT;de-DE;ja-JP" "Captions__supported_languages"
-db_edit com.google.android.platform.launcher boolVal "ENABLE_SMARTSPACE_ENHANCED"
+db_edit com.google.android.platform.launcher boolVal "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH"
 
 if [ $DPAS -eq 1 ]; then
     echo " - Installing Android System Intelligence" >> $logfile
@@ -2092,6 +2093,15 @@ fi
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
 db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget"
 
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.translate'"
+db_edit $gms com.google.android.apps.translate boolVal 1 "Widgets__enable_quick_actions_widget" "Widgets__enable_saved_history_widget"
+
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.systemui'"
+db_edit $gms com.google.android.platform.systemui boolVal 1 "quick_access_wallet_enabled"
+
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.systemui'"
+db_edit $gms com.google.android.platform.systemui boolVal 1 "quick_access_wallet_enabled"
+
 if [ -f $gser ]; then
 for i in "fitness.micro.show_fitness_promo" "fitness.micro.enable_active_mode_heart_rate" "fitness.micro.enable_active_mode_media_control" "photos:enable_backup_promo" "search_allow_voice_search_hints" "googletts:use_lstm"; do
     $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
@@ -2427,6 +2437,7 @@ if [ $API -le 27 ]; then
 fi
 
 rm -rf $MODPATH/system/product/data
+rm -rf /data/system/package_cache
 # rm -rf /data/davik-cache/*
 # rm -rf /data/resources-cache/*
 
