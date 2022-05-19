@@ -402,11 +402,11 @@ print ""
 print "- Detected Arch: $ARCH"
 print "- Detected SDK : $API"
 RAM=$( grep MemTotal /proc/meminfo | tr -dc '0-9')
-print "- Detected Ram: $RAM"
+print "- Detected RAM: $RAM"
 print ""
 if [ $RAM -le "6000000" ]; then
     rm -rf $MODPATH/system$product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
-    echo " - Removing GoogleCamera_6gb_or_more_ram.xml as device has less than 6Gb Ram" >> $logfile
+    echo " - Removing GoogleCamera_6gb_or_more_ram.xml as device has less than 6Gb RAM" >> $logfile
 fi
 
 DIALER1=$(find /system -name *Dialer.apk)
