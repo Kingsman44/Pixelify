@@ -179,7 +179,7 @@ DPVERSIONP=1
 if [ $ENABLE_OSR -eq 1 ]; then
     NGAVERSIONP=1.3
 else
-    NGAVERSIONP=1.2 
+    NGAVERSIONP=1.2
 fi
 LWVERSIONP=1.6
 PLVERSIONP=1
@@ -212,20 +212,20 @@ PCSSIZE="15 Mb"
 PCSVERSION=1
 
 if [ $API -eq 32 && "$(getprop ro.build.version.security_patch)" == "Tiramisu" ]; then
-	echo "Android version: 13" >> $logfile
-	WNEED=1
-	NEWAPI=33
-	WSIZE="2.2 Mb"
-	PLSIZE="11 Mb"
-	PLVERSIONP=1
+    echo "Android version: 13" >> $logfile
+    WNEED=1
+    NEWAPI=33
+    WSIZE="2.2 Mb"
+    PLSIZE="11 Mb"
+    PLVERSIONP=1
 elif [ $API -eq 32 ]; then
-	echo "Android version: 12.1 (12L)" >> $logfile
-	WNEED=1
-	WSIZE="2.2 Mb"
-	PLSIZE="11 Mb"
-	PLVERSIONP=1
+    echo "Android version: 12.1 (12L)" >> $logfile
+    WNEED=1
+    WSIZE="2.2 Mb"
+    PLSIZE="11 Mb"
+    PLVERSIONP=1
 elif [ $API -eq 31 ]; then
-	echo "Android version: 12 (S)" >> $logfile
+    echo "Android version: 12 (S)" >> $logfile
     DPSIZE="51 Mb"
     DPVERSIONP=2.0
     WSIZE="2.0 Mb"
@@ -237,19 +237,19 @@ elif [ $API -eq 31 ]; then
     fi
     PLSIZE="11 Mb"
 elif [ $API -eq 30 ]; then
-	echo "Android version: 11 (R)" >> $logfile
+    echo "Android version: 11 (R)" >> $logfile
     DPSIZE="20 Mb"
     DPVERSIONP=1.2
     WSIZE="2.1 Mb"
     WNEED=1
 elif [ $API -eq 29 ]; then
-	echo "Android version: 10 (Q)" >> $logfile
+    echo "Android version: 10 (Q)" >> $logfile
     WSIZE="3.6 Mb"
     DPSIZE="15 Mb"
     DPVERSIONP=1
     WNEED=1
 elif [ $API -eq 28 ]; then
-	echo "Android version: 9 (Pie)" >> $logfile
+    echo "Android version: 9 (Pie)" >> $logfile
     WSIZE="1.6 Mb"
     DPSIZE="10 Mb"
     DPVERSIONP=1
@@ -270,7 +270,7 @@ online_mb(){
 }
 
 if [ $internet -eq 1 ]; then
-	echo "- Fetching version of online packages" >> $logfile
+    echo "- Fetching version of online packages" >> $logfile
     ver=$($MODPATH/addon/curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
     if [ $ENABLE_OSR -eq 1 ]; then
         NGAVERSION=$(echo "$ver" | grep ngsa | cut -d'=' -f2)
@@ -290,8 +290,8 @@ if [ $internet -eq 1 ]; then
         DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-31.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
     fi
     if [ $NEW_PL -eq 1 ]; then
-    	PLVERSION=$(echo "$ver" | grep pl-new-$NEWAPI | cut -d'=' -f2)
-    	PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-new-$NEWAPI.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        PLVERSION=$(echo "$ver" | grep pl-new-$NEWAPI | cut -d'=' -f2)
+        PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-new-$NEWAPI.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     else
         PLVERSION=$(echo "$ver" | grep pl-$API | cut -d'=' -f2)
         PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
@@ -310,7 +310,7 @@ if [ $internet -eq 1 ]; then
     OSRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/osr.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
 else
-	echo "- Warning, Cannot able to fetch package version, using saved version instead" >> $logfile
+    echo "- Warning, Cannot able to fetch package version, using saved version instead" >> $logfile
     if [ ! -f $pix/nga.txt ]; then
         echo "$NGAVERSIONP" >> $pix/nga.txt
     fi
@@ -340,12 +340,12 @@ PCSVERSION=$(cat $pix/pcs.txt)
 PLVERSION=$(cat $pix/pl-$NEWAPI.txt)
 
 if [ "$(getprop ro.soc.model)" == "Tensor" ]; then
-	echo "- Tensor chip Detected..." >> $logfile
-	TENSOR=1
+    echo "- Tensor chip Detected..." >> $logfile
+    TENSOR=1
     rm -rf $MODPATH/zygisk
     mv $MODPATH/zygisk_1 $MODPATH/zygisk
 else
-	TENSOR=0
+    TENSOR=0
 fi
 
 if [ "$(getprop ro.product.vendor.name)" == "coral" ] || [ "$(getprop ro.product.vendor.name)" == "flame" ]; then
@@ -402,11 +402,11 @@ print ""
 print "- Detected Arch: $ARCH"
 print "- Detected SDK : $API"
 RAM=$( grep MemTotal /proc/meminfo | tr -dc '0-9')
-print "- Detected Ram: $RAM"
+print "- Detected RAM: $RAM"
 print ""
 if [ $RAM -le "6000000" ]; then
     rm -rf $MODPATH/system$product/etc/sysconfig/GoogleCamera_6gb_or_more_ram.xml
-    echo " - Removing GoogleCamera_6gb_or_more_ram.xml as device has less than 6Gb Ram" >> $logfile
+    echo " - Removing GoogleCamera_6gb_or_more_ram.xml as device has less than 6Gb RAM" >> $logfile
 fi
 
 DIALER1=$(find /system -name *Dialer.apk)
@@ -600,7 +600,7 @@ if [ "$(grep 'DEVICE_USES_VOLUME_KEY=' $MODPATH/module.prop | cut -d= -f2)" -eq 
     VKSEL=no_vksel
 else
     if keytest; then
-    	echo "- Using chooseport method for Volume keys" >> $logfile
+        echo "- Using chooseport method for Volume keys" >> $logfile
         VKSEL=chooseport
     else
         VKSEL=chooseportold
@@ -660,23 +660,23 @@ drop_sys() {
 }
 
 db_edit() {
-	type=$2
-	val=$3
-	name=$1
-	shift
-	shift
-	shift
-	echo "- $name patching started" >> $logfile
-	for i in $@; do
-		echo "Patching $i to $val" >> $logfile
-	    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'"
-	    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)"
-	    $sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
-	    # for j in $gacc; do
-	    	# $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
-	    # done
-	done
-	echo "- $name patching done" >> $logfile
+    type=$2
+    val=$3
+    name=$1
+    shift
+    shift
+    shift
+    echo "- $name patching started" >> $logfile
+    for i in $@; do
+        echo "Patching $i to $val" >> $logfile
+        $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'"
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)"
+        $sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
+        # for j in $gacc; do
+        # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
+        # done
+    done
+    echo "- $name patching done" >> $logfile
 }
 
 if [ ! -z $exact_prop ]  && [ $NEWAPI -ge 31 ] && [ $BETA_BUILD -eq 1 ]; then
@@ -695,12 +695,12 @@ if [ ! -z $exact_prop ]  && [ $NEWAPI -ge 31 ] && [ $BETA_BUILD -eq 1 ]; then
     if $VKSEL; then
         echo " " >> $MODPATH/system.prop
         echo "$exact_prop=redfin" >> $MODPATH/system.prop
-    fi   
+    fi
 fi
 
 ZYGISK_P=0
 if [ $TENSOR -eq 1 ]; then
-	[ $MAGISK_VER_CODE -ge 24000 ] && ZYGISK_P=1
+    [ $MAGISK_VER_CODE -ge 24000 ] && ZYGISK_P=1
     print ""
     print "(TENSOR CHIPSET DETECTED)"
     print "  Do you want to enable Google Photos Unlimited Backup?"
@@ -709,10 +709,10 @@ if [ $TENSOR -eq 1 ]; then
     print "   Vol Down += No"
     no_vk "ENABLE_TENSOR_UNLIMITED"
     if $VKSEL; then
-    	echo "- Enabling Unlimited storage in this Tensor chipset device" >> $logfile
-    	drop_sys
+        echo "- Enabling Unlimited storage in this Tensor chipset device" >> $logfile
+        drop_sys
     else
-    	echo "- Disabling Unlimited storage in this Tensor chipset device" >> $logfile
+        echo "- Disabling Unlimited storage in this Tensor chipset device" >> $logfile
         rm -rf $MODPATH/zygisk $MODPATH/zygisk_1
     fi
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
@@ -986,10 +986,10 @@ if [ -d /data/data/$DIALER ]; then
         G__new_voicemail_fragment_enabled"
 
         for i in $DIALERFLAGS; do
-             $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer' AND name='$i'"
-        	if [ $CUSTOM_CALL_SCREEN -eq 1 ] && [[ $i == "G__enable_revelio" || $i == "G__enable_revelio_r_api" || $i == "enable_revelio_transcript" || $i == "G__bypass_revelio_roaming_check" || $i == "G__enable_call_screen_saving_audio" || $i == "G__speak_easy_enabled" || $i == "G__enable_speakeasy_details" || $i == "G__speak_easy_bypass_locale_check" || $i == "G__speak_easy_use_soda_asr" ]]; then
-        		continue
-        	fi
+            $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer' AND name='$i'"
+            if [ $CUSTOM_CALL_SCREEN -eq 1 ] && [[ $i == "G__enable_revelio" || $i == "G__enable_revelio_r_api" || $i == "enable_revelio_transcript" || $i == "G__bypass_revelio_roaming_check" || $i == "G__enable_call_screen_saving_audio" || $i == "G__speak_easy_enabled" || $i == "G__enable_speakeasy_details" || $i == "G__speak_easy_bypass_locale_check" || $i == "G__speak_easy_use_soda_asr" ]]; then
+                continue
+            fi
             if [ $API -le 30 ] && [ $i == "enable_android_s_notifications" ]; then
                 continue
             fi
@@ -1003,7 +1003,7 @@ if [ -d /data/data/$DIALER ]; then
             print "  English (United States) for call screening to work"
             print " "
         else
-        	print " "
+            print " "
             if [ -f /sdcard/Pixelify/backup/callscreen-$lang.tar.xz ]; then
                 print "- Installing CallScreening $lang from backups"
                 print ""
@@ -1140,7 +1140,7 @@ if [ -d /data/data/$DIALER ]; then
             rm -rf $MODPATH/system$product/priv-app/GoogleDialer/oat
         fi
     else
-    	rm -rf $MODPATH/system$product/overlay/PixelifyGD.apk
+        rm -rf $MODPATH/system$product/overlay/PixelifyGD.apk
         chmod 755 /data/data/com.google.android.dialer/files/phenotype
         sed -i -e "s/cp -Tf $MODDIR\/com.google.android.dialer/#cp -Tf $MODDIR\/com.google.android.dialer/g" $MODPATH/service.sh
         sed -i -e "s/chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/#chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/g" $MODPATH/service.sh
@@ -1149,7 +1149,7 @@ else
     chmod 755 /data/data/com.google.android.dialer/files/phenotype
     sed -i -e "s/cp -Tf $MODDIR\/com.google.android.dialer/#cp -Tf $MODDIR\/com.google.android.dialer/g" $MODPATH/service.sh
     sed -i -e "s/chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/#chmod 500 \/data\/data\/com.google.android.dialer\/files\/phenotype/g" $MODPATH/service.sh
-	rm -rf $MODPATH/system$product/overlay/PixelifyGD.apk
+    rm -rf $MODPATH/system$product/overlay/PixelifyGD.apk
 fi
 
 osr_ins() {
@@ -1382,10 +1382,10 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
             echo " - Making Google a system app" >> $logfile
             print ""
             if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
-            	cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
-            	mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
+                cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
+                mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
             else
-            	cp -r ~/data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
+                cp -r ~/data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
             fi
             rm -rf $MODPATH/system/product/priv-app/Velvet/oat
             #mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
@@ -1395,12 +1395,12 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                 print "- Making Google a system app"
                 echo " - Making Google a system app" >> $logfile
                 print ""
-	            if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
-	            	cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
-	            	mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
-	            else
-	            	cp -r ~/data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
-	            fi
+                if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
+                    cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
+                    mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
+                else
+                    cp -r ~/data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
+                fi
                 rm -rf $MODPATH/system/product/priv-app/Velvet/oat
             fi
             #mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
@@ -1861,8 +1861,8 @@ if [ $API -ge 10000 ]; then
                 print ""
                 print "- Installing Pixel Camera Services"
                 tar -xf $MODPATH/files/pcs.tar.xz -C $MODPATH/system
-           	 	echo "ro.vendor.camera.extensions.package=com.google.android.apps.camera.services" >> $MODPATH/system.prop
-            	echo "ro.vendor.camera.extensions.service=com.google.android.apps.camera.services.extensions.service.PixelExtensions" >> $MODPATH/system.prop
+                echo "ro.vendor.camera.extensions.package=com.google.android.apps.camera.services" >> $MODPATH/system.prop
+                echo "ro.vendor.camera.extensions.service=com.google.android.apps.camera.services.extensions.service.PixelExtensions" >> $MODPATH/system.prop
 
                 REMOVE="$REMOVE $PCS"
                 print ""
@@ -1926,10 +1926,10 @@ if [ $API -ge 30 ]; then
         echo " - Installing Extreme Battery Saver (Flipendo)" >> $logfile
         cp -f $MODPATH/files/PixelifyFilpendo.apk $MODPATH/system/product/overlay/PixelifyFilpendo.apk
         if [ $NEWAPI -ge 31 ]; then
-        	tar -xf $MODPATH/files/flip-31.tar.xz -C $MODPATH/system
-    	else
-    		tar -xf $MODPATH/files/flip-$API.tar.xz -C $MODPATH/system
-    	fi
+            tar -xf $MODPATH/files/flip-31.tar.xz -C $MODPATH/system
+        else
+            tar -xf $MODPATH/files/flip-$API.tar.xz -C $MODPATH/system
+        fi
         FLIPENDO=$(find /system -name Flipendo)
         REMOVE="$REMOVE $FLIPENDO"
     else
@@ -1962,7 +1962,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     print "- Enabling Redesigned Ui"
     # print "- Enabling Lens for Gboard"
     print "- Enabling NGA Voice typing (If Nga is installed)"
-    
+
     bool_patch nga $GBOARD
     bool_patch redesign $GBOARD
     bool_patch lens $GBOARD
@@ -2059,24 +2059,24 @@ install_tts() {
     echo " - Making Google TTS a system app" >> $logfile
     mkdir -p $MODPATH/system$product/app/GoogleTTS
     if [ -f /$app/com.google.android.tts*/base.apk ]; then
-	    cp -r ~/$app/com.google.android.tts*/. $MODPATH/system$product/app/GoogleTTS
-	    mv $MODPATH/system$product/app/GoogleTTS/base.apk $MODPATH/system$product/app/GoogleTTS/GoogleTTS.apk
+        cp -r ~/$app/com.google.android.tts*/. $MODPATH/system$product/app/GoogleTTS
+        mv $MODPATH/system$product/app/GoogleTTS/base.apk $MODPATH/system$product/app/GoogleTTS/GoogleTTS.apk
     else
-    	cp -r ~/data/adb/modules/Pixelify/system/product/app/GoogleTTS/. $MODPATH/system$product/app/GoogleTTS
+        cp -r ~/data/adb/modules/Pixelify/system/product/app/GoogleTTS/. $MODPATH/system$product/app/GoogleTTS
     fi
     rm -rf $MODPATH/system$product/app/GoogleTTS/oat
     cp -f $MODPATH/files/PixeliflyTTS.apk $MODPATH/system/product/overlay/PixeliflyTTS.apk
-    
+
 }
 
 if [ ! -z $(pm list packages com.google.android.tts) ]; then
     if [ -z $(pm list packages -s com.google.android.tts) ] && [ ! -f /data/adb/modules/Pixelify/system/product/app/GoogleTTS/GoogleTTS.apk ]; then
-    	install_tts
+        install_tts
     elif [ -f /data/adb/modules/Pixelify/system$product/app/GoogleTTS/GoogleTTS.apk ]; then
-		install_tts
+        install_tts
     fi
 else
-	print ""
+    print ""
     print " ! Warning !"
     print " - It is recommended to install Google TTS"
     print " - If you face any problem regarding call screening or call recording"
@@ -2086,8 +2086,8 @@ else
 fi
 
 if [ $TENSOR -eq 0 ]; then
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder'"
-db_edit com.google.android.apps.recorder boolVal 0 "Experiment__soda_transcriber"
+    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder'"
+    db_edit com.google.android.apps.recorder boolVal 0 "Experiment__soda_transcriber"
 fi
 
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
@@ -2103,14 +2103,14 @@ $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.pl
 db_edit $gms com.google.android.platform.systemui boolVal 1 "quick_access_wallet_enabled"
 
 if [ -f $gser ]; then
-for i in "fitness.micro.show_fitness_promo" "fitness.micro.enable_active_mode_heart_rate" "fitness.micro.enable_active_mode_media_control" "photos:enable_backup_promo" "search_allow_voice_search_hints" "googletts:use_lstm"; do
-    $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
-    # $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', 'true')"
-done
-for i in "voice_search:advanced_features_enabled"; do
-    $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
-    # $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', '1')"
-done
+    for i in "fitness.micro.show_fitness_promo" "fitness.micro.enable_active_mode_heart_rate" "fitness.micro.enable_active_mode_media_control" "photos:enable_backup_promo" "search_allow_voice_search_hints" "googletts:use_lstm"; do
+        $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
+        # $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', 'true')"
+    done
+    for i in "voice_search:advanced_features_enabled"; do
+        $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
+        # $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', '1')"
+    done
 fi
 
 set_perm_app() {
@@ -2154,146 +2154,146 @@ for j in $MODPATH/system/priv-app/*/*.apk; do
 done
 
 font1='  <family name="google-sans">
-    <font weight="400" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="400"/>
-    </font>
-    <font weight="500" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="500"/>
-    </font>
-    <font weight="600" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="600"/>
-    </font>
-    <font weight="700" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="700"/>
-    </font>
-    <font weight="400" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="400"/>
-    </font>
-    <font weight="500" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="500"/>
-    </font>
-    <font weight="600" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="600"/>
-    </font>
-    <font weight="700" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="700"/>
-    </font>
-  </family>'
+<font weight="400" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="400"/>
+</font>
+<font weight="500" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="500"/>
+</font>
+<font weight="600" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="600"/>
+</font>
+<font weight="700" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="700"/>
+</font>
+<font weight="400" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="400"/>
+</font>
+<font weight="500" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="500"/>
+</font>
+<font weight="600" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="600"/>
+</font>
+<font weight="700" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="700"/>
+</font>
+</family>'
 
 font2='  <family name="google-sans-medium">
-    <font weight="500" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="500"/>
-    </font>
-  </family>'
+<font weight="500" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="500"/>
+</font>
+</family>'
 
 font3='  <family name="google-sans-bold">
-    <font weight="700" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="18.0"/>
-      <axis tag="wght" stylevalue="700"/>
-    </font>
-  </family>'
+<font weight="700" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="18.0"/>
+<axis tag="wght" stylevalue="700"/>
+</font>
+</family>'
 
 font4='  <family name="google-sans-text">
-    <font weight="400" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="400"/>
-    </font>
-    <font weight="500" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="500"/>
-    </font>
-    <font weight="600" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="600"/>
-    </font>
-    <font weight="700" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="700"/>
-    </font>
-    <font weight="400" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="400"/>
-    </font>
-    <font weight="500" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="500"/>
-    </font>
-    <font weight="600" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="600"/>
-    </font>
-    <font weight="700" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="700"/>
-    </font>
-  </family>'
+<font weight="400" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="400"/>
+</font>
+<font weight="500" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="500"/>
+</font>
+<font weight="600" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="600"/>
+</font>
+<font weight="700" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="700"/>
+</font>
+<font weight="400" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="400"/>
+</font>
+<font weight="500" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="500"/>
+</font>
+<font weight="600" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="600"/>
+</font>
+<font weight="700" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="700"/>
+</font>
+</family>'
 
 font5='  <family name="google-sans-text-medium">
-    <font weight="500" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="500"/>
-    </font>
-  </family>'
+<font weight="500" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="500"/>
+</font>
+</family>'
 
 font6='  <family name="google-sans-text-bold">
-    <font weight="700" style="normal">GoogleSans-Regular.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="700"/>
-    </font>
-  </family>'
+<font weight="700" style="normal">GoogleSans-Regular.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="700"/>
+</font>
+</family>'
 
 font7='  <family name="google-sans-text-italic">
-    <font weight="400" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="400"/>
-    </font>
-  </family>'
+<font weight="400" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="400"/>
+</font>
+</family>'
 
 font8='  <family name="google-sans-text-medium-italic">
-    <font weight="500" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="500"/>
-    </font>
-  </family>'
+<font weight="500" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="500"/>
+</font>
+</family>'
 
 font9='  <family name="google-sans-text-bold-italic">
-    <font weight="700" style="italic">GoogleSans-Italic.ttf
-      <axis tag="GRAD" stylevalue="0"/>
-      <axis tag="opsz" stylevalue="17.0"/>
-      <axis tag="wght" stylevalue="700"/>
-    </font>
-  </family>'
+<font weight="700" style="italic">GoogleSans-Italic.ttf
+<axis tag="GRAD" stylevalue="0"/>
+<axis tag="opsz" stylevalue="17.0"/>
+<axis tag="wght" stylevalue="700"/>
+</font>
+</family>'
 
 add_font() {
     if [ -z "$(grep \"$1\" $MODPATH/system/etc/fonts.xml)" ]; then
@@ -2318,64 +2318,64 @@ add_font() {
 
 
 sound_patch='    <!-- Multiple sound_model_config tags can be listed, each with unique
-         vendor_uuid. -->
-    <sound_model_config>
-        <param vendor_uuid="7038ddc8-30f2-11e6-b0ac-40a8f03d3f15" />
-        <param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
-        <param library="none" />
-        <param max_cpe_phrases="1" />
-        <param max_cpe_users="1" />
-        <gcs_usecase>
-            <param uid="0x1" />
-            <param load_sound_model_ids="0x18000001, 0x1, 0x18000100" />
-            <param start_engine_ids="0x18000001, 0x1, 0x18000101" />
-            <param request_detection_ids="0x18000001, 0x4, 0x18000106" />
-            <param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
-            <param read_cmd_ids="0x00020013, 0x1, 0x00020015" />
-            <param read_rsp_ids="0x00020013, 0x1, 0x00020016" />
-        </gcs_usecase>
-        <!--  kw_duration is in milli seconds. It is valid only for FTRT
-            transfer mode -->
-        <param capture_keyword="PCM_raw, FTRT, 2000" />
-        <param client_capture_read_delay="2000" />
-    </sound_model_config>
+vendor_uuid. -->
+<sound_model_config>
+<param vendor_uuid="7038ddc8-30f2-11e6-b0ac-40a8f03d3f15" />
+<param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
+<param library="none" />
+<param max_cpe_phrases="1" />
+<param max_cpe_users="1" />
+<gcs_usecase>
+<param uid="0x1" />
+<param load_sound_model_ids="0x18000001, 0x1, 0x18000100" />
+<param start_engine_ids="0x18000001, 0x1, 0x18000101" />
+<param request_detection_ids="0x18000001, 0x4, 0x18000106" />
+<param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
+<param read_cmd_ids="0x00020013, 0x1, 0x00020015" />
+<param read_rsp_ids="0x00020013, 0x1, 0x00020016" />
+</gcs_usecase>
+<!--  kw_duration is in milli seconds. It is valid only for FTRT
+transfer mode -->
+<param capture_keyword="PCM_raw, FTRT, 2000" />
+<param client_capture_read_delay="2000" />
+</sound_model_config>
 
-    <!-- music -->
-    <sound_model_config>
-        <param vendor_uuid="9f6ad62a-1f0b-11e7-87c5-40a8f03d3f15" />
-        <param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
-        <param library="none" />
-        <gcs_usecase>
-            <param uid="0x2" />
-            <param load_sound_model_ids="0x18000001, 0x1, 0x18000102" />
-            <param start_engine_ids="0x18000001, 0x1, 0x18000103" />
-            <param request_detection_ids="0x18000001, 0x4, 0x18000107" />
-            <param custom_config_ids="0x18000001, 0x1, 0x18000106" />
-            <param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
-            <param read_cmd_ids="0x00020013, 0x2, 0x00020015" />
-            <param read_rsp_ids="0x00020013, 0x2, 0x00020016" />
-        </gcs_usecase>
-        <!--  kw_duration is in milli seconds. It is valid only for FTRT
-            transfer mode -->
-        <param capture_keyword="MULAW_raw, FTRT, 4000" />
-        <param client_capture_read_delay="2000" />
-    </sound_model_config>
+<!-- music -->
+<sound_model_config>
+<param vendor_uuid="9f6ad62a-1f0b-11e7-87c5-40a8f03d3f15" />
+<param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
+<param library="none" />
+<gcs_usecase>
+<param uid="0x2" />
+<param load_sound_model_ids="0x18000001, 0x1, 0x18000102" />
+<param start_engine_ids="0x18000001, 0x1, 0x18000103" />
+<param request_detection_ids="0x18000001, 0x4, 0x18000107" />
+<param custom_config_ids="0x18000001, 0x1, 0x18000106" />
+<param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
+<param read_cmd_ids="0x00020013, 0x2, 0x00020015" />
+<param read_rsp_ids="0x00020013, 0x2, 0x00020016" />
+</gcs_usecase>
+<!--  kw_duration is in milli seconds. It is valid only for FTRT
+transfer mode -->
+<param capture_keyword="MULAW_raw, FTRT, 4000" />
+<param client_capture_read_delay="2000" />
+</sound_model_config>
 
-    <sound_model_config>
-        <param vendor_uuid="2fc815fa-4a42-11e7-99bd-40a8f03d3f15" />
-        <param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
-        <param library="none" />
-        <gcs_usecase>
-            <param uid="0x3" />
-            <param load_sound_model_ids="0x18000001, 0x1, 0x18000104" />
-            <param start_engine_ids="0x18000001, 0x1, 0x18000105" />
-            <param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
-        </gcs_usecase>
-        <!--  kw_duration is in milli seconds. It is valid only for FTRT
-            transfer mode -->
-        <param capture_keyword="PCM_raw, FTRT, 0" />
-        <param client_capture_read_delay="0" />
-    </sound_model_config>'
+<sound_model_config>
+<param vendor_uuid="2fc815fa-4a42-11e7-99bd-40a8f03d3f15" />
+<param execution_type="WDSP" /> <!-- value: "WDSP" "ADSP" "DYNAMIC" -->
+<param library="none" />
+<gcs_usecase>
+<param uid="0x3" />
+<param load_sound_model_ids="0x18000001, 0x1, 0x18000104" />
+<param start_engine_ids="0x18000001, 0x1, 0x18000105" />
+<param detection_event_ids="0x18000001, 0x1, 0x00012C29" />
+</gcs_usecase>
+<!--  kw_duration is in milli seconds. It is valid only for FTRT
+transfer mode -->
+<param capture_keyword="PCM_raw, FTRT, 0" />
+<param client_capture_read_delay="0" />
+</sound_model_config>'
 
 
 # if [ $NOT_REQ_SOUND_PATCH -eq 0 ] && [  -f /vendor/etc/sound_trigger_platform_info.xml ]; then
@@ -2444,9 +2444,9 @@ rm -rf /data/system/package_cache
 rm -rf $pix/apps_temp.txt $MODPATH/zygisk_1
 mv $pix/app2.txt $pix/app.txt
 
-echo " 
+echo "
 - Replacing apps $REMOVE
-" >> $logfile 
+" >> $logfile
 
 echo " ---- Installation Finished ----" >> $logfile
 
