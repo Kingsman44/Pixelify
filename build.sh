@@ -19,12 +19,12 @@ else
 sed -i -e "s/BETA_BUILD=1/BETA_BUILD=0/g" module.prop
 fi
 sed -i -e "s/Pixelify\/master\/update-no-vk.json/Pixelify\/master\/update.json/g" module.prop
-7z a Pixelify-v$version.zip $(ls | grep -v pixelify.sh | grep -v out | grep -v *.zip)
+7z a Pixelify-v$version.zip $(ls | grep -v pixelify.sh | grep -v out | grep -v .zip | grep -v .md | grep -v recording.txt | grep -v .json | grep -v LICENSE | grep -v build.sh)
 sed -i -e "s/DEVICE_USES_VOLUME_KEY=1/DEVICE_USES_VOLUME_KEY=0/g" module.prop
 sed -i -e "s/Pixelify\/master\/update.json/Pixelify\/master\/update-no-vk.json/g" module.prop
-7z a Pixelify-v$version-no_VK.zip $(ls | grep -v pixelify.sh | grep -v out | grep -v *.zip)
+7z a Pixelify-v$version-no_VK.zip $(ls | grep -v pixelify.sh | grep -v out | grep -v .zip | grep -v .md | grep -v recording.txt | grep -v .json | grep -v LICENSE | grep -v build.sh)
 mkdir -p out
 rm -rf out/*
 mv Pixelify-v$version.zip out
 mv Pixelify-v$version-no_VK.zip out
-cp -f no-VK.prop out/no-VK.prop
+cp -f config.prop out/config.prop
