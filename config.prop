@@ -104,3 +104,6 @@ ENABLE_EXTREME_BATTERY_SAVER=0
 
 # G Logo in Gboard
 G_LOGO=0
+
+# Google San fonts
+GSAN_FONT=0

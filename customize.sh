@@ -1,17 +1,59 @@
 #!/system/bin/sh
-if [ $ARCH != "arm64" ] && [ $API -le 23 ]; then
+
+. $MODPATH/vars.sh || abort
+. $MODPATH/utils.sh || abort
+
+[ -z "$MAGISKTMP" ] && MAGISKTMP=/sbin
+
+check_install_type
+
+if [ $MODULE_TYPE -eq 2 ]; then
+    mv "$ZYGISK_LIB_PATH" "$MODPATH/zygisk"
+elif [ $MODULE_TYPE -eq 3 ]; then
+    if [ -f $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh ]; then
+      ui_print "- Load $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh"
+      # shellcheck disable=SC1090
+      . $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh
+    else
+      if [ -f /data/adb/riru/util_functions.sh ]; then
+        ui_print "- Load /data/adb/riru/util_functions.sh"
+        . /data/adb/riru/util_functions.sh
+      fi
+    fi
+
+    enforce_install_from_magisk_app
+    api_level_arch_detect
+
+    [ -z "$IS64BIT" ] && IS64BIT=false
+    mkdir "$MODPATH/riru"
+
+    if [ "$ABI32" == "armeabi-v7a" ]; then
+        mv -f "$RIRU_LIB_PATH/armeabi-v7a" "$MODPATH/riru/lib"
+        $IS64BIT && mv -f "$RIRU_LIB_PATH/arm64-v8a" "$MODPATH/riru/lib64"
+    else
+       mv -f "$RIRU_LIB_PATH/x86" "$MODPATH/riru/lib"
+        $IS64BIT && mv -f "$RIRU_LIB_PATH/x86_64" "$MODPATH/riru/lib64"
+    fi
+fi
+
+if [ $API -le 23 ]; then
     ui_print "Error: Minimum requirements doesn't meet"
-    ui_print "arch: ARM64"
     ui_print "android version: 7.0+"
     exit 1
 fi
 
-. $MODPATH/vars.sh
-. $MODPATH/utils.sh
+rm -rf $MODPATH/lib
+
+# Check architecture
+if [ "$ARCH" != "arm" ] && [ "$ARCH" != "arm64" ] && [ "$ARCH" != "x86" ] && [ "$ARCH" != "x64" ]; then
+  abort "! Unsupported platform: $ARCH"
+fi
 
 alias keycheck="$MODPATH/addon/keycheck"
 sqlite=$MODPATH/addon/sqlite3
 VOL_KEYS="$(grep 'DEVICE_USES_VOLUME_KEY=' $MODPATH/module.prop | cut -d= -f2)"
+
+chmod 0755 $sqlite
 
 if [ ! -f $MODPATH/addon/curl ]; then
     mkdir -p $MODPATH/addon
@@ -155,18 +197,21 @@ DPSVERSION=$(cat $pix/dps.txt)
 PCSVERSION=$(cat $pix/pcs.txt)
 PLVERSION=$(cat $pix/pl-$NEWAPI.txt)
 
-if [ "$(getprop ro.soc.model)" == "Tensor" ]; then
+if [ $TENSOR -eq 1 ]; then
 	echo "- Tensor chip Detected..." >> $logfile
-	TENSOR=1
-    rm -rf $MODPATH/zygisk
-    mv $MODPATH/zygisk_1 $MODPATH/zygisk
 fi
 
 if [ "$(getprop ro.product.vendor.name)" == "coral" ] || [ "$(getprop ro.product.vendor.name)" == "flame" ]; then
-    echo "- Pixel 4/XL Detected !"
-    for i in $MODPATH/zygisk/*; do
-        sed -i -e "s/com.google.android.xx/com.google.android.as/g" $i
-    done
+    echo "- Pixel 4/XL Detected !" >> $logfile
+    if [ $MODULE_TYPE -eq 2 ] then
+        for i in $MODPATH/zygisk/*; do
+            sed -i -e "s/com.google.android.xx/com.google.android.as/g" $i
+        done
+    elif [ $MODULE_TYPE -eq 3 ] then
+        for i in $MODPATH/riru/*/*; do
+            sed -i -e "s/com.google.android.xx/com.google.android.as/g" $i
+        done
+    fi
 fi
 
 echo "
@@ -328,12 +373,6 @@ if [ $TENSOR -eq 1 ]; then
         rm -rf $MODPATH/zygisk $MODPATH/zygisk_1
     fi
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
-    print ""
-    print "- Magisk v24 and above detected "
-    print "- Zygisk must be enabled in order for the Pixelify Module to work"
-    print ""
-    print "- Spoofing Google apps according to their best configuration."
-    print ""
     drop_sys
 else
     print ""
@@ -390,9 +429,11 @@ fi
 [ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware && NOT_REQ_SOUND_PATCH=1
 
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
-db_edit com.google.android.platform.device_personalization_services boolVal 1 "SmartDictation__enable_selection_filtering" "Echo__avatar_enable_feature" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_alternatives_from_past_corrections" "SmartRecPixelSearch__enable_gboard_suggestion" "SmartRecPixelSearch__enable_spelling_correction" "Captions__enable_language_detection" "Echo__search_enable_mdp_play_results" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "Echo__smartspace_enable_ridesharing_eta" "Echo__smartspace_enable_food_delivery_eta" "Echo__smartspace_enable_eta_doordash" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor" "Echo__smartspace_enable_echo_unified_settings" "Echo__smartspace_enable_dark_launch_outlook_events" "Echo__smartspace_enable_step_predictor" "Echo__smartspace_enable_nap" "Echo__smartspace_enable_paired_device_connections" "Echo__smartspace_dedupe_fast_pair_notification" "Echo__smartspace_enable_nudge" "Echo__smartspace_enable_package_delivery" "Echo__smartspace_enable_outlook_events" "Echo__smartspace_gaia_twiddler" "Echo__smartspace_enable_eta_lyft" "Echo__smartspace_enable_sensitive_notification_twiddler" "Screenshot__enable_covid_card_action" "Screenshot__enable_lens_screenshots_search_action" "Screenshot__enable_lens_screenshots_similar_styles_action" "Screenshot__enable_lens_screenshots_translate_action" "Screenshot__enable_quick_share_smart_action" "Screenshot__enable_screenshot_notification_smart_actions" "Screenshot__enable_add_to_wallet_title" "Screenshot__can_use_gms_core_to_save_boarding_pass" "Screenshot__can_use_gpay_to_save_boarding_pass"
+db_edit com.google.android.platform.device_personalization_services boolVal 1 "Translate__enable_nextdoor" "SmartDictation__enable_selection_filtering" "SmartRecCompose__enable_compose_tc" "Translate__beta_audio_to_text_languages_in_live_caption" "Translate__translation_service_enabled" "Echo__avatar_enable_feature" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_alternatives_from_past_corrections" "SmartRecPixelSearch__enable_gboard_suggestion" "SmartRecPixelSearch__enable_spelling_correction" "Captions__enable_language_detection" "Echo__search_enable_mdp_play_results" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "Echo__smartspace_enable_ridesharing_eta" "Echo__smartspace_enable_food_delivery_eta" "Echo__smartspace_enable_eta_doordash" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor" "Echo__smartspace_enable_echo_unified_settings" "Echo__smartspace_enable_dark_launch_outlook_events" "Echo__smartspace_enable_step_predictor" "Echo__smartspace_enable_nap" "Echo__smartspace_enable_paired_device_connections" "Echo__smartspace_dedupe_fast_pair_notification" "Echo__smartspace_enable_nudge" "Echo__smartspace_enable_package_delivery" "Echo__smartspace_enable_outlook_events" "Echo__smartspace_gaia_twiddler" "Echo__smartspace_enable_eta_lyft" "Echo__smartspace_enable_sensitive_notification_twiddler" "Screenshot__enable_covid_card_action" "Screenshot__enable_lens_screenshots_search_action" "Screenshot__enable_lens_screenshots_similar_styles_action" "Screenshot__enable_lens_screenshots_translate_action" "Screenshot__enable_quick_share_smart_action" "Screenshot__enable_screenshot_notification_smart_actions" "Screenshot__enable_add_to_wallet_title" "Screenshot__can_use_gms_core_to_save_boarding_pass" "Screenshot__can_use_gpay_to_save_boarding_pass" "Echo__smartspace_enable_cross_device_timer" "Echo__smartspace_show_cross_device_timer_label" "Settings__enable_internal_settings" "People__enable_call_log_signals" "People__enable_contacts" "People__enable_dictation_client" "People__enable_hybrid_hotseat_client" "People__enable_notification_common" "People__enable_notification_signals" "People__enable_package_tracker" "People__enable_people_pecan" "People__enable_people_search_content" "People__enable_priority_suggestion_client" "People__enable_profile_signals" "People__enable_sharesheet_client" "People__enable_sms_signals" "GellerDataShare__enable_data_capture" "GellerDataShare__enable_data_fetch" "GellerDataShare__enable_settings_opt_in_switch" "SmartRecOverviewChips__enable_smartrec_for_overview_chips" "SmartRecOverviewChips__enable_settings_card_generator" "SmartRecOverviewChips__enable_reflection_generator" "SmartRecOverviewChips__enable_action_boost_generator" "SmartRecQuickSearchBox__enable_action_boost_generator" "SmartRecOverviewChips__enable_matchmaker_generator" "Echo__smartspace_enable_subcard_logging" "Echo__enable_widget_recommendations" "Echo__search_play_enable_spell_correction" "Echo__smartspace_enable_private_weather" "Echo__silo_enable_persistence" "Echo__settings_search_debug" "Echo__enable_people_module" "Echo__enable_nudge_debug_mode" "Echo__smartspace_enable_weather_data_pull_scheduler" "Echo__smartspace_enable_weather_data_pull_scheduler_use_location"
 # db_edit com.google.android.platform.device_personalization_services boolVal 0  "SmartRecPixelSearch__spelling_checker_superpacks_require_device_idle" "SmartRecPixelSearch__spelling_checker_superpacks_require_unmetered_connection"
 db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH"
+
+[ $TENSOR -eq 0 ] && db_edit com.google.android.platform.device_personalization_services boolVal 0 "Translate__blue_chip_translate_enabled"
 
 if [ $DPAS -eq 1 ]; then
     echo " - Installing Android System Intelligence" >> $logfile
@@ -1080,6 +1121,7 @@ if [ $API -ge 29 ]; then
         no_vk "ENABLE_PIXEL_LAUNCHER"
         if $VKSEL; then
             REMOVE="$REMOVE $PL $TR $QS $LW $TW $KW"
+            cp -f $MODPATH/files/PixelifyPixelLauncherCustomOverlay.apk $MODPATH/system/product/overlay/PixelifyPixelLauncherCustomOverlay.apk
             if [ "$(cat /sdcard/Pixelify/version/pl-$NEWAPI.txt)" != "$PLVERSION" ]; then
                 echo " - New Version Backup Detected for Pixel Launcher" >> $logfile
                 echo " - Old version:$(cat /sdcard/Pixelify/version/pl-$NEWAPI.txt), New Version:  $PLVERSION " >> $logfile
@@ -1213,119 +1255,16 @@ else
     rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
 fi
 
-# Google Pixel camera services (Disabled)
-if [ $INS_PCS -eq 1 ]; then
-    PCS=$(find /system -name *PixelCameraServices* | grep -v overlay | grep -v "\.")
-
-    if [ -f /sdcard/Pixelify/backup/pcs.tar.xz ]; then
-        echo " - Backup Detected for Pixel Camera Services" >> $logfile
-        print "  Do you want to install Pixel Camera Services?"
-        print "  (Backup detected, no internet needed)"
-        print "   Vol Up += Yes"
-        print "   Vol Down += No"
-        no_vk "ENABLE_PCS"
-        if $VKSEL; then
-            REMOVE="$REMOVE $PCS"
-            if [ "$(cat /sdcard/Pixelify/version/pcs.txt)" != "$PCSVERSION" ]; then
-                echo " - New Version Backup Detected forPixel Camera Services" >> $logfile
-                echo " - Old version:$(cat /sdcard/Pixelify/version/pl-$NEWAPI.txt), New Version:  $PCSVERSION " >> $logfile
-                print "  (Network Connection Needed)"
-                print "  New version Detected "
-                print "  Do you Want to update or use Old Backup?"
-                print "  Version: $PCSVERSION"
-                print "  Size: $PCSSIZE"
-                print "   Vol Up += Update"
-                print "   Vol Down += Use old backup"
-                no_vk "UPDATE_PCS"
-                if $VKSEL; then
-                    online
-                    if [ $internet -eq 1 ]; then
-                        echo " - Downloading and Installing New Backup for Pixel Camera Services" >> $logfile
-                        rm -rf /sdcard/Pixelify/backup/pcs.tar.xz
-                        rm -rf /sdcard/Pixelify/version/pcs.txt
-                        cd $MODPATH/files
-                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz -O &> /proc/self/fd/$OUTFD
-                        cd /
-                        print "- Creating Backup"
-                        print ""
-                        cp -f $MODPATH/files/pcs.tar.xz /sdcard/Pixelify/backup/pcs.tar.xz
-                        echo " - Creating Backup for Pixel Camera Services" >> $logfile
-                        echo "$PCSVERSION" >> /sdcard/Pixelify/version/pcs.txt
-                    else
-                        print "!! Warning !!"
-                        print " No internet detected"
-                        print ""
-                        print "- Using Old backup for now."
-                        print ""
-                        echo " - Using old Backup for Pixel Launcher due to no internet" >> $logfile
-                    fi
-                fi
-            fi
-            print "- Installing Pixel Camera Services"
-            print ""
-
-            tar -xf /sdcard/Pixelify/backup/pcs.tar.xz -C $MODPATH/system
-            echo "ro.vendor.camera.extensions.package=com.google.android.apps.camera.services" >> $MODPATH/system.prop
-            echo "ro.vendor.camera.extensions.service=com.google.android.apps.camera.services.extensions.service.PixelExtensions" >> $MODPATH/system.prop
-
-        else
-            echo " - Skipping Pixel Camera Services" >> $logfile
-        fi
-    else
-        print "  (Network Connection Needed)"
-        print "  Do you want to install and Download Pixel Camera Services?"
-        print "  Size: $PCSSIZE"
-        print "   Vol Up += Yes"
-        print "   Vol Down += No"
-        no_vk "ENABLE_PCS"
-        if $VKSEL; then
-            online
-            if [ $internet -eq 1 ]; then
-                print "- Downloading Pixel Camera Services"
-                echo " - Downloading and Installing Pixel Camera Services" >> $logfile
-                print ""
-                cd $MODPATH/files
-                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz -O &> /proc/self/fd/$OUTFD
-                cd /
-                print ""
-                print "- Installing Pixel Camera Services"
-                tar -xf $MODPATH/files/pcs.tar.xz -C $MODPATH/system
-           	 	echo "ro.vendor.camera.extensions.package=com.google.android.apps.camera.services" >> $MODPATH/system.prop
-            	echo "ro.vendor.camera.extensions.service=com.google.android.apps.camera.services.extensions.service.PixelExtensions" >> $MODPATH/system.prop
-
-                REMOVE="$REMOVE $PCS"
-                print ""
-                print "  Do you want to create backup of Pixel Camera Services?"
-                print "  so that you don't need redownload it every time."
-                print "   Vol Up += Yes"
-                print "   Vol Down += No"
-                no_vk "BACKUP_PCS"
-                if $VKSEL; then
-                    print "- Creating Backup"
-                    mkdir -p /sdcard/Pixelify/backup
-                    rm -rf /sdcard/Pixelify/backup/pcs.tar.xz
-                    cp -f $MODPATH/files/pcs.tar.xz /sdcard/Pixelify/backup/pcs.tar.xz
-                    print ""
-                    mkdir -p /sdcard/Pixelify/version
-                    echo " - Creating Backup for Pixel Camera Services" >> $logfile
-                    echo "$PCSVERSION" >> /sdcard/Pixelify/version/pcs.txt
-                    print " - Done"
-                    print ""
-                fi
-            else
-                print "!! Warning !!"
-                print " No internet detected"
-                print ""
-                print "- Skipping Pixel Camera Services"
-                print ""
-                echo " - Skipping Pixel Camera Services due to no internet" >> $logfile
-            fi
-        else
-            echo " - Skipping Pixel Camera Services" >> $logfile
-        fi
-    fi
-else
-    echo " - Skipping Pixel Camera Services" >> $logfile
+# Adding Googlesan font.
+print ""
+print "  (NOTE: Playstore or Google or GMS crashes then dont enable it)"
+print "  Do you want add Google San Fonts?"
+print "  Note: Enabling it will not show you languages in spacebar"
+print "    Vol Up += Yes"
+print "    Vol Down += No"
+no_vk "GSAN_FONT"
+if $VKSEL; then
+    patch_font
 fi
 
 # Google Settings service
@@ -1474,6 +1413,17 @@ db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__e
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
 db_edit $gms com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle" 
 
+if [ -f $gser ]; then
+for i in "photos:debug.photos.p_editr.eraser" "debug.photos.p_editr.eraser" "debug.photos.force_pixel_eol" "photos:debug.photos.force_pixel_eol" "debug.photos.b217460481" "photos:debug.photos.b217460481" "debug.photos.eraser_camo" "photos:debug.photos.eraser_camo" "debug.photos.eraser_1up_sugg" "debug.photos.eraser_suggestion"; do
+    $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
+    $sqlite $gser "DELETE FROM main WHERE name='$i'"
+    $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', 'true')"
+    $sqlite $gser "INSERT INTO main(name, value) VALUES('$i', 'true')"
+done
+$sqlite $gser "DELETE FROM overrides WHERE name='device_country'"
+$sqlite $gser "INSERT INTO overrides(name, value) VALUES('device_country', 'us')"
+fi
+
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do
     set_perm_app $j
@@ -1481,9 +1431,6 @@ done
 for j in $MODPATH/system/priv-app/*/*.apk; do
     set_perm_app $j
 done
-
-# Adding Googlesan font.
-patch_font
 
 # Patching Sound trigger
 #sound_trigger_patch

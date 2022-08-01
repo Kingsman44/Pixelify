@@ -1,5 +1,30 @@
 #!/system/bin/sh
 
+# Riru Vars
+MAGISKTMP="$(magisk --path)"
+RIRU_MODULE_LIB_NAME="pixelify"
+RIRU_MODULE_ID_PRE24="%%%RIRU_MODULE_ID_PRE24%%%"
+
+# Variables for customize.sh
+RIRU_API=0
+RIRU_MIN_COMPATIBLE_API=0
+RIRU_VERSION_CODE=0
+RIRU_VERSION_NAME=""
+
+# Used by /data/adb/riru/util_functions.sh
+RIRU_MODULE_API_VERSION=25
+RIRU_MODULE_MIN_API_VERSION=25
+RIRU_MODULE_MIN_RIRU_VERSION_NAME="v25.4.2"
+
+if [ "$MAGISK_VER_CODE" -ge 21000 ]; then
+  MAGISK_CURRENT_RIRU_MODULE_PATH=$(magisk --path)/.magisk/modules/riru-core
+else
+  MAGISK_CURRENT_RIRU_MODULE_PATH=/sbin/.magisk/modules/riru-core
+fi
+# Riru vars end
+
+# 1 - Normal, 2 - Zygisk, 3 - Riru
+MODULE_TYPE=1
 NEWAPI=$API
 CURR="NONE"
 REMOVE=""
@@ -35,13 +60,23 @@ OSRVERSIONP=1
 SEND_DPS=0
 SHOW_GSS=1
 TARGET_DEVICE_OP12=0
-TENSOR=0
 WALL_DID=0
 WNEED=0
 WREM=1
 ZYGISK_P=0
 PIXEL_SPOOF=0
 TARGET_LOGGING=0
+
+# Tensor
+if [ "$(getprop ro.soc.model)" == "Tensor" ]; then
+  TENSOR=1
+  RIRU_LIB_PATH="$MODPATH/lib/riru_tensor"
+  ZYGISK_LIB_PATH="$MODPATH/lib/zygisk_tensor"
+else
+  TENSOR=0
+  RIRU_LIB_PATH="$MODPATH/lib/riru"
+  ZYGISK_LIB_PATH="$MODPATH/lib/zygisk"
+fi
 
 # Default Locations
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml

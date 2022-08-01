@@ -1,5 +1,46 @@
 #!/system/bin/sh
 
+# Check which platform should be used
+check_install_type() {
+  if [ ! -f "$MAGISK_CURRENT_RIRU_MODULE_PATH/api_version" ] && [ ! -f "/data/adb/riru/api_version" ] && [ ! -f "/data/adb/riru/api_version.new" ]; then
+    if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
+      ui_print "- Using Magisk Zygisk"
+      MODULE_TYPE=2
+    else
+      ui_print "- Using Normal version"
+    fi
+  fi
+  RIRU_API=$(cat "$MAGISK_CURRENT_RIRU_MODULE_PATH/api_version") || RIRU_API=$(cat "/data/adb/riru/api_version.new") || RIRU_API=$(cat "/data/adb/riru/api_version") || RIRU_API=0
+  [ "$RIRU_API" -eq "$RIRU_API" ] || RIRU_API=0
+  ui_print "- Riru API version: $RIRU_API"
+  if [ "$RIRU_API" -lt $RIRU_MODULE_MIN_API_VERSION ]; then
+    ui_print "! Riru $RIRU_MODULE_MIN_RIRU_VERSION_NAME or above is required."
+    if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
+      MODULE_TYPE=2
+      ui_print "- Switching to Magisk Zygisk"
+    else
+      ui_print "- Using Normal version"
+    fi
+  else
+    MODULE_TYPE=3
+    ui_print "- Riru Detected !"
+    ui_print "- Using Riru instead of Zygisk"
+  fi
+}
+
+# This function will be used when util_functions.sh not exists
+enforce_install_from_magisk_app() {
+  if $BOOTMODE; then
+    ui_print "- Installing from Magisk app"
+  else
+    ui_print "*********************************************************"
+    ui_print "! Install from recovery is NOT supported"
+    ui_print "! Some recovery has broken implementations, install with such recovery will finally cause Riru or Riru modules not working"
+    ui_print "! Please install from Magisk app"
+    abort "*********************************************************"
+  fi
+}
+
 print() {
     ui_print "$@"
     sleep 0.3
@@ -383,9 +424,9 @@ oos_fix() {
         print ""
         print " -  Applying Fix for OOS 12"
         cd $MODPATH/system/product/
-        cp -rf $MODPATH/system/product/* $MODPATH/system
+        cp -rf $MODPATH/system/product/. $MODPATH/system
         cd $MODPATH/system/system_ext/
-        cp -rf $MODPATH/system/system_ext/* ../system
+        cp -rf $MODPATH/system/system_ext/. ../system
         cd /
         rm -rf $MODPATH/system/product $MODPATH/system/system_ext
         mv $MODPATH/system/overlay $MODPATH/vendor/overlay
@@ -550,6 +591,14 @@ osr_ins() {
         print ""
         tar -xf /sdcard/Pixelify/backup/osr.tar.xz -C $MODPATH/system/product
 
+        for i in /data/data/com.google.android.tts/files/datadownload/shared/public/datadownloadfile_*; do
+            if [ ! -z "$(grep 'en-US' $i/metadata)" ]; then 
+                rm -rf $i/*
+                cp -r $MODPATH/system/product/usr/srec/en-US/. $i
+                echo " - Fixing OSR for Google TTs" >> $logfile
+            fi
+        done
+
         # Remove 70xx or 50xx because it gonna available from systen side
         rm -rf /data/data/com.google.android.googlequicksearchbox/app_g3_models/en-US
     else
@@ -573,6 +622,18 @@ osr_ins() {
                 print " "
                 print "  Extracting Google offline speech recognition"
                 tar -xf $MODPATH/files/osr.tar.xz -C $MODPATH/system/product
+
+                for i in /data/data/com.google.android.tts/files/datadownload/shared/public/datadownloadfile_*; do
+                    if [ ! -z "$(grep 'en-US' $i/metadata)" ]; then 
+                        rm -rf $i/*
+                        cp -r $MODPATH/system/product/usr/srec/en-US/. $i
+                        echo " - Fixing OSR for Google TTs" >> $logfile
+                    fi
+                done
+
+                # Remove 70xx or 50xx because it gonna available from systen side
+                rm -rf /data/data/com.google.android.googlequicksearchbox/app_g3_models/en-US
+
                 print ""
                 print "  Do you want to create backup of Google offline speech recognition"
                 print "  so that you don't need redownload it everytime."
@@ -614,7 +675,7 @@ now_playing() {
     no_vk "ENABLE_NOW_PLAYING"
     if $VKSEL; then
         cp -f $MODPATH/files/PixeliflyNowPlaying.apk $MODPATH/system$product/overlay/PixeliflyNowPlaying.apk
-        db_edit com.google.android.platform.device_personalization_services boolVal 1 "NowPlaying__youtube_export_enabled" "NowPlaying__labs_personalized_shard_allowed" "NowPlaying__fast_recognition_ui_cleanup_enabled" "NowPlaying__ambient_music_on_demand_enabled" "NowPlaying__now_playing_allowed" "NowPlaying__ambient_music_handle_results_with_search" "NowPlaying__handle_ambient_music_results_with_history" "NowPlaying__favorites_enabled" "NowPlaying__history_summary_enabled" "NowPlaying__feature_users_count_enabled" "NowPlaying__ambient_music_notification_show_assistant_text" "NowPlaying__handle_ambient_music_results_with_assistant" "NowPlaying__ambient_music_smart_audio_playback_detection"
+        db_edit com.google.android.platform.device_personalization_services boolVal 1 "NowPlaying__capture_own_speaker_allowed" "NowPlaying__youtube_export_enabled" "NowPlaying__labs_personalized_shard_allowed" "NowPlaying__fast_recognition_ui_cleanup_enabled" "NowPlaying__ambient_music_on_demand_enabled" "NowPlaying__now_playing_allowed" "NowPlaying__ambient_music_handle_results_with_search" "NowPlaying__handle_ambient_music_results_with_history" "NowPlaying__favorites_enabled" "NowPlaying__history_summary_enabled" "NowPlaying__feature_users_count_enabled" "NowPlaying__ambient_music_notification_show_assistant_text" "NowPlaying__handle_ambient_music_results_with_assistant"
     else
         rm -rf $MODPATH/system/etc/firmware
     fi
