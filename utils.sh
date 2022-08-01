@@ -2,16 +2,6 @@
 
 # Check which platform should be used
 check_install_type() {
-  if [ ! -f "$MAGISK_CURRENT_RIRU_MODULE_PATH/api_version" ] && [ ! -f "/data/adb/riru/api_version" ] && [ ! -f "/data/adb/riru/api_version.new" ]; then
-    if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
-      ui_print "- Using Magisk Zygisk"
-      MODULE_TYPE=2
-    else
-      ui_print "- Using Normal version"
-    fi
-  fi
-  RIRU_API=$(cat "$MAGISK_CURRENT_RIRU_MODULE_PATH/api_version") || RIRU_API=$(cat "/data/adb/riru/api_version.new") || RIRU_API=$(cat "/data/adb/riru/api_version") || RIRU_API=0
-  [ "$RIRU_API" -eq "$RIRU_API" ] || RIRU_API=0
   ui_print "- Riru API version: $RIRU_API"
   if [ "$RIRU_API" -lt $RIRU_MODULE_MIN_API_VERSION ]; then
     ui_print "! Riru $RIRU_MODULE_MIN_RIRU_VERSION_NAME or above is required."
@@ -23,7 +13,6 @@ check_install_type() {
     fi
   else
     MODULE_TYPE=3
-    ui_print "- Riru Detected !"
     ui_print "- Using Riru instead of Zygisk"
   fi
 }

@@ -5,21 +5,27 @@
 
 [ -z "$MAGISKTMP" ] && MAGISKTMP=/sbin
 
-check_install_type
+if [ -f $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh ]; then
+  ui_print "- Load $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh"
+  # shellcheck disable=SC1090
+  . $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh
+  check_install_type
+elif [ -f /data/adb/riru/util_functions.sh ]; then
+    ui_print "- Load /data/adb/riru/util_functions.sh"
+    . /data/adb/riru/util_functions.sh
+    check_install_type
+else
+    if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
+      MODULE_TYPE=2
+      ui_print "- Using to Magisk Zygisk"
+    else
+      ui_print "- Using Normal version"
+    fi
+fi
 
 if [ $MODULE_TYPE -eq 2 ]; then
     mv "$ZYGISK_LIB_PATH" "$MODPATH/zygisk"
 elif [ $MODULE_TYPE -eq 3 ]; then
-    if [ -f $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh ]; then
-      ui_print "- Load $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh"
-      # shellcheck disable=SC1090
-      . $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh
-    else
-      if [ -f /data/adb/riru/util_functions.sh ]; then
-        ui_print "- Load /data/adb/riru/util_functions.sh"
-        . /data/adb/riru/util_functions.sh
-      fi
-    fi
 
     enforce_install_from_magisk_app
     api_level_arch_detect
@@ -203,11 +209,11 @@ fi
 
 if [ "$(getprop ro.product.vendor.name)" == "coral" ] || [ "$(getprop ro.product.vendor.name)" == "flame" ]; then
     echo "- Pixel 4/XL Detected !" >> $logfile
-    if [ $MODULE_TYPE -eq 2 ] then
+    if [ $MODULE_TYPE -eq 2 ]; then
         for i in $MODPATH/zygisk/*; do
             sed -i -e "s/com.google.android.xx/com.google.android.as/g" $i
         done
-    elif [ $MODULE_TYPE -eq 3 ] then
+    elif [ $MODULE_TYPE -eq 3 ]; then
         for i in $MODPATH/riru/*/*; do
             sed -i -e "s/com.google.android.xx/com.google.android.as/g" $i
         done
