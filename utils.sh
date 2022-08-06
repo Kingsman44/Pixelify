@@ -699,3 +699,48 @@ drop_sys() {
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
 }
+
+ok_google_hotword() {
+    if [ $NEWAPI -ge 30 ]; then
+        print ""
+        print "  Do you want to add Hotword Blobs for OK GOOGLE?"
+        print "   Vol Up += Yes"
+        print "   Vol Down += No"
+        no_vk "OK_GOOGLE_HOTWORD"
+        if $VKSEL; then
+            mkdir -p $MODPATH/system/vendor/etc
+            if [ -f /data/adb/modules/Pixelify/system/vendor/etc/audio_policy_configuration.xml ]; then
+                cp -f /data/adb/modules/Pixelify/system/vendor/etc/audio_policy_configuration.xml $MODPATH/system/vendor/etc/audio_policy_configuration.xml
+            else
+                if [ -z "$(grep 'hotword input' /vendor/etc/audio_policy_configuration.xml)" ]; then
+                    cp -f /vendor/etc/audio_policy_configuration.xml $MODPATH/system/vendor/etc/audio_policy_configuration.xml
+                    if [ -z "$(grep "<audioPolicyConfiguration version=\"7.0\"" $MODPATH/system/vendor/etc/audio_policy_configuration.xml)" ]; then
+                        sed -i -e '
+                        /<\/mixPorts>/i\
+                                        <mixPort name="hotword input" role="sink" flags="AUDIO_INPUT_FLAG_HW_HOTWORD" maxActiveCount="0" >\
+                                            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"\
+                                                     samplingRates="8000,11025,12000,16000,22050,24000,32000,44100,48000"\
+                                                     channelMasks="AUDIO_CHANNEL_IN_MONO AUDIO_CHANNEL_IN_STEREO"\/>\
+                                        <\/mixPort>
+                        ' $MODPATH/system/vendor/etc/audio_policy_configuration.xml
+                    else 
+                        sed -i -e '
+                        /<\/mixPorts>/i\
+                                        <mixPort name="hotword input" role="sink" flags="AUDIO_INPUT_FLAG_HW_HOTWORD" maxActiveCount="0" >\
+                                            <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"\
+                                                     samplingRates="8000 11025 12000 16000 22050 24000 32000 44100 48000"\
+                                                     channelMasks="AUDIO_CHANNEL_IN_MONO AUDIO_CHANNEL_IN_STEREO"\/>\
+                                        <\/mixPort>
+                        ' $MODPATH/system/vendor/etc/audio_policy_configuration.xml
+                    fi
+                    sed -i -e '
+                    /<\/routes>/i\
+                                    <route type="mix" sink="hotword input"\
+                                           sources="Built-In Mic,Built-In Back Mic,Wired Headset Mic,BT SCO Headset Mic,FM Tuner,Telephony Rx"\/>
+                    ' $MODPATH/system/vendor/etc/audio_policy_configuration.xml
+                fi
+            fi                                   
+            tar -xf $MODPATH/files/hotword.tar.xz -C $MODPATH
+        fi
+    fi
+}

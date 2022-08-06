@@ -39,6 +39,9 @@ ADD_CALL_SCREENING_FILES=1
 # BAckup Lang Specific files for Call Screenining in DE,JP,IT,FR..
 BACKUP_CALL_SCREENING_FILES=1
 
+# Ok google fix Google hotword
+OK_GOOGLE_HOTWORD=0
+
 # Enable Next Generation Assistant
 ENABLE_NGA=1
 
