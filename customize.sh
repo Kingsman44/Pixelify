@@ -97,7 +97,7 @@ tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
 chmod 0755 $MODPATH/addon/*
 
-if [ !-z "$(getprop ro.oplus.image.system.version)" ] && [ $NEW_API -ge 31 ]; then
+if [ -n "$(getprop ro.oplus.image.system.version)" ] && [ $API -ge 31 ]; then
     TARGET_DEVICE_OP12=1
 fi
 
