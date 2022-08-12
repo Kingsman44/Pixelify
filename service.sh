@@ -18,7 +18,7 @@ TARGET_LOGGING=1
 temp=""
 
 pm_enable() {
-    pm enable $1 > /dev/null 2>&1
+    pm enable $1 >/dev/null 2>&1
     log "Enabling $1"
 }
 
@@ -35,13 +35,13 @@ set_prop() {
 }
 
 bootlooped() {
-    echo -n >> $MODDIR/disable
+    echo -n >>$MODDIR/disable
     log "- Bootloop detected"
     #echo "$temp" >> /sdcard/Pixelify/logs.txt
     #logcat -d >> /sdcard/Pixelify/boot_logs.txt
     rip="$(logcat -d)"
     rm -rf $MODDIR/boot_logs.txt
-    echo "$rip" >> $MODDIR/boot_logs.txt
+    echo "$rip" >>$MODDIR/boot_logs.txt
     cp -Tf $MODDIR/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
     #echo "$rip" >> /sdcard/Pixelify/boot_logs.txt
     sleep .5
@@ -81,21 +81,6 @@ log "Service Started"
 # Call Screening
 cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
 
-# GBoard
-patch_gboard
-
-# GoogleFit
-bool_patch DeviceStateFeature $FIT
-bool_patch TestingFeature $FIT
-bool_patch Sync__sync_after_promo_shown $FIT
-bool_patch Sync__use_experiment_flag_from_promo $FIT
-bool_patch Promotions $FIT
-bool_patch googler $FIT
-bool_patch dasher $FIT
-
-# Turbo
-bool_patch AdaptiveCharging__v1_enabled $TURBO
-
 # Wellbeing
 pm_enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity
 
@@ -134,17 +119,21 @@ CPU_ABI=$(getprop ro.product.cpu.api)
 sleep 5
 ZYGOTE_PID1=$(pidof "$MAIN_ZYGOTE_NICENAME")
 echo "1z is $ZYGOTE_PID1"
+device_config put privacy location_accuracy_enabled true
 
 # Wait for SystemUI to start
 sleep 10
 SYSUI_PID1=$(pidof "$MAIN_SYSUI_NICENAME")
 echo "1s is $SYSUI_PID1"
+device_config put privacy location_accuracy_enabled true
 
 sleep 15
 ZYGOTE_PID2=$(pidof "$MAIN_ZYGOTE_NICENAME")
 SYSUI_PID2=$(pidof "$MAIN_SYSUI_NICENAME")
 echo "2z is $ZYGOTE_PID2"
 echo "2s is $SYSUI_PID2"
+device_config put privacy location_accuracy_enabled true
+cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
 
 if check "$ZYGOTE_PID1" "$ZYGOTE_PID2"; then
     echo "No zygote error on step 1, ok!"
@@ -163,6 +152,9 @@ ZYGOTE_PID3=$(pidof "$MAIN_ZYGOTE_NICENAME")
 SYSUI_PID3=$(pidof "$MAIN_SYSUI_NICENAME")
 echo "3z is $ZYGOTE_PID3"
 echo "3s is $SYSUI_PID3"
+device_config put privacy location_accuracy_enabled true
+cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+am force-stop com.google.android.dialer
 
 if check "$ZYGOTE_PID2" "$ZYGOTE_PID3"; then
     echo "No zygote error on step 2, ok!"
@@ -181,7 +173,7 @@ else
 fi
 
 # Set device config
-#set_device_config
+set_device_config
 
 # Temporary Workaround for Precise Location
 device_config put privacy location_accuracy_enabled true
@@ -202,4 +194,4 @@ sleep 30
 device_config put privacy location_accuracy_enabled true
 
 log "Service Finished"
-echo "$temp" >> /sdcard/Pixelify/logs.txt
+echo "$temp" >>/sdcard/Pixelify/logs.txt
