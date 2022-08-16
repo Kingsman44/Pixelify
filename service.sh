@@ -12,7 +12,7 @@ MODDIR=${0%/*}
 . $MODDIR/utils.sh
 
 sqlite=$MODDIR/addon/sqlite3
-chmod 0755 $sqlite3
+chmod 0755 $sqlite
 
 TARGET_LOGGING=1
 temp=""
@@ -32,6 +32,67 @@ $date $tim: $@"
 set_prop() {
     setprop "$1" "$2"
     log "Setting prop $1 to $2"
+}
+
+bool_patch() {
+    file=$2
+    if [ -f $file ]; then
+        line=$(grep $1 $2 | grep false | cut -c 16- | cut -d' ' -f1)
+        for i in $line; do
+            val_false='value="false"'
+            val_true='value="true"'
+            write="${i} $val_true"
+            find="${i} $val_false"
+            log "Setting bool $(echo $i | cut -d'"' -f2) to True"
+            sed -i -e "s/${find}/${write}/g" $file
+        done
+    fi
+}
+
+bool_patch_false() {
+    file=$2
+    if [ -f $file ]; then
+        line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
+        for i in $line; do
+            val_false='value="true"'
+            val_true='value="false"'
+            write="${i} $val_true"
+            find="${i} $val_false"
+            log "Setting bool $i to False"
+            sed -i -e "s/${find}/${write}/g" $file
+        done
+    fi
+}
+
+string_patch() {
+    file=$3
+    if [ -f $file ]; then
+        str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
+        for i in $str1; do
+            str2=$(grep $i $3 | grep string | cut -c 14- | cut -d'<' -f1)
+            add="$i>$2"
+            if [ ! "$add" == "$str2" ]; then
+                log "Setting string $i to $2"
+                sed -i -e "s/${str2}/${add}/g" $file
+            fi
+        done
+    fi
+}
+
+long_patch() {
+    file=$3
+    if [ -f $file ]; then
+        lon=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1)
+        for i in $lon; do
+            str=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-2)
+            str1=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
+            add="$str\"$2"
+            if [ ! "$add" == "$str1" ]; then
+                log "Setting string $i to $2"
+                sed -i -e "s/${str1}/${add}/g" $file
+            fi
+        done
+    fi
 }
 
 bootlooped() {
@@ -152,9 +213,12 @@ ZYGOTE_PID3=$(pidof "$MAIN_ZYGOTE_NICENAME")
 SYSUI_PID3=$(pidof "$MAIN_SYSUI_NICENAME")
 echo "3z is $ZYGOTE_PID3"
 echo "3s is $SYSUI_PID3"
+
 device_config put privacy location_accuracy_enabled true
 cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
 am force-stop com.google.android.dialer
+patch_gboard
+am force-stop com.google.android.dialer com.google.android.inputmethod.latin
 
 if check "$ZYGOTE_PID2" "$ZYGOTE_PID3"; then
     echo "No zygote error on step 2, ok!"

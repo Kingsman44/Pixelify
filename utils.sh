@@ -62,38 +62,54 @@ fetch_version() {
         PCSVERSION=$(echo "$ver" | grep pcs | cut -d'=' -f2)
         PCSSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
-        if [ $NEWAPI -eq 31 ] || [ $NEWAPI -eq 32 ]; then
+        if [ $API -eq 31 ] || [ $API -eq 32 ]; then
             DPVERSION=$(echo "$ver" | grep asi-new-31 | cut -d'=' -f2)
             DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-31.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
-        elif [ $NEWAPI -eq 33 ]; then
+        elif [ $API -eq 33 ]; then
             DPVERSION=$(echo "$ver" | grep asi-new-33 | cut -d'=' -f2)
             DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-33.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         fi
-        if [ $NEW_JN_PL -eq 1 ]; then
-            PLVERSION=$(echo "$ver" | grep pl-j-new-$NEWAPI | cut -d'=' -f2)
-            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-$NEWAPI.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        if [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
+            PLVERSION=$(echo "$ver" | grep plx-32 | cut -d'=' -f2)
+            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-32.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         elif [ $NEW_PL -eq 1 ]; then
-            PLVERSION=$(echo "$ver" | grep pl-new-$NEWAPI | cut -d'=' -f2)
-            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-new-$NEWAPI.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+            PLVERSION=$(echo "$ver" | grep pl-new-$API | cut -d'=' -f2)
+            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-new-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         else
             PLVERSION=$(echo "$ver" | grep pl-$API | cut -d'=' -f2)
             PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        fi
+        if [ -z "$PLVERSION" ]; then
+            echo "! Cannot fetch latest version of Pixel Launcher" >>$logfile
+            PLVERSION=$PLVERSIONP
+        fi
+        if [ -z "$DPVERSION" ]; then
+            echo "! Cannot fetch latest version of Android System Intelligence" >>$logfile
+            DPVERSION=$DPVERSIONP
+        fi
+        if [ -z "$OSRVERSION" ]; then
+            echo "! Cannot fetch latest version of OSR" >>$logfile
+            OSRVERSION=$OSRVERSIONP
+        fi
+        if [ -z "$LWVERSION" ]; then
+            echo "! Cannot fetch latest version of Live Wallpapers" >>$logfile
+            LWVERSION=$LWVERSIONP
         fi
         rm -rf $pix/nga.txt
         rm -rf $pix/pixel.txt
         rm -rf $pix/dp.txt
         rm -rf $pix/osr.txt
-        rm -rf $pix/pl-$NEWAPI.txt
+        rm -rf $pix/pl-$API.txt
         echo "$PCSVERSION" >>$pix/pcs.txt
         echo "$NGAVERSION" >>$pix/nga.txt
         echo "$LWVERSION" >>$pix/pixel.txt
         echo "$DPVERSION" >>$pix/dp.txt
         echo "$OSRVERSION" >>$pix/osr.txt
-        echo "$PLVERSION" >>$pix/pl-$NEWAPI.txt
+        echo "$PLVERSION" >>$pix/pl-$API.txt
         OSRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/osr.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     else
-        echo "- Warning, Cannot able to fetch package version, using saved version instead" >>$logfile
+        echo "! Warning, Cannot able to fetch package version, using saved version instead" >>$logfile
         if [ ! -f $pix/nga.txt ]; then
             echo "$NGAVERSIONP" >>$pix/nga.txt
         fi
@@ -109,8 +125,8 @@ fetch_version() {
         if [ ! -f $pix/dp.txt ]; then
             echo "$DPVERSIONP" >>$pix/dp.txt
         fi
-        if [ ! -f $pix/pl-$NEWAPI.txt ]; then
-            echo "$PLVERSIONP" >>$pix/pl-$NEWAPI.txt
+        if [ ! -f $pix/pl-$API.txt ]; then
+            echo "$PLVERSIONP" >>$pix/pl-$API.txt
         fi
     fi
 }
@@ -147,14 +163,13 @@ online() {
 
 bool_patch() {
     file=$2
-    if [ -f $file ] && [ !-z $file ]; then
+    if [ -f $file ]; then
         line=$(grep $1 $2 | grep false | cut -c 16- | cut -d' ' -f1)
         for i in $line; do
             val_false='value="false"'
             val_true='value="true"'
             write="${i} $val_true"
             find="${i} $val_false"
-            [ $TARGET_LOGGING -eq 1 ] && log "Setting bool $(echo $i | cut -d'"' -f2) to True"
             sed -i -e "s/${find}/${write}/g" $file
         done
     fi
@@ -162,14 +177,13 @@ bool_patch() {
 
 bool_patch_false() {
     file=$2
-    if [ -f $file ] && [ !-z $file ]; then
+    if [ -f $file ]; then
         line=$(grep $1 $2 | grep false | cut -c 14- | cut -d' ' -f1)
         for i in $line; do
             val_false='value="true"'
             val_true='value="false"'
             write="${i} $val_true"
             find="${i} $val_false"
-            [ $TARGET_LOGGING -eq 1 ] && log "Setting bool $i to False"
             sed -i -e "s/${find}/${write}/g" $file
         done
     fi
@@ -177,13 +191,12 @@ bool_patch_false() {
 
 string_patch() {
     file=$3
-    if [ -f $file ] && [ !-z $file ]; then
+    if [ -f $file ]; then
         str1=$(grep $1 $3 | grep string | cut -c 14- | cut -d'>' -f1)
         for i in $str1; do
             str2=$(grep $i $3 | grep string | cut -c 14- | cut -d'<' -f1)
             add="$i>$2"
             if [ ! "$add" == "$str2" ]; then
-                [ $TARGET_LOGGING -eq 1 ] && log "Setting string $i to $2"
                 sed -i -e "s/${str2}/${add}/g" $file
             fi
         done
@@ -192,14 +205,13 @@ string_patch() {
 
 long_patch() {
     file=$3
-    if [ -f $file ] && [ !-z $file ]; then
+    if [ -f $file ]; then
         lon=$(grep $1 $3 | grep long | cut -c 17- | cut -d'"' -f1)
         for i in $lon; do
             str=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-2)
             str1=$(grep $i $3 | grep long | cut -c 17- | cut -d'"' -f1-3)
             add="$str\"$2"
             if [ ! "$add" == "$str1" ]; then
-                [ $TARGET_LOGGING -eq 1 ] && log "Setting string $i to $2"
                 sed -i -e "s/${str1}/${add}/g" $file
             fi
         done
@@ -418,8 +430,10 @@ oos_fix() {
         cp -rf $MODPATH/system/system_ext/. ../system
         cd /
         rm -rf $MODPATH/system/product $MODPATH/system/system_ext
-        mv $MODPATH/system/overlay $MODPATH/vendor/overlay
-        echo $REMOVE | tr ' ' '\n' | grep -v '/product'
+        mkdir -p $MODPATH/vendor/overlay
+        cp -rf $MODPATH/system/overlay/. $MODPATH/vendor/overlay
+        rm -rf $MODPATH/system/overlay
+        REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
     fi
 }
 
@@ -489,8 +503,7 @@ patch_gboard() {
     bool_patch emojify $GBOARD
     bool_patch enable_grammar_checker $GBOARD
     string_patch enable_emojify_language_tags "en" $GBOARD
-    long_patch grammar_checker_min_sentence_length 3 $GBOARD
-    string_patch grammar_checker_manifest_uri 'https://www.gstatic.com/android/keyboard/spell_checker/experiment/memory_fix/metadata_cpu_2021102041.json' $GBOARD
+    cp -Tf $GBOARD $NEW_GBOARD
 }
 
 is_monet() {
@@ -514,13 +527,13 @@ install_wallpaper() {
                 print "- Downloading Styles and Wallpapers"
                 echo " - Downloading and installing Styles and Wallpapers" >>$logfile
                 cd $MODPATH/files
-                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$NEWAPI.tar.xz -O &>/proc/self/fd/$OUTFD
+                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &>/proc/self/fd/$OUTFD
                 cd /
                 rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
                 print ""
                 print "- Installing Styles and Wallpapers"
                 print ""
-                tar -xf $MODPATH/files/wpg-$NEWAPI.tar.xz -C $MODPATH/system$product/priv-app
+                tar -xf $MODPATH/files/wpg-$API.tar.xz -C $MODPATH/system$product/priv-app
                 if [ $API -ge 31 ]; then
                     mkdir -p $MODPATH/system/product/app/PixelThemesStub
                     rm -rf $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
@@ -616,11 +629,11 @@ osr_ins() {
                     if [ ! -z "$(grep 'en-US' $i/metadata)" ]; then
                         rm -rf $i/*
                         cp -r $MODPATH/system/product/usr/srec/en-US/. $i
-                        echo " - Fixing OSR for Google TTs" >>$logfile
+                        echo " - Fixing OSR for Google TTS" >>$logfile
                     fi
                 done
 
-                # Remove 70xx or 50xx because it gonna available from systen side
+                # Remove 70xx or 50xx because it gonna available from system side
                 rm -rf /data/data/com.google.android.googlequicksearchbox/app_g3_models/en-US
 
                 print ""
@@ -701,8 +714,9 @@ drop_sys() {
 }
 
 ok_google_hotword() {
-    if [ $NEWAPI -ge 30 ]; then
+    if [ $API -ge 30 ]; then
         print ""
+        print "  (NOTE: If Ok Google working fine then dont enable it)"
         print "  Do you want to add Hotword Blobs for OK GOOGLE?"
         print "   Vol Up += Yes"
         print "   Vol Down += No"

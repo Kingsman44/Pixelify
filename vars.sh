@@ -25,7 +25,6 @@ fi
 
 # 1 - Normal, 2 - Zygisk, 3 - Riru
 MODULE_TYPE=1
-NEWAPI=$API
 CURR="NONE"
 REMOVE=""
 
@@ -35,7 +34,7 @@ NEW_JN_PL=0
 DPVERSIONP=1
 LWVERSIONP=1.6
 PLVERSIONP=1
-NGAVERSIONP=1.2
+NGAVERSIONP=1.3
 
 # Default size
 PCSSIZE="15 Mb"
@@ -83,6 +82,7 @@ FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_
 TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
 DIALER=com.google.android.dialer
 GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
+NEW_GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_override.xml
 FORCE_FILE="/sdcard/Pixelify/apps.txt"
 SPDB="/data/data/com.google.android.as/databases/superpacks.db"
 DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml

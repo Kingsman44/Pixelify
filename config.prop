@@ -13,9 +13,9 @@ ENABLE_TENSOR_UNLIMITED=1
 # Pixel 5/6 Spoofing
 ENABLE_PIXEL_SPOOFING=0
 
-# 0 - spoof to pixel 5
-# 1 - spoof to pixel 6 pro
-TARGET_USES_PIXEL5_SPOOF=0
+# 1 - spoof to pixel 5
+# 0 - spoof to pixel 6 pro
+TARGET_USES_PIXEL5_SPOOF=1
 
 # Install Device Personalistaion Services
 ENABLE_DPS=1

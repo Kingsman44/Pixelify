@@ -10,3 +10,7 @@ ro.url.legal=http://www.google.com/intl/%s/mobile/android/basic/phone-legal.html
 ro.product.needs_model_edit=false
 ro.support_one_handed_mode=true
 persist.sys.storage_picker_enabled=true
+debug.photos.p_editr.eraser=1
+debug.photos.force_pixel_eol=1
+debug.photos.eraser_camo=1
+debug.photos.eraser_suggestion=1
