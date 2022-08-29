@@ -1,7 +1,7 @@
 id=Pixelify
 name=Pixelify
-version=2.1-beta-4
-versionCode=20220816
+version=2.1-beta-5
+versionCode=20220829
 author=Kingsman44
 description=Enables pixel exclusive features :- Call Screening, Live Translate, Direct Call, Google Dialer Call Recording, Extreme Battery Saver, Hold For Me, Gboard Smart Compose, Adaptive Connectivity, Adaptive Sound, Next generation assistant, Pixel LiveWallpapers, Google Fit Heart rate and many more...
 # 0 -  Disable, 1 - Enable

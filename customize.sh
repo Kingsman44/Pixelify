@@ -17,9 +17,9 @@ elif [ -f /data/adb/riru/util_functions.sh ]; then
 else
     if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
         MODULE_TYPE=2
-        ui_print "- Using Zygisk"
+        ui_print "- Installation Type: Zygisk"
     else
-        ui_print "- Using Normal version"
+        ui_print "- Installation Type: Normal Magisk"
     fi
 fi
 
@@ -43,8 +43,8 @@ elif [ $MODULE_TYPE -eq 3 ]; then
 fi
 
 if [ $API -le 23 ]; then
-    ui_print "Error: Minimum requirements doesn't meet"
-    ui_print "android version: 7.0+"
+    ui_print " x Minimum requirements doesn't meet"
+    ui_print " x Android version: 7.0+"
     exit 1
 fi
 
@@ -52,7 +52,7 @@ rm -rf $MODPATH/lib
 
 # Check architecture
 if [ "$ARCH" != "arm" ] && [ "$ARCH" != "arm64" ] && [ "$ARCH" != "x86" ] && [ "$ARCH" != "x64" ]; then
-    abort "! Unsupported platform: $ARCH"
+    abort " x Unsupported platform: $ARCH"
 fi
 
 alias keycheck="$MODPATH/addon/keycheck"
@@ -84,6 +84,10 @@ if [ -z $exact_prop ] && [ ! -z "$(getprop ro.crdroid.build.version)" ]; then
     exact_prop="ro.product.device"
 fi
 
+if [ -z $exact_prop ] && [ ! -z "$(getprop org.elixir.version)" ]; then
+    exact_prop="org.pixelexperience.device"
+fi
+
 rm -rf $logfile
 
 echo "=============
@@ -97,7 +101,7 @@ tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
 chmod 0755 $MODPATH/addon/*
 
-if [ $NEW_API -ge 31 ] && [ -d /system_ext/oplus ]; then
+if [ $API -ge 31 ] && [ -d /system_ext/oplus ]; then
     TARGET_DEVICE_OP12=1
 fi
 
@@ -353,6 +357,7 @@ fi
 print ""
 print "- Installing Pixelify Module"
 print "- Extracting Files...."
+print ""
 echo "- Extracting Files ..." >>$logfile
 if [ $API -ge 28 ]; then
     tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
@@ -364,7 +369,6 @@ if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.mi
 fi
 
 if [ -f /sdcard/Pixelify/config.prop ] && [ $VOL_KEYS -eq 1 ]; then
-    print ""
     print "  (Config detected)"
     print "  Do you want to use config for installation?"
     print "   Vol Up += Yes"
@@ -380,7 +384,6 @@ FIRST_ONLINE_TIME=1
 echo "$var_menu" >>$logfile
 
 if [ ! -z $exact_prop ] && [ $API -ge 31 ] && [ $BETA_BUILD -eq 1 ]; then
-    print ""
     print "  Disclaimer: This Feature is in BETA"
     print "  This features is only intended to Quick Phrase."
     print "  Disabling Internal Spoofing can break OTA Update (rom dependent)"
@@ -400,7 +403,6 @@ fi
 
 [ $MAGISK_VER_CODE -ge 24000 ] && ZYGISK_P=1
 if [ $TENSOR -eq 1 ]; then
-    print ""
     print "(TENSOR CHIPSET DETECTED)"
     print "  Do you want to enable Google Photos Unlimited Backup?"
     print "  Note: Magic Eraser will only work on the Photos app provided through my GitHub page!"
@@ -417,7 +419,6 @@ if [ $TENSOR -eq 1 ]; then
 elif [ $MAGISK_VER_CODE -ge 24000 ]; then
     drop_sys
 else
-    print ""
     print "  Do you want to Spoof your device to Pixel 5/Pixel 6 Pro?"
     print "   Vol Up += Yes"
     print "   Vol Down += No"
@@ -473,7 +474,7 @@ fi
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
 db_edit com.google.android.platform.device_personalization_services boolVal 1 " Translate__enable_language_profile_quick_update" "SmartDictation__enable_selection_filtering" "SmartRecCompose__enable_compose_tc" "Translate__beta_audio_to_text_languages_in_live_caption" "Translate__translation_service_enabled" "Echo__avatar_enable_feature" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_alternatives_from_past_corrections" "SmartRecPixelSearch__enable_gboard_suggestion" "SmartRecPixelSearch__enable_spelling_correction" "Captions__enable_language_detection" "Echo__search_enable_mdp_play_results" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "Echo__smartspace_enable_ridesharing_eta" "Echo__smartspace_enable_food_delivery_eta" "Echo__smartspace_enable_eta_doordash" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor" "Echo__smartspace_enable_echo_unified_settings" "Echo__smartspace_enable_dark_launch_outlook_events" "Echo__smartspace_enable_step_predictor" "Echo__smartspace_enable_nap" "Echo__smartspace_enable_paired_device_connections" "Echo__smartspace_dedupe_fast_pair_notification" "Echo__smartspace_enable_nudge" "Echo__smartspace_enable_package_delivery" "Echo__smartspace_enable_outlook_events" "Echo__smartspace_gaia_twiddler" "Echo__smartspace_enable_eta_lyft" "Echo__smartspace_enable_sensitive_notification_twiddler" "Screenshot__enable_covid_card_action" "Screenshot__enable_lens_screenshots_search_action" "Screenshot__enable_lens_screenshots_similar_styles_action" "Screenshot__enable_lens_screenshots_translate_action" "Screenshot__enable_quick_share_smart_action" "Screenshot__enable_screenshot_notification_smart_actions" "Screenshot__enable_add_to_wallet_title" "Screenshot__can_use_gms_core_to_save_boarding_pass" "Screenshot__can_use_gpay_to_save_boarding_pass" "Echo__smartspace_enable_cross_device_timer" "Echo__smartspace_show_cross_device_timer_label" "Settings__enable_internal_settings" "People__enable_call_log_signals" "People__enable_contacts" "People__enable_dictation_client" "People__enable_hybrid_hotseat_client" "People__enable_notification_common" "People__enable_notification_signals" "People__enable_package_tracker" "People__enable_people_pecan" "People__enable_people_search_content" "People__enable_priority_suggestion_client" "People__enable_profile_signals" "People__enable_sharesheet_client" "People__enable_sms_signals" "GellerDataShare__enable_data_capture" "GellerDataShare__enable_data_fetch" "GellerDataShare__enable_settings_opt_in_switch" "SmartRecOverviewChips__enable_smartrec_for_overview_chips" "SmartRecOverviewChips__enable_settings_card_generator" "SmartRecOverviewChips__enable_reflection_generator" "SmartRecOverviewChips__enable_action_boost_generator" "SmartRecQuickSearchBox__enable_action_boost_generator" "SmartRecOverviewChips__enable_matchmaker_generator" "Echo__smartspace_enable_subcard_logging" "Echo__enable_widget_recommendations" "Echo__search_play_enable_spell_correction" "Echo__silo_enable_persistence" "Echo__settings_search_debug" "Echo__enable_people_module" "Echo__enable_nudge_debug_mode"
 # db_edit com.google.android.platform.device_personalization_services boolVal 0  "SmartRecPixelSearch__spelling_checker_superpacks_require_device_idle" "SmartRecPixelSearch__spelling_checker_superpacks_require_unmetered_connection"
-db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH"
+db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
 
 if [ $DPAS -eq 1 ]; then
     echo " - Installing Android System Intelligence" >>$logfile
@@ -512,11 +513,10 @@ if [ $DPAS -eq 1 ]; then
                     print "- Creating Backup"
                 else
                     print ""
-                    print "!! Warning !!"
-                    print " No internet detected"
+                    print " ! No internet detected"
                     print ""
-                    print "- Using Old backup for now."
-                    echo " - Using Old backup for Android System Intelligence due to no internet services" >>$logfile
+                    print "! Using Old backup for now."
+                    echo " ! Using Old backup for Android System Intelligence due to no internet services" >>$logfile
                     print ""
                 fi
             else
@@ -577,8 +577,7 @@ if [ $DPAS -eq 1 ]; then
                     print " - Done"
                 fi
             else
-                print "!! Warning !!"
-                print " No internet detected"
+                print " ! No internet detected"
                 print ""
                 print "- Skipping Android System Intelligence"
                 print ""
@@ -639,7 +638,7 @@ if [ -d /data/data/$DIALER ]; then
         db_edit com.google.android.dialer floatVal "1.0" "G__call_screen_audio_stitching_downlink_volume_multiplier"
         db_edit com.google.android.dialer floatVal "0.6" "G__call_screen_audio_stitching_uplink_volume_multiplier"
         db_edit com.google.android.dialer intVal "1000" "G__embedding_generation_step_size"
-        db_edit com.google.android.dialer stringVal 'CgxhdGxhcy1tb2RlbHMSpAESYmh0dHBzOi8vZGwuZ29vZ2xlLmNvbS9oZm0vWkpiM2xJODEybzM3UnFMTVFwYnlRRWo5ZjcwYU9FRm40SjJ5ckNwblNRWWlpSlBiS0hKQkFORHVjb0lONDA5Zy92MjUuemlwIMWr0QgqKDUxY2MzOTA3NGNiZmQ5NzBkMWIxYmJmMWMxZmEyMmJhYjgwMDdiYzg6D2RldGVjdGlvbl9tb2RlbBiAxgpQt/WviwZqCAgAEAIggPUk' "G__atlas_mdd_ph_config"
+        # db_edit com.google.android.dialer stringVal 'CgxhdGxhcy1tb2RlbHMSpAESYmh0dHBzOi8vZGwuZ29vZ2xlLmNvbS9oZm0vWkpiM2xJODEybzM3UnFMTVFwYnlRRWo5ZjcwYU9FRm40SjJ5ckNwblNRWWlpSlBiS0hKQkFORHVjb0lONDA5Zy92MjUuemlwIMWr0QgqKDUxY2MzOTA3NGNiZmQ5NzBkMWIxYmJmMWMxZmEyMmJhYjgwMDdiYzg6D2RldGVjdGlvbl9tb2RlbBiAxgpQt/WviwZqCAgAEAIggPUk' "G__atlas_mdd_ph_config"
         if [ $CUSTOM_CALL_SCREEN -eq 0 ]; then
             print " "
             print "- Please set your language to"
@@ -685,8 +684,7 @@ if [ -d /data/data/$DIALER ]; then
                             print ""
                         fi
                     else
-                        print "!! Warning !!"
-                        print " No internet detected"
+                        print " ! No internet detected"
                         print ""
                         print "- Skipping CallScreening Resources."
                         print ""
@@ -826,12 +824,11 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                         cp -Tf $MODPATH/files/nga.tar.xz /sdcard/Pixelify/backup/nga.tar.xz
                         echo "$NGAVERSION" >>/sdcard/Pixelify/version/nga.txt
                     else
-                        print "!! Warning !!"
-                        print " No internet detected"
+                        print " ! No internet detected"
                         print ""
-                        print "- Using Old backup for now."
+                        print " ! Using Old backup for now."
                         print ""
-                        echo " - using old backup for NGA Resources due to no internet" >>$logfile
+                        echo " ! using old backup for NGA Resources due to no internet" >>$logfile
                     fi
                 else
                     echo " - using old backup for NGA Resources" >>$logfile
@@ -851,7 +848,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                 online
                 if [ $internet -eq 1 ]; then
                     echo " - Downloading and Installing NGA Resources" >>$logfile
-                    print "  Downloading NGA Resources"
+                    print " - Downloading NGA Resources"
                     cd $MODPATH/files
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new.tar.xz -o nga.tar.xz -O &>/proc/self/fd/$OUTFD
                     cd /
@@ -876,8 +873,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
                         print ""
                     fi
                 else
-                    print "!! Warning !!"
-                    print " No internet detected"
+                    print " ! No internet detected"
                     print ""
                     print "- Skipping NGA Resources."
                     print ""
@@ -983,12 +979,11 @@ if [ $API -ge 28 ]; then
                         echo " - Creating Backup for Pixel Wallpapers" >>$logfile
                         echo "$LWVERSION" >>/sdcard/Pixelify/version/pixel.txt
                     else
-                        print "!! Warning !!"
-                        print " No internet detected"
+                        print " ! No internet detected"
                         print ""
-                        print "- Using Old backup for now."
+                        print " ! Using Old backup for now."
                         print ""
-                        echo " - Using old Backup for Pixel Wallpapers due to no internet" >>$logfile
+                        echo " ! Using old Backup for Pixel Wallpapers due to no internet" >>$logfile
                     fi
                 fi
             fi
@@ -1030,7 +1025,7 @@ if [ $API -ge 28 ]; then
                 print ""
                 print "- Installing Pixel LiveWallpapers"
                 tar -xf $MODPATH/files/pixel.tar.xz -C $MODPATH/system$product
-                pm install $MODPATH/system$product/priv-app/PixelLiveWallpaperPrebuilt/*.apk
+                pm install $MODPATH/system$product/priv-app/PixelLiveWallpaperPrebuilt/*.apk &>/dev/null
 
                 if [ $API -le 28 ]; then
                     mv $MODPATH/system/overlay/Breel*.apk $MODPATH/vendor/overlay
@@ -1061,12 +1056,11 @@ if [ $API -ge 28 ]; then
                 install_wallpaper
                 WALL_DID=1
             else
-                print "!! Warning !!"
-                print " No internet detected"
+                print " ! No internet detected"
                 print ""
-                print "- Skipping Pixel LiveWallpaper"
+                print " ! Skipping Pixel LiveWallpaper"
                 print ""
-                echo " - Skipping Pixel Wallpapers due to no internet" >>$logfile
+                echo " ! Skipping Pixel Wallpapers due to no internet" >>$logfile
             fi
         else
             echo " - Skipping Pixel Wallpapers" >>$logfile
@@ -1087,6 +1081,9 @@ print "   Vol Down += No"
 no_vk "ENABLE_BOOTANIMATION"
 if $VKSEL; then
     echo " - Installing Pixel Bootanimation" >>$logfile
+    if [ $TARGET_DEVICE_OP12 -eq 1 ]; then
+        REMOVE="$REMOVE /system/product/media/bootanimation.zip /system/product/media/bootanimation-dark.zip"
+    fi
     if [ -f /system/media/bootanimation.zip ]; then
         MEDIA_PATH=system/media
     else
@@ -1096,7 +1093,7 @@ if $VKSEL; then
     if [ ! -z "$boot_res" ]; then
         print " - Detected $boot_res Resolution Bootanimation"
     else
-        print " - Warning: Failed to detect Resolution of Bootanimation"
+        print " ! Failed to detect Resolution of Bootanimation"
     fi
     print ""
     mkdir -p $MODPATH/$MEDIA_PATH
@@ -1136,6 +1133,7 @@ if $VKSEL; then
             print " - Using 1080p resolution pixel Bootanimation"
             ;;
         esac
+        print ""
         cp -f $MODPATH/$MODPATH/bootanimation.zip $MODPATH/$MODPATH/bootanimation-dark.zip
     fi
 else
@@ -1196,12 +1194,11 @@ if [ $API -ge 29 ]; then
                         echo " - Creating Backup for Pixel Launcher" >>$logfile
                         echo "$PLVERSION" >>/sdcard/Pixelify/version/pl-$API.txt
                     else
-                        print "!! Warning !!"
-                        print " No internet detected"
+                        print " ! No internet detected"
                         print ""
-                        print "- Using Old backup for now."
+                        print " ! Using Old backup for now."
                         print ""
-                        echo " - Using old Backup for Pixel Launcher due to no internet" >>$logfile
+                        echo " ! Using old Backup for Pixel Launcher due to no internet" >>$logfile
                     fi
                 fi
             fi
@@ -1277,12 +1274,11 @@ if [ $API -ge 29 ]; then
                     install_wallpaper
                 fi
             else
-                print "!! Warning !!"
-                print " No internet detected"
+                print " ! No internet detected"
                 print ""
-                print "- Skipping Pixel launcher"
+                print " ! Skipping Pixel launcher"
                 print ""
-                echo " - Skipping Pixel Launcher due to no internet" >>$logfile
+                echo " ! Skipping Pixel Launcher due to no internet" >>$logfile
                 rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
             fi
         else
@@ -1310,6 +1306,7 @@ fi
 # fi
 rm -rf $MODPATH/system/product/overlay/PixelifyGsan*.apk
 rm -rf $MODPATH/system/product/overlay/GInterOverlay.apk
+rm -rf $MODPATH/system/fonts
 
 # Google Settings service
 if [ $API -ge 28 ]; then
@@ -1401,7 +1398,6 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     fi
 
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
-        print ""
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard a system app"
         echo " - Making Google Keyboard a system app" >>$logfile
@@ -1411,7 +1407,6 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         #mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
         echo "gboard" >>$pix/app2.txt
     elif [ ! -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
-        print ""
         print "- GBoard is not installed as a system app !!"
         echo " - Making Google Keyboard as system app" >>$logfile
         print "- Making Gboard a system app"
@@ -1432,12 +1427,11 @@ if [ ! -z $(pm list packages com.google.android.tts) ]; then
     fi
 else
     print ""
-    print " ! Warning !"
-    print " - It is recommended to install Google TTS"
-    print " - If you face any problem regarding call screening or call recording"
-    [ $API -ge 31 ] && print " - It is required for Live caption data downloading"
-    print " - Then Install GoogleTTS via playstore"
-    print " - Reinstall module to make it system app"
+    print " ! It is recommended to install Google TTS"
+    print " ! If you face any problem regarding call screening or call recording"
+    [ $API -ge 31 ] && print " ! It is required for Live caption data downloading"
+    print " ! Then Install GoogleTTS via playstore"
+    print " ! Reinstall module to make it system app"
     print ""
 fi
 
@@ -1535,8 +1529,18 @@ rm -rf $MODPATH/files
 rm -rf $MODPATH/spoof.prop
 rm -rf $MODPATH/inc.prop
 
+# create Uninstaller
+[ -f $PIXELIFYUNS ] && rm -rf $PIXELIFYUNS
+mkdir -p $PIXELIFYUNS
+mv $MODPATH/module-uninstaller.prop $PIXELIFYUNS/module.prop
+mv $MODPATH/service-uninstaller.sh $PIXELIFYUNS/service.sh
+cp -f $MODPATH/deviceconfig.txt $PIXELIFYUNS/deviceconfig.txt
+cp -r $MODPATH/addon $PIXELIFYUNS
+
 echo " 
-- Replacing apps $REMOVE
+- Replacing apps -
+$REMOVE
+------------------
 " >>$logfile
 
 echo " ---- Installation Finished ----" >>$logfile

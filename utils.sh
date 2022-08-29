@@ -7,13 +7,15 @@ check_install_type() {
         ui_print "! Riru $RIRU_MODULE_MIN_RIRU_VERSION_NAME or above is required."
         if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
             MODULE_TYPE=2
-            ui_print "- Switching to Magisk Zygisk"
+            ui_print "- Changing installation mode to zygisk"
+            ui_print "- Installation Type: Zygisk"
         else
-            ui_print "- Using Normal version"
+            ui_print "- Changing installation mode to normal magisk"
+            ui_print "- Installation Type: Normal Magisk"
         fi
     else
         MODULE_TYPE=3
-        ui_print "- Using Riru instead of Zygisk"
+        ui_print "- Installation Type: Riru"
     fi
 }
 
@@ -109,7 +111,7 @@ fetch_version() {
         OSRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/osr.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     else
-        echo "! Warning, Cannot able to fetch package version, using saved version instead" >>$logfile
+        echo " ! Cannot able to fetch package version, using saved version instead" >>$logfile
         if [ ! -f $pix/nga.txt ]; then
             echo "$NGAVERSIONP" >>$pix/nga.txt
         fi
@@ -424,16 +426,10 @@ oos_fix() {
         echo " - Apply fixup for OOS 12/ Color OS 12" >>$logfile
         print ""
         print " -  Applying Fix for OOS 12"
-        cd $MODPATH/system/product/
-        cp -rf $MODPATH/system/product/. $MODPATH/system
-        cd $MODPATH/system/system_ext/
-        cp -rf $MODPATH/system/system_ext/. ../system
-        cd /
-        rm -rf $MODPATH/system/product $MODPATH/system/system_ext
-        mkdir -p $MODPATH/vendor/overlay
-        cp -rf $MODPATH/system/overlay/. $MODPATH/vendor/overlay
-        rm -rf $MODPATH/system/overlay
-        REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
+        mkdir -p $MODPATH/system_ext/overlay
+        cp -rf $MODPATH/product/overlay/. $MODPATH/system_ext/overlay
+        rm -rf $MODPATH/product/overlay
+        #REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
     fi
 }
 
@@ -578,12 +574,11 @@ osr_ins() {
                     cp -Tf $MODPATH/files/osr.tar.xz /sdcard/Pixelify/backup/osr.tar.xz
                     echo "$OSRVERSION" >>/sdcard/Pixelify/version/osr.txt
                 else
-                    print "!! Warning !!"
-                    print " No internet detected"
+                    print " ! No internet detected"
                     print ""
-                    print "- Using Old backup for now."
+                    print " ! Using Old backup for now."
                     print ""
-                    echo " - using old backup for Google offline speech recognition due to no internet" >>$logfile
+                    echo " ! using old backup for Google offline speech recognition due to no internet" >>$logfile
                 fi
             else
                 echo " - using old backup for Google offline speech recognition" >>$logfile
@@ -655,15 +650,14 @@ osr_ins() {
                     print ""
                 fi
             else
-                print "!! Warning !!"
-                print " No internet detected"
+                print " ! No internet detected"
                 print ""
-                print "- Skipping Google offline speech recognition."
+                print " ! Skipping Google offline speech recognition."
                 print ""
-                echo " - skipping Google offline speech recognition due to no internet" >>$logfile
+                echo " ! Skipping Google offline speech recognition due to no internet" >>$logfile
             fi
         else
-            echo " - skipping Google offline speech recognition" >>$logfile
+            echo " - Skipping Google offline speech recognition" >>$logfile
         fi
     fi
 }
@@ -714,9 +708,7 @@ drop_sys() {
 }
 
 ok_google_hotword() {
-    if [ $API -ge 30 ]; then
-        print ""
-        print "  (NOTE: If Ok Google working fine then dont enable it)"
+    if [ $API -ge 28 ]; then
         print "  Do you want to add Hotword Blobs for OK GOOGLE?"
         print "   Vol Up += Yes"
         print "   Vol Down += No"
@@ -754,7 +746,11 @@ ok_google_hotword() {
             #         ' $MODPATH/system/vendor/etc/audio_policy_configuration.xml
             #     fi
             # fi
-            tar -xf $MODPATH/files/hotword.tar.xz -C $MODPATH
+            if [ $API -ge 30 ]; then
+                tar -xf $MODPATH/files/hotword.tar.xz -C $MODPATH
+            else
+                tar -xf $MODPATH/files/hotword-9.tar.xz -C $MODPATH/system$product/priv-app
+            fi
         fi
     fi
 }

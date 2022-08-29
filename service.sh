@@ -121,20 +121,6 @@ check() {
     $RESULT
 }
 
-set_device_config() {
-    while read p; do
-        if [ ! -z "$(echo $p)" ]; then
-            if [ "$(echo $p | head -c 1)" != "#" ]; then
-                name="$(echo $p | cut -d= -f1)"
-                namespace="$(echo $name | cut -d/ -f1)"
-                key="$(echo $name | cut -d/ -f2)"
-                value="$(echo $p | cut -d= -f2)"
-                device_config put $namespace $key $value
-            fi
-        fi
-    done <$MODDIR/deviceconfig.txt
-}
-
 mkdir -p /sdcard/Pixelify
 
 log "Service Started"
@@ -144,9 +130,6 @@ cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/fi
 
 # Wellbeing
 pm_enable com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.walkingdetection.ui.WalkingDetectionActivity
-
-# Temporary Workaround for Precise Location
-device_config put privacy location_accuracy_enabled true
 
 if [ $(grep CallScreen $MODDIR/var.prop | cut -d'=' -f2) -eq 1 ]; then
     mkdir -p /data/data/com.google.android.dialer/files/phenotype
@@ -180,20 +163,18 @@ CPU_ABI=$(getprop ro.product.cpu.api)
 sleep 5
 ZYGOTE_PID1=$(pidof "$MAIN_ZYGOTE_NICENAME")
 echo "1z is $ZYGOTE_PID1"
-device_config put privacy location_accuracy_enabled true
 
 # Wait for SystemUI to start
 sleep 10
 SYSUI_PID1=$(pidof "$MAIN_SYSUI_NICENAME")
 echo "1s is $SYSUI_PID1"
-device_config put privacy location_accuracy_enabled true
 
 sleep 15
 ZYGOTE_PID2=$(pidof "$MAIN_ZYGOTE_NICENAME")
 SYSUI_PID2=$(pidof "$MAIN_SYSUI_NICENAME")
 echo "2z is $ZYGOTE_PID2"
 echo "2s is $SYSUI_PID2"
-device_config put privacy location_accuracy_enabled true
+
 cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
 
 if check "$ZYGOTE_PID1" "$ZYGOTE_PID2"; then
@@ -214,7 +195,6 @@ SYSUI_PID3=$(pidof "$MAIN_SYSUI_NICENAME")
 echo "3z is $ZYGOTE_PID3"
 echo "3s is $SYSUI_PID3"
 
-device_config put privacy location_accuracy_enabled true
 cp -Tf $MODDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
 am force-stop com.google.android.dialer
 patch_gboard
@@ -238,24 +218,6 @@ fi
 
 # Set device config
 set_device_config
-
-# Temporary Workaround for Precise Location
-device_config put privacy location_accuracy_enabled true
-
-sleep 30
-device_config put privacy location_accuracy_enabled true
-
-sleep 30
-device_config put privacy location_accuracy_enabled true
-
-sleep 30
-device_config put privacy location_accuracy_enabled true
-
-sleep 30
-device_config put privacy location_accuracy_enabled true
-
-sleep 30
-device_config put privacy location_accuracy_enabled true
 
 log "Service Finished"
 echo "$temp" >>/sdcard/Pixelify/logs.txt

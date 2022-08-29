@@ -78,6 +78,7 @@ else
 fi
 
 # Default Locations
+PIXELIFYUNS=/data/adb/modules/PixelifyUninstaller
 FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
 TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
 DIALER=com.google.android.dialer
