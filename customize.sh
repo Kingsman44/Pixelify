@@ -103,6 +103,8 @@ chmod 0755 $MODPATH/addon/*
 
 if [ $API -ge 31 ] && [ -d /system_ext/oplus ]; then
     TARGET_DEVICE_OP12=1
+elif [ $API -ge 31 ] && [ ! -z "$(getprop ro.build.version.oneui)" ]; then
+    TARGET_DEVICE_ONEUI=1
 fi
 
 online
@@ -363,7 +365,7 @@ if [ $API -ge 28 ]; then
     tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
 fi
 
-if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.miui.ui.version.code)" ] || [ "$(getprop ro.product.vendor.manufacturer)" == "samsung" ] && [ $API -le 30 ]; then
+if [ ! -z "$(getprop ro.rom.version | grep Oxygen)" ] || [ ! -z "$(getprop ro.miui.ui.version.code)" ] || [ ! -z "$(getprop ro.build.version.oneui)" ] && [ $API -le 30 ]; then
     echo " - Oxygen OS or MiUI or One Ui Rom Detected" >>$logfile
     SHOW_GSS=0
 fi
@@ -472,9 +474,9 @@ fi
 [ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware && NOT_REQ_SOUND_PATCH=1
 
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
-db_edit com.google.android.platform.device_personalization_services boolVal 1 " Translate__enable_language_profile_quick_update" "SmartDictation__enable_selection_filtering" "SmartRecCompose__enable_compose_tc" "Translate__beta_audio_to_text_languages_in_live_caption" "Translate__translation_service_enabled" "Echo__avatar_enable_feature" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_alternatives_from_past_corrections" "SmartRecPixelSearch__enable_gboard_suggestion" "SmartRecPixelSearch__enable_spelling_correction" "Captions__enable_language_detection" "Echo__search_enable_mdp_play_results" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "Echo__smartspace_enable_ridesharing_eta" "Echo__smartspace_enable_food_delivery_eta" "Echo__smartspace_enable_eta_doordash" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor" "Echo__smartspace_enable_echo_unified_settings" "Echo__smartspace_enable_dark_launch_outlook_events" "Echo__smartspace_enable_step_predictor" "Echo__smartspace_enable_nap" "Echo__smartspace_enable_paired_device_connections" "Echo__smartspace_dedupe_fast_pair_notification" "Echo__smartspace_enable_nudge" "Echo__smartspace_enable_package_delivery" "Echo__smartspace_enable_outlook_events" "Echo__smartspace_gaia_twiddler" "Echo__smartspace_enable_eta_lyft" "Echo__smartspace_enable_sensitive_notification_twiddler" "Screenshot__enable_covid_card_action" "Screenshot__enable_lens_screenshots_search_action" "Screenshot__enable_lens_screenshots_similar_styles_action" "Screenshot__enable_lens_screenshots_translate_action" "Screenshot__enable_quick_share_smart_action" "Screenshot__enable_screenshot_notification_smart_actions" "Screenshot__enable_add_to_wallet_title" "Screenshot__can_use_gms_core_to_save_boarding_pass" "Screenshot__can_use_gpay_to_save_boarding_pass" "Echo__smartspace_enable_cross_device_timer" "Echo__smartspace_show_cross_device_timer_label" "Settings__enable_internal_settings" "People__enable_call_log_signals" "People__enable_contacts" "People__enable_dictation_client" "People__enable_hybrid_hotseat_client" "People__enable_notification_common" "People__enable_notification_signals" "People__enable_package_tracker" "People__enable_people_pecan" "People__enable_people_search_content" "People__enable_priority_suggestion_client" "People__enable_profile_signals" "People__enable_sharesheet_client" "People__enable_sms_signals" "GellerDataShare__enable_data_capture" "GellerDataShare__enable_data_fetch" "GellerDataShare__enable_settings_opt_in_switch" "SmartRecOverviewChips__enable_smartrec_for_overview_chips" "SmartRecOverviewChips__enable_settings_card_generator" "SmartRecOverviewChips__enable_reflection_generator" "SmartRecOverviewChips__enable_action_boost_generator" "SmartRecQuickSearchBox__enable_action_boost_generator" "SmartRecOverviewChips__enable_matchmaker_generator" "Echo__smartspace_enable_subcard_logging" "Echo__enable_widget_recommendations" "Echo__search_play_enable_spell_correction" "Echo__silo_enable_persistence" "Echo__settings_search_debug" "Echo__enable_people_module" "Echo__enable_nudge_debug_mode"
+db_edit com.google.android.platform.device_personalization_services boolVal 1 " Translate__enable_language_profile_quick_update" "SmartDictation__enable_selection_filtering" "SmartRecCompose__enable_compose_tc" "Translate__beta_audio_to_text_languages_in_live_caption" "Translate__enable_chronicle_migration" "Translate__use_translate_kit_streaming_api" "SpeechRecognitionService__resumable_diarization_enabled" "Echo__smartspace_enable_grocery" "Echo_smartspace__enable_is_debug" "Echo_smartspace__enable_hotel_smartspace_aiai" "Echo_smartspace__enable_flight_landing_smartspace_aiai" "Echo__smartspace_enable_dwb_bedtime_predictor" "Translate__translation_service_enabled" "Echo__avatar_enable_feature" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_alternatives_from_past_corrections" "SmartRecPixelSearch__enable_gboard_suggestion" "SmartRecPixelSearch__enable_spelling_correction" "Captions__enable_language_detection" "Echo__search_enable_mdp_play_results" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "Echo__smartspace_enable_ridesharing_eta" "Echo__smartspace_enable_food_delivery_eta" "Echo__smartspace_enable_eta_doordash" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor" "Echo__smartspace_enable_echo_unified_settings" "Echo__smartspace_enable_dark_launch_outlook_events" "Echo__smartspace_enable_step_predictor" "Echo__smartspace_enable_nap" "Echo__smartspace_enable_paired_device_connections" "Echo__smartspace_dedupe_fast_pair_notification" "Echo__smartspace_enable_nudge" "Echo__smartspace_enable_package_delivery" "Echo__smartspace_enable_outlook_events" "Echo__smartspace_gaia_twiddler" "Echo__smartspace_enable_eta_lyft" "Echo__smartspace_enable_sensitive_notification_twiddler" "Screenshot__enable_covid_card_action" "Screenshot__enable_lens_screenshots_search_action" "Screenshot__enable_lens_screenshots_similar_styles_action" "Screenshot__enable_lens_screenshots_translate_action" "Screenshot__enable_quick_share_smart_action" "Screenshot__enable_screenshot_notification_smart_actions" "Screenshot__enable_add_to_wallet_title" "Screenshot__can_use_gms_core_to_save_boarding_pass" "Screenshot__can_use_gpay_to_save_boarding_pass" "Echo__smartspace_enable_cross_device_timer" "Echo__smartspace_show_cross_device_timer_label" "Settings__enable_internal_settings" "People__enable_call_log_signals" "People__enable_contacts" "People__enable_dictation_client" "People__enable_hybrid_hotseat_client" "People__enable_notification_common" "People__enable_notification_signals" "People__enable_package_tracker" "People__enable_people_pecan" "People__enable_people_search_content" "People__enable_priority_suggestion_client" "People__enable_profile_signals" "People__enable_sharesheet_client" "People__enable_sms_signals" "GellerDataShare__enable_data_capture" "GellerDataShare__enable_data_fetch" "GellerDataShare__enable_settings_opt_in_switch" "SmartRecOverviewChips__enable_smartrec_for_overview_chips" "SmartRecOverviewChips__enable_settings_card_generator" "SmartRecOverviewChips__enable_reflection_generator" "SmartRecOverviewChips__enable_action_boost_generator" "SmartRecQuickSearchBox__enable_action_boost_generator" "SmartRecOverviewChips__enable_matchmaker_generator" "Echo__smartspace_enable_subcard_logging" "Echo__enable_widget_recommendations" "Echo__search_play_enable_spell_correction" "Echo__silo_enable_persistence" "Echo__settings_search_debug" "Echo__enable_people_module" "Echo__enable_nudge_debug_mode"
 # db_edit com.google.android.platform.device_personalization_services boolVal 0  "SmartRecPixelSearch__spelling_checker_superpacks_require_device_idle" "SmartRecPixelSearch__spelling_checker_superpacks_require_unmetered_connection"
-db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
+db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search" "inject_web_top"
 
 if [ $DPAS -eq 1 ]; then
     echo " - Installing Android System Intelligence" >>$logfile
@@ -784,7 +786,7 @@ else
     rm -rf $MODPATH/system$product/overlay/PixelifyGD.apk
 fi
 
-if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ]; then
+if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] && [ $TARGET_DEVICE_ONEUI -eq 0 ]; then
     print "  Google is installed."
     print "  Do you want to installed Next generation assistant?"
     print "   Vol Up += Yes"
@@ -886,8 +888,9 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ];
 
         $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox'"
         # db_edit com.google.android.googlequicksearchbox boolVal 0 "45351541" "9670" "8888" "15052" "45363987" "45363985" "45359819"
-        db_edit com.google.android.googlequicksearchbox stringVal 'Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' '17074'
-        db_edit com.google.android.googlequicksearchbox stringVal 'Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL' '45353661'
+        db_edit com.google.android.googlequicksearchbox boolVal 1 "9243"
+        db_edit com.google.android.googlequicksearchbox stringVal 'Pixel 7 Pro,Pixel 7,Pixel 6a,Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' '17074'
+        db_edit com.google.android.googlequicksearchbox stringVal 'Oriole,oriole,Raven,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL,Pixel 7 Pro,Pixel 7,Redmi Note 4,mido' '45353661'
 
         cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
         cp -f $MODPATH/files/PixeliflyGA.apk $MODPATH/system/product/overlay/PixeliflyGA.apk
@@ -1075,74 +1078,78 @@ fi
 is_monet
 
 # Pixel bootanimation
-print "  Do you want to install Pixel Bootanimation?"
-print "   Vol Up += Yes"
-print "   Vol Down += No"
-no_vk "ENABLE_BOOTANIMATION"
-if $VKSEL; then
-    echo " - Installing Pixel Bootanimation" >>$logfile
-    if [ $TARGET_DEVICE_OP12 -eq 1 ]; then
-        REMOVE="$REMOVE /system/product/media/bootanimation.zip /system/product/media/bootanimation-dark.zip"
-    fi
-    if [ -f /system/media/bootanimation.zip ]; then
-        MEDIA_PATH=system/media
-    else
-        MEDIA_PATH=system/product/media
-    fi
-    boot_res=$(unzip -p /$MEDIA_PATH/bootanimation.zip desc.txt | head -n 1 | cut -d' ' -f1)
-    if [ ! -z "$boot_res" ]; then
-        print " - Detected $boot_res Resolution Bootanimation"
-    else
-        print " ! Failed to detect Resolution of Bootanimation"
-    fi
-    print ""
-    mkdir -p $MODPATH/$MEDIA_PATH
-    if [ $MONET_BOOTANIMATION -eq 0 ]; then
-        case "$boot_res" in
-        720)
-            tar -xf $MODPATH/files/bootanimation-720.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 720p resolution pixel Bootanimation"
-            ;;
-        1440)
-            tar -xf $MODPATH/files/bootanimation-1440.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 1440p resolution pixel Bootanimation"
-            ;;
-        *)
-            tar -xf $MODPATH/files/bootanimation.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 1080p resolution pixel Bootanimation"
-            ;;
-        esac
+if [ $TARGET_DEVICE_OP12 -eq 0 ]; then
+    print "  Do you want to install Pixel Bootanimation?"
+    print "   Vol Up += Yes"
+    print "   Vol Down += No"
+    no_vk "ENABLE_BOOTANIMATION"
+    if $VKSEL; then
+        echo " - Installing Pixel Bootanimation" >>$logfile
+        if [ $TARGET_DEVICE_OP12 -eq 1 ]; then
+            REMOVE="$REMOVE /system/product/media/bootanimation.zip /system/product/media/bootanimation-dark.zip"
+        fi
+        if [ -f /system/media/bootanimation.zip ]; then
+            MEDIA_PATH=system/media
+        else
+            MEDIA_PATH=system/product/media
+        fi
+        boot_res=$(unzip -p /$MEDIA_PATH/bootanimation.zip desc.txt | head -n 1 | cut -d' ' -f1)
+        if [ ! -z "$boot_res" ]; then
+            print " - Detected $boot_res Resolution Bootanimation"
+        else
+            print " ! Failed to detect Resolution of Bootanimation"
+        fi
         print ""
-        if [ ! -f /system/bin/themed_bootanimation ]; then
-            rm -rf $MODPATH/$MEDIA_PATH/bootanimation.zip
-            cp -f $MODPATH/$MEDIA_PATH/bootanimation-dark.zip $MODPATH/$MEDIA_PATH/bootanimation.zip
-            echo " - Themed Animation not detected, using dark animation as default" >>$logfile
+        mkdir -p $MODPATH/$MEDIA_PATH
+        if [ $MONET_BOOTANIMATION -eq 0 ]; then
+            case "$boot_res" in
+            720)
+                tar -xf $MODPATH/files/bootanimation-720.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 720p resolution pixel Bootanimation"
+                ;;
+            1440)
+                tar -xf $MODPATH/files/bootanimation-1440.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1440p resolution pixel Bootanimation"
+                ;;
+            *)
+                tar -xf $MODPATH/files/bootanimation.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1080p resolution pixel Bootanimation"
+                ;;
+            esac
+            print ""
+            if [ ! -f /system/bin/themed_bootanimation ]; then
+                rm -rf $MODPATH/$MEDIA_PATH/bootanimation.zip
+                cp -f $MODPATH/$MEDIA_PATH/bootanimation-dark.zip $MODPATH/$MEDIA_PATH/bootanimation.zip
+                echo " - Themed Animation not detected, using dark animation as default" >>$logfile
+            fi
+        else
+            case "$boot_res" in
+            720)
+                tar -xf $MODPATH/files/bootanimation-m-720.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 720p resolution pixel Bootanimation"
+                ;;
+            1440)
+                tar -xf $MODPATH/files/bootanimation-m-1440.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1440p resolution pixel Bootanimation"
+                ;;
+            *)
+                tar -xf $MODPATH/files/bootanimation-m.tar.xz -C $MODPATH/$MEDIA_PATH
+                print " - Using 1080p resolution pixel Bootanimation"
+                ;;
+            esac
+            print ""
+            cp -f $MODPATH/$MODPATH/bootanimation.zip $MODPATH/$MODPATH/bootanimation-dark.zip
         fi
     else
-        case "$boot_res" in
-        720)
-            tar -xf $MODPATH/files/bootanimation-m-720.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 720p resolution pixel Bootanimation"
-            ;;
-        1440)
-            tar -xf $MODPATH/files/bootanimation-m-1440.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 1440p resolution pixel Bootanimation"
-            ;;
-        *)
-            tar -xf $MODPATH/files/bootanimation-m.tar.xz -C $MODPATH/$MEDIA_PATH
-            print " - Using 1080p resolution pixel Bootanimation"
-            ;;
-        esac
-        print ""
-        cp -f $MODPATH/$MODPATH/bootanimation.zip $MODPATH/$MODPATH/bootanimation-dark.zip
+        echo " - Skipping Pixel Bootanimation" >>$logfile
+        rm -rf $MODPATH/system$product/media/boot*.zip
     fi
 else
-    echo " - Skipping Pixel Bootanimation" >>$logfile
     rm -rf $MODPATH/system$product/media/boot*.zip
 fi
 
 # Pixel Launcher
-if [ $API -ge 29 ]; then
+if [ $API -ge 29 ] && [ $TARGET_DEVICE_OP12 -eq 0 ]; then
     PL=$(find /system -name *Launcher* | grep -v overlay | grep -v Nexus | grep -v bin | grep -v "\.")
     TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v "\.")
     QS=$(find /system -name *QuickStep* | grep -v overlay | grep -v "\.")
@@ -1394,7 +1401,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         fi
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 3 "grammar_checker_min_sentence_length"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger,tw.nekomimi.nekogram,org.telegram.BifToGram" "emojify_app_allowlist"
-        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "enable_nga_language_download" "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
     fi
 
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
@@ -1450,17 +1457,6 @@ db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__e
 # Fix Precise Location
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
 db_edit $gms com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
-
-if [ -f $gser ]; then
-    for i in "photos:debug.photos.p_editr.eraser" "debug.photos.p_editr.eraser" "debug.photos.force_pixel_eol" "photos:debug.photos.force_pixel_eol" "debug.photos.b217460481" "photos:debug.photos.b217460481" "debug.photos.eraser_camo" "photos:debug.photos.eraser_camo" "debug.photos.eraser_1up_sugg" "debug.photos.eraser_suggestion"; do
-        $sqlite $gser "DELETE FROM overrides WHERE name='$i'"
-        $sqlite $gser "DELETE FROM main WHERE name='$i'"
-        $sqlite $gser "INSERT INTO overrides(name, value) VALUES('$i', 'true')"
-        $sqlite $gser "INSERT INTO main(name, value) VALUES('$i', 'true')"
-    done
-    $sqlite $gser "DELETE FROM overrides WHERE name='device_country'"
-    $sqlite $gser "INSERT INTO overrides(name, value) VALUES('device_country', 'us')"
-fi
 
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do

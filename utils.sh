@@ -426,10 +426,16 @@ oos_fix() {
         echo " - Apply fixup for OOS 12/ Color OS 12" >>$logfile
         print ""
         print " -  Applying Fix for OOS 12"
-        mkdir -p $MODPATH/system_ext/overlay
-        cp -rf $MODPATH/product/overlay/. $MODPATH/system_ext/overlay
-        rm -rf $MODPATH/product/overlay
-        #REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
+        cd $MODPATH/system/product/
+        cp -rf $MODPATH/system/product/. $MODPATH/system
+        cd $MODPATH/system/system_ext/
+        cp -rf $MODPATH/system/system_ext/. ../system
+        cd /
+        rm -rf $MODPATH/system/product $MODPATH/system/system_ext
+        mkdir -p $MODPATH/vendor/overlay
+        cp -rf $MODPATH/system/overlay/. $MODPATH/vendor/overlay
+        rm -rf $MODPATH/system/overlay
+        REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
     fi
 }
 
@@ -533,7 +539,8 @@ install_wallpaper() {
                 if [ $API -ge 31 ]; then
                     mkdir -p $MODPATH/system/product/app/PixelThemesStub
                     rm -rf $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
-                    mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+                    [ $API -eq 33 ] && mv $MODPATH/files/PixelThemesStub13.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+                    [ $API -le 32 ] && mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
                 fi
                 WREM=0
             fi
@@ -680,16 +687,38 @@ now_playing() {
 drop_sys() {
     echo " - Enabling Google Photos Original quality unlimited storage" >>$logfile
     for i in /system/product/etc/sysconfig/*; do
-        if [ ! -z "$(grep PIXEL_2020_ $i)" ] || [ ! -z "$(grep PIXEL_2021_ $i)" ] || [ ! -z "$(grep PIXEL_2022_ $i)" ]; then
-            [ ! -f $MODPATH/system/product/etc/sysconfig/$i ] && cat /system/product/etc/sysconfig/$i | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ >$MODPATH/system/product/etc/sysconfig/$i
-            echo " - Fixing Photos Original quality by editing $i" >>$logfile
+        file=$i
+        file=${file/\/system\/product\/etc\/sysconfig\//}
+        if [ ! -z "$(grep PIXEL_2020_ $i)" ] || [ ! -z "$(grep PIXEL_2021_ $i)" ] || [ ! -z "$(grep PIXEL_2019_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2018_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2022_ $i)" ]; then
+            [ ! -f $MODPATH/system/product/etc/sysconfig/$file ] && cat /system/product/etc/sysconfig/$file | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD >$MODPATH/system/product/etc/sysconfig/$file
+            echo " - Fixing Photos Original quality by editing $file in product" >>$logfile
+        fi
+    done
+    for i in /system/etc/sysconfig/*; do
+        file=$i
+        file=${file/\/system\/etc\/sysconfig\//}
+        if [ ! -z "$(grep PIXEL_2020_ $i)" ] || [ ! -z "$(grep PIXEL_2021_ $i)" ] || [ ! -z "$(grep PIXEL_2019_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2018_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2022_ $i)" ]; then
+            [ ! -f $MODPATH/system/product/etc/sysconfig/$file ] && cat /system/etc/sysconfig/$file | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD >$MODPATH/system/etc/sysconfig/$file
+            echo " - Fixing Photos Original quality by editing $file in system" >>$logfile
         fi
     done
     if [ -f /data/adb/modules/Pixelify/system/product/etc/sysconfig ]; then
         for i in /data/adb/modules/Pixelify/system/product/etc/sysconfig/*; do
-            if [ ! -f $MODPATH/system/product/etc/sysconfig/$i ]; then
-                cp -f /data/adb/modules/Pixelify/system/product/etc/sysconfig/$i $MODPATH/system/product/etc/sysconfig/$i
-                echo " - Fixing Photos Original quality by editing $i" >>$logfile
+            file=$i
+            file=${file/\/data\/adb\/modules\/Pixelify\/system\/product\/etc\/sysconfig\//}
+            if [ ! -f $MODPATH/system/product/etc/sysconfig/$file ]; then
+                cp -f /data/adb/modules/Pixelify/system/product/etc/sysconfig/$file $MODPATH/system/product/etc/sysconfig/$file
+                echo " - Fixing Photos Original quality by copying $file in product" >>$logfile
+            fi
+        done
+    fi
+    if [ -f /data/adb/modules/Pixelify/system/etc/sysconfig ]; then
+        for i in /data/adb/modules/Pixelify/system/etc/sysconfig/*; do
+            file=$i
+            file=${file/\/data\/adb\/modules\/Pixelify\/system\/etc\/sysconfig\//}
+            if [ ! -f $MODPATH/system/etc/sysconfig/$file ]; then
+                cp -f /data/adb/modules/Pixelify/system/etc/sysconfig/$file $MODPATH/system/etc/sysconfig/$file
+                echo " - Fixing Photos Original quality by copying $file in system" >>$logfile
             fi
         done
     fi
