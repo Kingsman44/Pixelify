@@ -188,13 +188,11 @@ enable_time_keeper_histogram
 enable_dialpad_v2_ux
 enable_stir_shaken
 enable_video_handover_dialog
-enable_android_s_notifications
 G__speak_easy_use_soda_asr
 G__enable_call_screen_data_in_call_log
 G__enable_embedding_spam_revelio
-G__enable_primes
-G__enable_primes_crash_metric
-G__enable_primes_timer_metric
+G__show_call_screen_recording_player_in_call_log
+G__enable_default_dialer
 G__enable_call_screen_saving_audio
 G__enable_call_recording
 G__force_within_call_recording_geofence_value
@@ -216,7 +214,14 @@ enable_hold_detection
 enable_video_calling_screen
 enable_video_type_picker
 enable_video_call_type_chooser
-G__new_voicemail_fragment_enabled"
+G__new_voicemail_fragment_enabled
+G__call_screen_audio_listener_enabled
+enable_sigil
+Xatu__xatu_enable_show_ahead
+enable_tincan
+enable_stir_shaken
+enable_time_keeper_active_download
+G__enable_patronus_spam"
 
 sound_patch='    <!-- Multiple sound_model_config tags can be listed, each with unique
          vendor_uuid. -->

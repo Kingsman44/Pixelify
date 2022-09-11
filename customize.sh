@@ -725,10 +725,8 @@ if [ -d /data/data/$DIALER ]; then
 
         if [ ! -z $carr_coun ]; then
             echo " - Adding Country ($carr_coun) patch for Call Recording and Hold for me, Direct My Call" >>$logfile
-            if [ -z $(echo "AU US JP" | grep $carr_coun) ]; then
-                sed -i -e "s/YY/${carr_coun}/g" $MODPATH/files/com.google.android.dialer
-                sed -i -e "s/YY/${carr_coun}/g" $MODPATH/files/com.google.android.dialer-custom
-            fi
+            sed -i -e "s/YY/${carr_coun}/g" $MODPATH/files/com.google.android.dialer
+            sed -i -e "s/cc-CC/${full_lang}/g" $MODPATH/files/com.google.android.dialer
         fi
 
         if [ -z $(echo "GB IE JP US DE IT FR ES" | grep $carr_coun) ]; then
@@ -1149,7 +1147,7 @@ else
 fi
 
 # Pixel Launcher
-if [ $API -ge 29 ] && [ $TARGET_DEVICE_OP12 -eq 0 ]; then
+if [ $API -ge 29 ]; then
     PL=$(find /system -name *Launcher* | grep -v overlay | grep -v Nexus | grep -v bin | grep -v "\.")
     TR=$(find /system -name *Trebuchet* | grep -v overlay | grep -v "\.")
     QS=$(find /system -name *QuickStep* | grep -v overlay | grep -v "\.")
@@ -1400,8 +1398,9 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
             db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 86400000 "branding_fadeout_delay_ms"
         fi
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 3 "grammar_checker_min_sentence_length"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 3 "grammar_checker_min_sentence_length"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger,tw.nekomimi.nekogram,org.telegram.BifToGram" "emojify_app_allowlist"
-        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "enable_nga_language_download" "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "material3_theme" "enable_access_points_new_design" "enable_nga_language_download" "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
     fi
 
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then

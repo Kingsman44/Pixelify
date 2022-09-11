@@ -1,8 +1,9 @@
 # PIXELIFY MAGISK MODULE
 Enables Pixel Ui and Some Exclusive Features.<br>
 
-<a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.02-brown.svg" width="150"></a>
+<a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.1-brown.svg" width="150"></a>
 <br><br>
+<img src="https://img.shields.io/github/downloads/Kingsman44/Pixelify/total">
 <a href="https://forum.xda-developers.com/t/magisk-pixelify.4415387/"><img src="https://img.shields.io/badge/XDA_Thread-brown.svg"></a>
 <a href="https://photos.app.goo.gl/jBPm3zTHHhc67Pdy7"><img src="https://img.shields.io/badge/Screenshots-red.svg"></a>
 <a href="https://t.me/pixelifysupport"><img src="https://img.shields.io/badge/Telegram-Support_Group-blue.svg"></a>
@@ -10,9 +11,9 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 ## ⭐ Requirements
 - **Android Version: Android 7.0 to Android 13**
 - **Arm64 device**
-- **Volume Keys**
+- **Volume Keys (optional)**
 - **Internet for NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
-- **Zygisk (Recommended but not compulsary)**
+- **Zygisk or Riru (Recommended but not compulsary)**
 - **Note: flash zip on magisk only not twrp**
 
 ### Supported Roms
@@ -22,12 +23,10 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - Android One
 - MiUI
 - FunTouchOS
-- Oxygen OS (Android 11 and below)
-- Color Os (Android 11 and below)
-
-### Unsupported Roms
-- Oxygen os Android 12
-- Color Os Android 12
+- OxygenOS
+- ColorOs
+- All stock android roms
+- Windows Subsystem Android
 
 ### Installation
 - Recommend to use magisk v24 or above from Pixelify v2
@@ -38,45 +37,64 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 
 ### Installation without Volume Keys
 - Use packages with Pixelify-${version}-no_VK.zip
-- Place no-Vk.prop to internal storage>Pixelify (/sdcard/Pixelify/no-VK.prop)
+- Place config.prop to internal storage>Pixelify (/sdcard/Pixelify/config.prop)
 - Edit prop according what you want to select
-- (If you have any problem placing no-VK.prop there then you also can extract and update no-VK.prop inside the packages it automatcally use it.) 
+- (If you have any problem placing config.prop there then you also can extract and update no-VK.prop inside the packages it automatically use it.) 
 
-### Zygisk spoofing configuration
+### Zygisk and Riru spoofing configuration
 - Pixel 5:- Google TTS, Google Play services, Pixel Buds
 - Pixel XL:- Google Photos
 - Pixel 6 Pro:- Rest Google apps except (all Google camera package)
 <br><br>**Note** :- Zygisk spoofing can't overide PixelProp Utils.
 
-## ⭐ Features
+### Features of Pixelify module
+- Initial Size of module is low
+- Open Source
+- Works with Riru as well as Zygisk
+- Works with most of Android version (Nougat to 13)
+- Uses Dynamic spoofing (Riru & Zygisk) to only Google apps to prevent crashes and other issues
+- Provides most of Pixel Features
+- Installation is can be optional
+- Supports (720p,1080p,1440p) Google bootanimation
+- Allows to created backup for online pixelify packages
+- Also provides some unreleased Pixel Features
+- Create Google keyboard, Google app, Google Text to speech, Google Dialer as system app if not installed
+- Dynamic Permission generation of apps installed by pixelify
+- Config as well as Volume key installation
+- Patches Flags to force enable pixel features
+- Single zip works with Zygisk as well as Riru
+- Works on almost all roms.
+
+## ⭐ Pixel Features
 ### Pixel 6 Features Enables
--   Pixel 6 Live Wallpapers *
+-   Pixel 6 Live Wallpapers*
 -   Magic Eraser (<a href="https://t.me/google_nws/864">USE THIS APK</a>)(7+)
 -   Google Dialer Direct Call (12+)
--   Live Transcript (12+)
 -   New At a Glance feature (12+ & Dec+ Patch) 
--   Google Quick Pharse *
--   Google Next Generation Assistant Typing (Next Generation Assistant Required)* 
+-   Google Quick Pharse*
+-   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
+-   Call Caption Typing (12+)
+-   Live Captions different language
 
 ### Other Features
 -   Adaptive Charging (Google SystemUI)
--   Adaptive Connectivty (11+)
+-   Adaptive Connectivity (11+)
 -   Adaptive Sound (11+)*
+-   Battery Widget (Working depends on rom)
 -   Call Captions (11+)(Depends on Rom)
 -   Enables Nexus, Pixel, and Android One app support
--   Extreme Battery Saver (11+) [ Settings > Battery > Extreme Battery Saver - 11 | Settings > Battery > Battery Saver > Extreme Battery Saver -12 ]
+-   Extreme Battery Saver (11+) [ Settings > Battery > Battery Saver > Extreme Battery Saver -12 ]
 -   Google Dialer Call Screening
 -   Google Dialer Hold for me
 -   Google Dialer Call Recording (Device depended for working)
 -   Google Digital Wellbeing Heads up
 -   Google Duo features
--   Google Fit Heart rate (needed reboot if installed after module installtion)
--   Google Fit Respiratory rate (needed reboot if installed after module installtion)
--   Google Sans Font
+-   Google Fit Heart rate
+-   Google Fit Respiratory rate
 -   Live captions (10+)
 -   Next Generation Assistant* (10+)(Optional)
 -   Now Playing Export* (Works only on Pixel Phone)
--   Pixel Device spoof (Optional)
+-   Pixel Device spoofing (Optional)
 -   Pixel Blue theme accent
 -   Pixel bootanimation (Optional)
 -   Pixel Launcher (10+)(Optional)
@@ -84,8 +102,9 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 -   Pokemon SideKick Live Wallpaper (Optional-Included with LiveWallpapers)
 -   Portrait Light (10+)
 -   Screen Attention Service
+-   Smart Compose
 -   Unlimited Photos backup (Storage saver)
--   Unlimited Photos backup (original) (needs Zygisk magisk 24+)
+-   Unlimited Photos backup (original) (needs Zygisk or Riru)
 <br>
 * - Requires Spoofing to Pixel device
 
@@ -113,13 +132,58 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - **UPI id (India only)** - shivan.0972@okhdfcbank
 
 ## ⭐ Credits
+- Google to creating these awesome features
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
 - [#TeamFiles](https://t.me/modulesrepo) for so many themed icons for Pixel Launcher android 12
 - [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
 - [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
+- [HuskyDG](https://github.com/HuskyDG) for intial Riru Port
+- Pixelify Support Group Members for testing beta versions
 
 ## ⭐ ChangeLogs
+
+### Version 2.1
+- Support for OxygenOS & Color OS 12, 12L, 13.
+- Support for Riru
+- Added Bootloop saver inside Pixelify (only for Pixelify)
+- Fixed Android 13 Styles and wallpaper showing 4 Colors instead of 16
+- Fixed Call caption crashes in Android 13
+- More Fixes for the safety net (CTS)
+- Disabled Next Generation Assistant in ONEUi 4 or above due to boot loop
+- Disabled Boot animation in OxygenOS 12, 12L, 13
+- Updated Android System Intelligence (13) to T8.pixel6
+- Updated Android System Intelligence (12) to S28.pixel6
+- Fixed Google photos Unlimited backup becomes storage saver in some ROMs due to features conflict.
+- Fixed Pixel Launcher not installing on some Lineage OS ROM due to an invalid security patch defined by rom
+- Fixes for Precise location
+- Created Pixelify Uninstaller to remove pixelify
+- Enabled Universal Search in Android 13
+- Enabled Unified Security & Privacy settings in Android 13
+- Updated Pixel Live Wallpapers to v1.9
+- Fixed Prebuilt Pixel Launcher disappeared while uninstalling Pixelify
+- Added Script to generate Bootloop logs (beta) at /sdcard/Pixelify/boot_logs.txt
+- Added OK Google Hotword (Android Pie to Android 13)
+- Enabled Internal Spoofing for Elixir OS
+- Fixed Recent Text selection in Pixel Launcher Recents
+- The G logo in Gboard is made Optional
+- Renamed no_vk.prop to config.prop
+- Normal Pixelify.vXX.zip can now also config.prop
+- Added Bootloop Saver for Pixelify
+- Fixes for Grammar & Correction in Google Keyboard
+- Fixes for Audio issues
+- Enabled more options in At a Glance
+- Improved Pixelify installation logs
+- Added more Themed icons in Pixel Launcher from #TEAMFILES
+- Added Styles and Wallpapers for Android 13
+- Added Pixel Launcher for Android 13
+- Fixes for some ROMs not showing pixel static wallpapers
+- Fixed Bubble not showing in Google dialer
+- Fixes for Google Text to speech
+- Updated Pixel Launcher in Android 12
+- Improved Battery backup from v2.02
+- Added Support to disable internal spoofing of particular rom
+- Many minor improvements & bug fixes
 
 ### Version 2.02
 - Fixes for Quick phrase

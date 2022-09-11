@@ -97,13 +97,14 @@ fi
 loop=0
 while true; do
     set_device_config
-    if [ $loop -ge 30 ]; then
+    # Run loop for 10mins
+    if [ $loop -ge 600 ]; then
         break
     fi
-    sleep 10
+    sleep 1
     loop=$((loop + 1))
 done
 
-sleep 5
+sleep 30
 
 [ $(device_config get privacy location_accuracy_enabled) != "true" ] && sleep 1 && set_device_config

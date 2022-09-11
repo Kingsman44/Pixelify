@@ -432,8 +432,18 @@ oos_fix() {
         cp -rf $MODPATH/system/system_ext/. ../system
         cd /
         rm -rf $MODPATH/system/product $MODPATH/system/system_ext
-        mkdir -p $MODPATH/vendor/overlay
-        cp -rf $MODPATH/system/overlay/. $MODPATH/vendor/overlay
+        #copy overlays to system priv app they also work there.
+        for i in $MODPATH/system/overlay/*; do
+            name=$i
+            name=${name/$MODPATH\/system\/overlay\//}
+            name=${name/.apk/}
+            if [ -f $i ]; then
+                mkdir -p $MODPATH/system/priv-app/$name
+                mv $i $MODPATH/system/priv-app/$name
+            else
+                mv $i $MODPATH/system/priv-app
+            fi
+        done
         rm -rf $MODPATH/system/overlay
         REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
     fi
