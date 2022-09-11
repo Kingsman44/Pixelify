@@ -143,7 +143,7 @@ Enables Pixel Ui and Some Exclusive Features.<br>
 - [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
 - [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
-- [HuskyDG](https://github.com/HuskyDG) for intial Riru Port
+- [HuskyDG](https://github.com/HuskyDG) for intial Riru Port, Bootloop saver
 - Pixelify Support Group Members for testing beta versions
 
 ## ⭐ ChangeLogs
