@@ -1,5 +1,5 @@
 # PIXELIFY MAGISK MODULE
-Enables Pixel Ui and Some Exclusive Features.<br>
+Enable Pixel Ui and Some Exclusive Features.<br>
 
 <a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.1-brown.svg" width="150"></a>
 <br><br>
