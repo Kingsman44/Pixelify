@@ -1,0 +1,41 @@
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.0.0-alpha14'
+    }
+}
+
+plugins {
+    id 'idea'
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+idea.module {
+    excludeDirs += file('out')
+    resourceDirs += file('template')
+    resourceDirs += file('scripts')
+}
+
+ext {
+    min_sdk = 23
+    target_sdk = 31
+    minSdkVersion = 23
+    targetSdkVersion = 30
+    buildToolsVersion = '30.0.3'
+    ndkVersion = '21.4.7075529'
+    outDir = file("$rootDir/out")
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir, outDir
+}

@@ -1,0 +1,72 @@
+type flipendo_userfaultfd
+type flipendo
+typeattribute flipendo appdomain
+typeattribute flipendo halclientdomain
+typeattribute flipendo hal_power_client
+allow flipendo app_api_service service_manager find
+allow flipendo fwk_stats_hwservice hwservice_manager find
+allow flipendo color_display_service service_manager find
+allow flipendo hal_power_service service_manager find
+allow flipendo hal_power_default binder { call transfer }
+allow flipendo hal_power_client binder { receive call }
+allow flipendo statsd binder { receive call }
+allow flipendo gpuservice binder { receive call }
+allow flipendo stats_service_server binder { receive call }
+allow flipendo flipendo_userfaultfd anon_inode { ioctl read create }
+allow flipendo appdomain_tmpfs file { read write getattr map execute }
+allow flipendo servicemanager binder { call transfer }
+allow servicemanager flipendo binder { call transfer }
+allow servicemanager flipendo dir { search }
+allow servicemanager flipendo file { read open }
+allow servicemanager flipendo process { getattr }
+allow flipendo flipendo dir search
+allow flipendo flipendo process { fork getsched }
+allow flipendo flipendo unix_dgram_socket create
+
+allow untrusted_app app_api_service service_manager find
+allow untrusted_app fwk_stats_hwservice hwservice_manager find
+allow untrusted_app color_display_service service_manager find
+allow untrusted_app hal_power_service service_manager find
+allow untrusted_app hal_power_default binder { call transfer }
+allow untrusted_app hal_power_client binder { receive call }
+allow untrusted_app statsd binder { receive call }
+allow untrusted_app gpuservice binder { receive call }
+allow untrusted_app stats_service_server binder { receive call }
+allow untrusted_app untrusted_app_userfaultfd anon_inode { ioctl read create }
+allow untrusted_app appdomain_tmpfs file { read write getattr map execute }
+allow untrusted_app servicemanager binder { call transfer }
+allow servicemanager untrusted_app binder { call transfer }
+allow servicemanager untrusted_app dir { search }
+allow servicemanager untrusted_app file { read open }
+allow servicemanager untrusted_app process { getattr }
+
+allow platform_app app_api_service service_manager find
+allow platform_app fwk_stats_hwservice hwservice_manager find
+allow platform_app color_display_service service_manager find
+allow platform_app hal_power_service service_manager find
+allow platform_app hal_power_default binder { call transfer }
+allow platform_app hal_power_client binder { receive call }
+allow platform_app statsd binder { receive call }
+allow platform_app gpuservice binder { receive call }
+allow platform_app stats_service_server binder { receive call }
+allow platform_app platform_userfaultfd anon_inode { ioctl read create }
+allow platform_app appdomain_tmpfs file { read write getattr map execute }
+allow platform_app servicemanager binder { call transfer }
+allow platform_app hal_power_service service_manager { find }
+
+allow priv_app app_api_service service_manager find
+allow priv_app fwk_stats_hwservice hwservice_manager find
+allow priv_app color_display_service service_manager find
+allow priv_app hal_power_service service_manager find
+allow priv_app hal_power_default binder { call transfer }
+allow priv_app hal_power_client binder { receive call }
+allow priv_app statsd binder { receive call }
+allow priv_app gpuservice binder { receive call }
+allow priv_app stats_service_server binder { receive call }
+allow priv_app priv_userfaultfd anon_inode { ioctl read create }
+allow priv_app appdomain_tmpfs file { read write getattr map execute }
+allow priv_app servicemanager binder { call transfer }
+allow priv_app hal_power_service service_manager { find }
+
+allow system_app logpersistd_logging_prop file { read }
+allow system_app logpersistd_logging_prop property_service { set }

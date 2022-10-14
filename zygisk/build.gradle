@@ -1,0 +1,178 @@
+import org.apache.tools.ant.filters.FixCrLfFilter
+import org.apache.tools.ant.filters.ReplaceTokens
+
+import java.security.MessageDigest
+
+plugins {
+    id 'com.android.library'
+}
+
+apply from: file(rootProject.file('module.gradle'))
+
+android {
+    compileSdk target_sdk
+    defaultConfig {
+        minSdk min_sdk
+        targetSdk target_sdk
+        externalNativeBuild {
+            cmake {
+                arguments "-DMODULE_NAME:STRING=$moduleLibraryName";
+            }
+        }
+    }
+    buildFeatures {
+        prefab false
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+}
+
+afterEvaluate {
+    android.libraryVariants.forEach { variant ->
+        def variantCapped = variant.name.capitalize()
+        def variantLowered = variant.name.toLowerCase()
+
+        def zipName = "${magiskModuleId.replace('_', '-')}-${moduleVersion}.zip"
+        def zipNamenovk = "${magiskModuleId.replace('_', '-')}-${moduleVersion}-no-VK.zip"
+        def magiskDir = file("$outDir/magisk_module_$variantLowered")
+        def templatePath = "$rootDir/module"
+        def types = [Instance1: 'arm64-v8a', Instance2: 'armeabi-v7a',Instance3: 'x86',Instance4: 'x86_64']
+
+        task("prepareMagiskFiles${variantCapped}", type: Sync) {
+            dependsOn("assemble$variantCapped")
+            def nativeOutDir = file("$rootDir/riru/build/intermediates/cmake/$variant.name/obj")
+
+            into magiskDir
+            from(templatePath) {
+                exclude 'module.prop'
+            }
+            from(templatePath) {
+                include 'module.prop'
+                expand([
+                        id         : magiskModuleId,
+                        name       : moduleName,
+                        version    : moduleVersion,
+                        versionCode: moduleVersionCode.toString(),
+                        author     : moduleAuthor,
+                        description: moduleDescription,
+                        volType: "1",
+                ])
+                filter(FixCrLfFilter.class,
+                        eol: FixCrLfFilter.CrLf.newInstance("lf"))
+            }
+            types.each { instance, resourceDir ->
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                    into 'lib/zygisk'
+                    exclude "**/libpixelify-tensor.so"
+                    rename 'libpixelify.so', "${resourceDir}.so"
+                }
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                    into 'lib/zygisk_tensor'
+                    exclude "**/libpixelify.so"
+                    rename 'libpixelify-tensor.so', "${resourceDir}.so"
+                }
+            }
+            doLast {
+                copy {
+                    from "$nativeOutDir"
+                    into "$magiskDir/lib/riru"
+                    exclude "**/*.txt" , "**/libpixelify-tensor.so"
+                }
+                copy {
+                    from "$nativeOutDir"
+                    into "$magiskDir/lib/riru_tensor"
+                    exclude "**/*.txt" , "**/libpixelify.so"
+                    rename "libpixelify-tensor.so" , "$variant.name"
+                }
+            }
+
+        }
+
+        task("novk${variantCapped}", type: Sync) {
+            dependsOn("assemble$variantCapped")
+            def nativeOutDir = file("$rootDir/riru/build/intermediates/cmake/$variant.name/obj")
+
+            into magiskDir
+            from(templatePath) {
+                exclude 'module.prop'
+            }
+            from(templatePath) {
+                include 'module.prop'
+                expand([
+                        id         : magiskModuleId,
+                        name       : moduleName,
+                        version    : moduleVersion,
+                        versionCode: moduleVersionCode.toString(),
+                        author     : moduleAuthor,
+                        description: moduleDescription,
+                        volType: "0",
+                ])
+                filter(FixCrLfFilter.class,
+                        eol: FixCrLfFilter.CrLf.newInstance("lf"))
+            }
+            types.each { instance, resourceDir ->
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                    into 'lib/zygisk'
+                    exclude "**/libpixelify-tensor.so"
+                    rename 'libpixelify.so', "${resourceDir}.so"
+                }
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                    into 'lib/zygisk_tensor'
+                    exclude "**/libpixelify.so"
+                    rename 'libpixelify-tensor.so', "${resourceDir}.so"
+                }
+            }
+            doLast {
+                copy {
+                    from "$nativeOutDir"
+                    into "$magiskDir/lib/riru"
+                    exclude "**/*.txt" , "**/libpixelify-tensor.so"
+                }
+                copy {
+                    from "$nativeOutDir"
+                    into "$magiskDir/lib/riru_tensor"
+                    exclude "**/*.txt" , "**/libpixelify.so"
+                    rename "libpixelify-tensor.so" , "libpixelify.so"
+                }
+            }
+        }
+
+        task("zip${variantCapped}", type: Zip) {
+            dependsOn("prepareMagiskFiles${variantCapped}")
+            from magiskDir
+            archiveName zipName
+            destinationDir outDir
+        }
+
+        task("novkzip${variantCapped}", type: Zip) {
+            dependsOn("zip${variantCapped}")
+            dependsOn("novk${variantCapped}")
+            tasks.findByName("novk${variantCapped}").mustRunAfter "zip${variantCapped}"
+            from magiskDir
+            archiveName zipNamenovk
+            destinationDir outDir
+        }
+
+        task("push${variantCapped}", type: Exec) {
+            dependsOn("zip${variantCapped}")
+            workingDir outDir
+            commandLine android.adbExecutable, "push", zipName, "/data/local/tmp/"
+        }
+
+        task("flash${variantCapped}", type: Exec) {
+            dependsOn("push${variantCapped}")
+            commandLine android.adbExecutable, "shell", "su", "-c",
+                    "magisk --install-module /data/local/tmp/${zipName}"
+        }
+
+        task("flashAndReboot${variantCapped}", type: Exec) {
+            dependsOn("flash${variantCapped}")
+            commandLine android.adbExecutable, "shell", "reboot"
+        }
+
+        variant.assembleProvider.get().finalizedBy("novkzip${variantCapped}")
+    }
+}

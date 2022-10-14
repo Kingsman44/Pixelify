@@ -1,0 +1,116 @@
+apply plugin: 'com.android.library'
+apply from: rootProject.file('module.gradle')
+
+android {
+    compileSdkVersion rootProject.ext.targetSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    ndkVersion rootProject.ext.ndkVersion
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        externalNativeBuild {
+            cmake {
+                arguments "-DMODULE_NAME:STRING=$moduleLibraryName",
+                        "-DRIRU_MODULE_API_VERSION=$moduleRiruApiVersion",
+                        "-DRIRU_MODULE_VERSION=$moduleVersionCode",
+                        "-DRIRU_MODULE_VERSION_NAME:STRING=\"$moduleVersion\"",
+                        "-DRIRU_MODULE_MIN_API_VERSION=$moduleMinRiruApiVersion"
+            }
+        }
+    }
+    buildFeatures {
+        prefab true
+        buildConfig false
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+    ndkVersion '25.1.8937393'
+}
+
+dependencies {
+    implementation 'dev.rikka.ndk:riru:25.0.0'
+    implementation 'dev.rikka.ndk.thirdparty:nativehelper:1.0.1'
+}
+
+def magiskDir = file("$outDir/riru")
+def isWindows = org.gradle.internal.os.OperatingSystem.current().isWindows()
+
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+import java.security.MessageDigest
+
+static def calcSha256(file) {
+    def md = MessageDigest.getInstance("SHA-256")
+    file.eachByte 4096, { bytes, size ->
+        md.update(bytes, 0, size)
+    }
+    return md.digest().encodeHex()
+}
+
+afterEvaluate {
+    android.libraryVariants.forEach { variant ->
+        def variantCapped = variant.name.capitalize()
+        def variantLowered = variant.name.toLowerCase()
+        def zipName = "${magiskModuleId.replace('_', '-')}-${moduleVersion}-${variantLowered}.zip"
+
+        task("prepareMagiskFiles${variantCapped}") {
+            dependsOn("assemble$variantCapped")
+
+            def nativeOutDir = file("build/intermediates/cmake/$variant.name/obj")
+
+            doFirst {
+                copy {
+                    from "$nativeOutDir"
+                    into "$magiskDir/lib/riru"
+                    exclude "**/*.txt" , "**/libpixelify-tensor.so"
+                }
+                copy {
+                    from "$nativeOutDir"
+                    into "$magiskDir/lib/riru_tensor"
+                    exclude "**/*.txt" , "**/libpixelify.so"
+                    rename "libpixelify-tensor.so" , "libpixelify.so"
+                }
+            }
+        }
+
+        task("push${variantCapped}", type: Exec) {
+            dependsOn("assemble${variantCapped}")
+            workingDir outDir
+            def commands = [android.adbExecutable, "push",
+                            zipName,
+                            "/data/local/tmp/"]
+            if (isWindows) {
+                commandLine 'cmd', '/c', commands.join(" ")
+            } else {
+                commandLine commands
+            }
+        }
+
+        task("flash${variantCapped}", type: Exec) {
+            dependsOn("push${variantCapped}")
+            def commands = [android.adbExecutable, "shell", "su", "-c",
+                            "magisk --install-module /data/local/tmp/${zipName}"]
+            if (isWindows) {
+                commandLine 'cmd', '/c', commands.join(" ")
+            } else {
+                commandLine commands
+            }
+        }
+
+        task("flashAndReoot${variantCapped}", type: Exec) {
+            dependsOn("flash${variantCapped}")
+            def commands = [android.adbExecutable, "shell", "reboot"]
+            if (isWindows) {
+                commandLine 'cmd', '/c', commands.join(" ")
+            } else {
+                commandLine commands
+            }
+        }
+
+        variant.assembleProvider.get()
+    }
+}

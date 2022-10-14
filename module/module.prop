@@ -1,0 +1,8 @@
+id=${id}
+name=${name}
+version=${version}
+versionCode=${versionCode}
+author=${author}
+description=${description}
+# 0 -  Disable, 1 - Enable
+DEVICE_USES_VOLUME_KEY=${volType}
