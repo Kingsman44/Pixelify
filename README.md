@@ -127,8 +127,9 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 - Creating pull request to enable new feature or code improvements
 - Donation
 
-## Thanks to project contributer
-- @HiFiiDev, @ChrisvanChip, @anant-strong for Pull request
+## Thanks to the following project contributors
+- <a href="https://github.com/HiFiiDev">@HifiiDev, </a> <a href="https://github.com/ChrisvanChip, ">@ChrisvanChip</a> <a href="https://github.com/Anant-Strong">and @anant-strong</a>
+ for Pull Requests that got merged 
 - Johannes Drechsler, David Cash, Hendrik Roggenbuck for Donation
 - Pixelify Support Group Members for testing beta versions
 
