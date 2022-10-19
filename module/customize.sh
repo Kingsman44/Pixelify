@@ -1517,12 +1517,12 @@ db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbei
 
 # Google translate
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.translate'"
-db_edit $gms com.google.android.apps.translate boolVal 1 "Widgets__enable_quick_actions_widget" "Widgets__enable_saved_history_widget"
+db_edit com.google.android.apps.translate boolVal 1 "Widgets__enable_quick_actions_widget" "Widgets__enable_saved_history_widget"
 
 # Google photos
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.photos'"
-db_edit $gms com.google.android.apps.photos boolVal 1 "45353596" "45363145" "45357512" "45361445" "45357511" "45376295"
-db_edit $gms com.google.android.apps.photos boolVal 0 "photos.backup.throttled_state"
+db_edit com.google.android.apps.photos boolVal 1 "45353596" "45363145" "45357512" "45361445" "45357511" "45376295"
+db_edit com.google.android.apps.photos boolVal 0 "photos.backup.throttled_state"
 
 pref_patch 45353596 1 boolean $PHOTOS_PREF
 pref_patch 45363145 1 boolean $PHOTOS_PREF
@@ -1537,16 +1537,16 @@ db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__e
 
 # Google settings Services
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.libraries.consentverifier#com.google.android.deskclock'"
-db_edit com.google.android.libraries.consentverifier#com.google.android.deskclock boolVal 1 "CollectionBasisVerifierFeatures__enable_all_features"
+db_edit "com.google.android.libraries.consentverifier#com.google.android.deskclock" boolVal 1 "CollectionBasisVerifierFeatures__enable_all_features"
 
 # Fix Precise Location
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
-db_edit $gms com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
+db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
 gms_edit_bool "com.google.android.platform.privacy" "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
 
 # Live Wallpapers
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
-db_edit $gms com.google.pixel.livewallpaper stringVal "" "DownloadableWallpaper__blocking_module_list"
+db_edit com.google.pixel.livewallpaper stringVal "" "DownloadableWallpaper__blocking_module_list"
 
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do

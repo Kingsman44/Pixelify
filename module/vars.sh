@@ -68,7 +68,7 @@ PIXEL_SPOOF=0
 TARGET_LOGGING=0
 
 # Tensor
-if [ "$(getprop ro.soc.model)" == "Tensor" ] || [ "$(getprop ro.soc.model)" == "GS201" ]; then
+if [[ "$(getprop ro.soc.model)" == "Tensor" || "$(getprop ro.soc.model)" == "GS201" ]]; then
   TENSOR=1
   RIRU_LIB_PATH="$MODPATH/lib/riru_tensor"
   ZYGISK_LIB_PATH="$MODPATH/lib/zygisk_tensor"

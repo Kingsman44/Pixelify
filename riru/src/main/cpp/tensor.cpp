@@ -13,6 +13,12 @@
 #include "nativehelper/scoped_utf_chars.h"
 #include "android_filesystem_config.h"
 
+char* OFP = new char [1024];
+char* OMODEL = new char [1024];
+char* ODEVICE = new char [1024];
+char* OMANU = new char [1024];
+char* OBRAND = new char [1024];
+
 void injectBuild(const char *package_name, const char *model1, const char *product1, const char *finger1, JNIEnv *env)
 {
     if (env == nullptr)
@@ -94,10 +100,18 @@ void injectBuild(const char *package_name, const char *model1, const char *produ
 static void preSpecialize(const char *process, JNIEnv *env)
 {
     std::string package_name = process;
+    __system_property_get("ro.build.fingerprint", OFP);
+    __system_property_get("ro.product.model", OMODEL);
+    __system_property_get("ro.product.device", ODEVICE);
+    __system_property_get("ro.product.manufacturer", OMANU);
+    __system_property_get("ro.build.brand", OBRAND);
+    
 
     if (package_name.find("com.google.android.apps.photos") != std::string::npos)
     {
         injectBuild(process, "Pixel XL", "marlin", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys", env);
+    } else {
+        injectBuild(process, OMODEL, ODEVICE, OFP, env); 
     }
 }
 

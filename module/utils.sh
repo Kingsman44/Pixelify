@@ -360,8 +360,11 @@ db_edit() {
     for i in $@; do
         # echo "Patching $i to $val" >> $logfile
         $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'"
+        sleep .001
         $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)"
+        sleep .001
         $sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
+        sleep .05
         # for j in $gacc; do
         # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
         # done
