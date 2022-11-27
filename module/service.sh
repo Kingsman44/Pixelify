@@ -89,6 +89,6 @@ if [ $PIDS -eq 0 ]; then
         # Set device config
         set_device_config
     elif [ "$(getprop init.svc.bootanim)" != "stopped" ]; then
-        disable_modules
+        bootlooped
     fi
 fi
