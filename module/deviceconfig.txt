@@ -111,9 +111,9 @@ notification_assistant/generate_replies=true
 
 # Privacy
 privacy/safety_center_is_enabled=true
-privacy/location_access_check_enabled=true
+#privacy/location_access_check_enabled=true
 privacy/location_accuracy_enabled=true
-privacy/location_indicators_enabled=true
+#privacy/location_indicators_enabled=true
 privacy/permissions_hub_enabled=true
 privacy/permissions_hub_2_enabled=true
 privacy/privacy_dashboard_7_day_toggle=true

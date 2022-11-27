@@ -4,6 +4,9 @@ option=$1
 sel=$2
 ac=0
 
+. $DIR/vars.sh
+. $DIR/utils.sh
+
 case $option in
 "--disable")
     if [ $sel == "pixellauncher" ] || [ $sel == "pl" ]; then
@@ -15,12 +18,17 @@ case $option in
         rm -rf $DIR/system/**/priv-app/*MiuiHome*
         rm -rf $DIR/system/**/priv-app/*TouchWizHome*
         rm -rf $DIR/system/**/PixelLauncherOverlay.apk
+    elif [ $sel == "now-playing" ]; then
+        rm -rf $DIR/system/etc/firmware
+        rm -rf $DIR/system/product/overlay/PixeliflyNowPlaying.apk
+    elif [ $sel == "hotword" ]; then
+        rm -rf $DIR/system/
     else
         echo "x Invalid choice"
         ac=1
     fi
     if [ $ac -eq 0 ]; then
-        echo "- Success"
+        echo "- Success, Please Reboot to take effect !!"
     fi
     ;;
 "--remove-backup")
@@ -46,6 +54,38 @@ case $option in
     fi
     if [ $ac -eq 0 ]; then
         echo "- Done"
+    fi
+    ;;
+"lockscreen_qr")
+    if [ $sel == "1" ] || [ $sel == "true" ]; then
+        settings put secure lock_screen_show_qr_code_scanner 1
+        echo "- Success"
+    elif [ $sel == "0" ] || [ $sel == "false" ]; then
+        settings put secure lock_screen_show_qr_code_scanner 0
+        echo "- Success"
+    else
+        echo "x Invalid choice"
+        ac=1
+    fi
+    ;;
+"install")
+    if [ $sel == "now-playing" ]; then
+        if [ -f $DIR/extras/nplaying.tar.xz ]; then
+            tar -xf $DIR/extras/nplaying.tar.xz -C $DIR/system
+            echo "- Success, Please Reboot to take effect !!"
+        else
+            echo "! File missing, cannot able to install now playing"
+        fi
+    elif [ $sel == "hotword" ]; then
+        if [ $API -ge 30 ]; then
+            tar -xf $DIR/extras/hotword.tar.xz -C $DIR
+        else
+            tar -xf $DIR/extras/hotword-9.tar.xz -C $DIR/system$product/priv-app
+        fi
+        echo "- Success, Please Reboot to take effect !!"
+    else
+        echo "x Invalid choice"
+        ac=1
     fi
     ;;
 "*")

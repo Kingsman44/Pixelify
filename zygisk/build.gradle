@@ -47,7 +47,7 @@ afterEvaluate {
 
             into magiskDir
             from(templatePath) {
-                exclude 'module.prop'
+                exclude 'module.prop', 'files/system'
             }
             from(templatePath) {
                 include 'module.prop'
@@ -97,7 +97,7 @@ afterEvaluate {
 
             into magiskDir
             from(templatePath) {
-                exclude 'module.prop'
+                exclude 'module.prop', 'files/system'
             }
             from(templatePath) {
                 include 'module.prop'

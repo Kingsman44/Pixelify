@@ -50,6 +50,7 @@ set_device_config() {
 log() {
     date=$(date +%y/%m/%d)
     tim=$(date +%H:%M:%S)
+    echo "$@"
     temp="$temp
 $date $tim: $@"
 }
@@ -221,17 +222,62 @@ else
     am force-stop com.google.android.settings.intelligence
 
     settings put global settings_enable_clear_calling true
+    settings put secure show_qr_code_scanner_setting true
     set_device_config
 
     patch_gboard
     am force-stop com.google.android.dialer com.google.android.inputmethod.latin
 
-    pref_patch 45353596 1 boolean $PHOTOS_PREF
-    pref_patch 45363145 1 boolean $PHOTOS_PREF
-    pref_patch 45357512 1 boolean $PHOTOS_PREF
-    pref_patch 45361445 1 boolean $PHOTOS_PREF
-    pref_patch 45357511 1 boolean $PHOTOS_PREF
-    pref_patch photos.backup.throttled_state 0 boolean $PHOTOS_PREF
+    pref_patch 45353596 true boolean $PHOTOS_PREF
+    pref_patch 45363145 true boolean $PHOTOS_PREF
+    pref_patch 45357512 true boolean $PHOTOS_PREF
+    pref_patch 45361445 true boolean $PHOTOS_PREF
+    pref_patch 45357511 true boolean $PHOTOS_PREF
+    pref_patch photos.backup.throttled_state false boolean $PHOTOS_PREF
+
+    if [ -f $MODDIR/first ]; then
+        if [ -d /data/data/com.google.android.apps.nexuslauncher ]; then
+            pm install $MODDIR/system/**/priv-app/WallpaperPickerGoogleRelease/WallpaperPickerGoogleRelease.apk
+            if [ ! -f $PL_PREF ]; then
+                echo "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>" >>$PL_PREF
+                echo '<map>
+    <int name="launcher.home_bounce_count" value="3" />
+    <boolean name="launcher.apps_view_shown" value="true" />
+    <boolean name="pref_allowChromeTabResult" value="false" />
+    <boolean name="pref_allowWebResultAga" value="true" />
+    <int name="ALL_APPS_SEARCH_CORPUS_PREFERENCE" value="206719" />
+    <boolean name="pref_allowWidgetsResult" value="false" />
+    <int name="migration_src_device_type" value="0" />
+    <boolean name="pref_search_show_keyboard" value="false" />
+    <boolean name="pref_allowPeopleResult" value="true" />
+    <boolean name="pref_enable_minus_one" value="true" />
+    <string name="migration_src_workspace_size">5,5</string>
+    <boolean name="pref_search_show_hidden_targets" value="false" />
+    <boolean name="pref_allowWebSuggestChrome" value="false" />
+    <boolean name="pref_allowPixelTipsResult" value="true" />
+    <string name="idp_grid_name">normal</string>
+    <boolean name="pref_allowScreenshotResult" value="true" />
+    <boolean name="pref_allowMemoryResult" value="true" />
+    <boolean name="pref_allowShortcutResult" value="true" />
+    <boolean name="pref_allowRotation" value="false" />
+    <boolean name="launcher.select_tip_seen" value="true" />
+    <boolean name="pref_allowWebResult" value="true" />
+    <boolean name="pref_allowSettingsResult" value="true" />
+    <int name="migration_src_hotseat_count" value="5" />
+    <int name="launcher.hotseat_discovery_tip_count" value="5" />
+    <boolean name="pref_add_icon_to_home" value="true" />
+    <string name="migration_src_db_file">launcher.db</string>
+    <boolean name="pref_overview_action_suggestions" value="false" />
+    <boolean name="pref_allowPlayResult" value="true" />
+    <int name="launcher.all_apps_visited_count" value="10" />
+</map>' >>$PL_PREF
+            else
+                pref_patch pref_overview_action_suggestions false boolean $PL_PREF
+            fi
+            am force-stop com.google.android.apps.nexuslauncher
+        fi
+        rm -rf $MODDIR/first
+    fi
 fi
 
 # loop=0

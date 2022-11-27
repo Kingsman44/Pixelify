@@ -15,10 +15,10 @@
 
 #include <sys/system_properties.h>
 
-static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpapers20", "com.snapchat.android", "ndroid.systemui"};
+static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpapers20", "com.snapchat.android"};
 static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.gms", "com.google.android.apps.wearables.maestro.companion"};
 static std::vector<std::string> P1 = {"com.google.android.apps.photos"};
-static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper"};
+static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper","com.google.android.googlequicksearchbox"};
 static std::vector<std::string> keep = {"com.google.android.GoogleCamera", "com.google.ar.core", "com.google.vr.apps.ornament", "com.google.android.apps.motionsense.bridge", "com.google.android.xx"};
 
 bool DEBUG = false;

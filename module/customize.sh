@@ -3,9 +3,21 @@
 . $MODPATH/vars.sh || abort
 . $MODPATH/utils.sh || abort
 
+alias keycheck="$MODPATH/addon/keycheck"
+sqlite=$MODPATH/addon/sqlite3
+VOL_KEYS="$(grep 'DEVICE_USES_VOLUME_KEY=' $MODPATH/module.prop | cut -d= -f2)"
+
+chmod 0755 $sqlite
+
 [ -z "$MAGISKTMP" ] && MAGISKTMP=/sbin
 
 zygisk_enabled="$(magisk --sqlite "SELECT value FROM settings WHERE (key='zygisk')")"
+
+if [ "$MAGISK_VER_CODE" -ge 21000 ]; then
+    MAGISK_CURRENT_RIRU_MODULE_PATH=$(magisk --path)/.magisk/modules/riru-core
+else
+    MAGISK_CURRENT_RIRU_MODULE_PATH=/sbin/.magisk/modules/riru-core
+fi
 
 if [ -f $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh ]; then
     if [ "$zygisk_enabled" == "value=1" ]; then
@@ -76,12 +88,6 @@ if [ "$ARCH" != "arm" ] && [ "$ARCH" != "arm64" ] && [ "$ARCH" != "x86" ] && [ "
     abort " x Unsupported platform: $ARCH"
 fi
 
-alias keycheck="$MODPATH/addon/keycheck"
-sqlite=$MODPATH/addon/sqlite3
-VOL_KEYS="$(grep 'DEVICE_USES_VOLUME_KEY=' $MODPATH/module.prop | cut -d= -f2)"
-
-chmod 0755 $sqlite
-
 if [ ! -f $MODPATH/addon/curl ]; then
     mkdir -p $MODPATH/addon
     cp -f /system/bin/curl $MODPATH/addon/curl
@@ -127,6 +133,14 @@ if [ -z $exact_prop ]; then
     done
 fi
 
+# if [ -z $exact_prop ]; then
+#     case "$(getprop ro.custom.version)" in
+#     PixelOS_*)
+#         exact_prop="ro.custom.device"
+#         ;;
+#     esac
+# fi
+
 rm -rf $logfile
 
 echo "=============
@@ -140,7 +154,11 @@ tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
 chmod 0755 $MODPATH/addon/*
 
-if [ $API -ge 31 ] && [ -d /system_ext/oplus ]; then
+if [ -d /system_ext/oplus ] || [ ! -z "$(getprop ro.vivo.os.version)" ] || [ ! -z "$(getprop ro.oplus.image.system.version)" ]; then
+    REQ_FIX=1
+fi
+
+if [ $API -ge 31 ] && [ $REQ_FIX -eq 1 ]; then
     TARGET_DEVICE_OP12=1
 elif [ $API -ge 31 ] && [ ! -z "$(getprop ro.build.version.oneui)" ]; then
     TARGET_DEVICE_ONEUI=1
@@ -171,6 +189,15 @@ fi
 sec_patch="$(getprop ro.build.version.security_patch)"
 build_date="$(getprop ro.build.date.utc)"
 # Greater then DEC patch 2022 or Android version 12L or greater
+if [ $API -eq 33 ]; then
+    for i in "ro.lineage.device" "ro.crdroid.version" "ro.rice.version" "ro.miui.ui.version.code"; do
+        if [ ! -z "$(getprop $i)" ]; then
+            LOS_FIX=1
+            break
+        fi
+    done
+fi
+
 if [ $API -ge 32 ]; then
     NEW_PL=1
 elif [ $(echo $sec_patch | cut -d- -f1) -ge 2022 ] && [ $API -ge 31 ]; then
@@ -375,9 +402,18 @@ fi
 # Have user option to skip vol keys
 if [ "$VOL_KEYS" -eq 0 ]; then
     print "- Skipping Vol Keys -"
-    print ""
-    print " Using config: $vk_loc"
-    VKSEL=no_vksel
+    if [ -f /sdcard/Pixelify/config.prop ]; then
+        print ""
+        print " Using config: $vk_loc"
+        VKSEL=no_vksel
+    else
+        print "X Config not found installation"
+        print "- Config is now placed at /sdcard/Pixelify/config.prop"
+        mkdir -p /sdcard/Pixelify
+        cp -f $vk_loc /sdcard/Pixelify/config.prop
+        print "- Please configure it and reinstall pixelify"
+        abort
+    fi
 else
     if keytest; then
         echo "- Using chooseport method for Volume keys" >>$logfile
@@ -443,20 +479,23 @@ if [ ! -z $exact_prop ] && [ $API -ge 31 ] && [ $BETA_BUILD -eq 1 ]; then
 fi
 
 [ $MAGISK_VER_CODE -ge 24000 ] && ZYGISK_P=1
-if [ $MODULE_TYPE -eq 2 ] || [ $MODULE_TYPE -eq 3 ]; then
-    [ $TENSOR -eq 1 ] && print "(TENSOR CHIPSET DETECTED)"
+if [ $TENSOR -eq 1 ]; then
+    print "(TENSOR CHIPSET DETECTED)"
     print "  Do you want to enable Google Photos Unlimited Backup?"
-    [ $TENSOR -eq 1 ] && print "  Note: Magic Eraser will only work on the Photos app provided through my GitHub page!"
+    print "  Note: Magic Eraser will only work on the Photos app provided through my GitHub page!"
     print "   Vol Up += Yes"
     print "   Vol Down += No"
     no_vk "ENABLE_PHOTOS_UNLIMITED"
     if $VKSEL; then
-        echo "- Enabling Unlimited storage" >>$logfile
+        echo "- Enabling Unlimited storage in this Tensor chipset device" >>$logfile
         drop_sys
     else
-        echo "- Disabling Unlimited storage" >>$logfile
-        [ $TENSOR -eq 1 ] && rm -rf $MODPATH/zygisk
+        echo "- Disabling Unlimited storage in this Tensor chipset device" >>$logfile
+        rm -rf $MODPATH/zygisk $MODPATH/zygisk_1
     fi
+elif [ $MODULE_TYPE -eq 2 ] || [ $MODULE_TYPE -eq 3 ]; then
+    echo "- Enabling Unlimited storage" >>$logfile
+    drop_sys
 else
     print "  Do you want to Spoof your device to Pixel 5/Pixel 6 Pro?"
     print "   Vol Up += Yes"
@@ -508,12 +547,7 @@ if [ "$(getprop ro.product.vendor.manufacturer)" == "samsung" ]; then
     fi
 fi
 
-[ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware && NOT_REQ_SOUND_PATCH=1
-
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
-db_edit com.google.android.platform.device_personalization_services boolVal 1 "AmbientContext__enable" "AmbientContext__enable_quick_tap" "Legibility__enable_legibility" "Echo_smartspace__smartspace_enable_daily_forecast" "Captions__enable_enhanced_voice_dictation_biasing" "Echo_smartspace__smartspace_enable_timely_reminder" "Captions__allow_use_public_speech_recognition" "Echo_search__enable_dota" "Translate__enable_language_profile_quick_update" "SmartDictation__enable_selection_filtering" "SmartRecCompose__enable_compose_tc" "Translate__beta_audio_to_text_languages_in_live_caption" "Translate__enable_chronicle_migration" "Translate__use_translate_kit_streaming_api" "SpeechRecognitionService__resumable_diarization_enabled" "Echo__smartspace_enable_grocery" "Echo_smartspace__enable_is_debug" "Echo_smartspace__enable_hotel_smartspace_aiai" "Echo_smartspace__enable_flight_landing_smartspace_aiai" "Echo__smartspace_enable_dwb_bedtime_predictor" "Translate__translation_service_enabled" "Echo__avatar_enable_feature" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_alternatives_from_past_corrections" "SmartRecPixelSearch__enable_gboard_suggestion" "SmartRecPixelSearch__enable_spelling_correction" "Captions__enable_language_detection" "Echo__search_enable_mdp_play_results" "Echo__search_enable_superpacks_play_results" "Echo__search_enable_assistant_quick_phrases_settings" "Echo__smartspace_enable_battery_notification_parser" "Echo__smartspace_enable_ridesharing_eta" "Echo__smartspace_enable_food_delivery_eta" "Echo__smartspace_enable_eta_doordash" "SmartDictation__enable_alternatives_from_past_corrections" "SmartDictation__enable_alternatives_from_speech_hypotheses" "SmartDictation__enable_biasing_for_commands" "SmartDictation__enable_biasing_for_contacts" "SmartDictation__enable_biasing_for_contacts_learned_from_past_corrections" "SmartDictation__enable_biasing_for_interests_model" "SmartDictation__enable_biasing_for_past_correction" "SmartDictation__enable_biasing_for_screen_context" "SmartDictation__enable_personalized_biasing_on_locked_device" "SmartDictation__enable_selection_filtering" "Echo__search_enable_apps" "Captions__text_transform_augmented_input" "Captions__enable_augmented_modality" "Captions__enable_augmented_modality_input" "Echo__enable_headphones_suggestions_from_agsa" "NowPlaying__youtube_export_enabled" "Overview__enable_lens_r_overview_long_press" "Overview__enable_lens_r_overview_select_mode" "Overview__enable_lens_r_overview_translate_action" "Echo__smartspace_enable_doorbell" "Echo__smartspace_enable_earthquake_alert_predictor" "Echo__smartspace_enable_echo_settings" "Echo__smartspace_enable_light_predictor" "Echo__smartspace_enable_paired_device_predictor" "Echo__smartspace_enable_safety_check_predictor" "Echo__smartspace_enable_echo_unified_settings" "Echo__smartspace_enable_dark_launch_outlook_events" "Echo__smartspace_enable_step_predictor" "Echo__smartspace_enable_nap" "Echo__smartspace_enable_paired_device_connections" "Echo__smartspace_dedupe_fast_pair_notification" "Echo__smartspace_enable_nudge" "Echo__smartspace_enable_package_delivery" "Echo__smartspace_enable_outlook_events" "Echo__smartspace_gaia_twiddler" "Echo__smartspace_enable_eta_lyft" "Echo__smartspace_enable_sensitive_notification_twiddler" "Screenshot__enable_covid_card_action" "Screenshot__enable_lens_screenshots_search_action" "Screenshot__enable_lens_screenshots_similar_styles_action" "Screenshot__enable_lens_screenshots_translate_action" "Screenshot__enable_quick_share_smart_action" "Screenshot__enable_screenshot_notification_smart_actions" "Screenshot__enable_add_to_wallet_title" "Screenshot__can_use_gms_core_to_save_boarding_pass" "Screenshot__can_use_gpay_to_save_boarding_pass" "Echo__smartspace_enable_cross_device_timer" "Echo__smartspace_show_cross_device_timer_label" "Settings__enable_internal_settings" "People__enable_call_log_signals" "People__enable_contacts" "People__enable_dictation_client" "People__enable_hybrid_hotseat_client" "People__enable_notification_common" "People__enable_notification_signals" "People__enable_package_tracker" "People__enable_people_pecan" "People__enable_people_search_content" "People__enable_priority_suggestion_client" "People__enable_profile_signals" "People__enable_sharesheet_client" "People__enable_sms_signals" "GellerDataShare__enable_data_capture" "GellerDataShare__enable_data_fetch" "GellerDataShare__enable_settings_opt_in_switch" "SmartRecOverviewChips__enable_smartrec_for_overview_chips" "SmartRecOverviewChips__enable_settings_card_generator" "SmartRecOverviewChips__enable_reflection_generator" "SmartRecOverviewChips__enable_action_boost_generator" "SmartRecQuickSearchBox__enable_action_boost_generator" "SmartRecOverviewChips__enable_matchmaker_generator" "Echo__smartspace_enable_subcard_logging" "Echo__enable_widget_recommendations" "Echo__search_play_enable_spell_correction" "Echo__silo_enable_persistence" "Echo__settings_search_debug" "Echo__enable_people_module" "Echo__enable_nudge_debug_mode"
-# db_edit com.google.android.platform.device_personalization_services boolVal 0  "SmartRecPixelSearch__spelling_checker_superpacks_require_device_idle" "SmartRecPixelSearch__spelling_checker_superpacks_require_unmetered_connection"
-db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
+#[ -f /product/etc/firmware/music_detector.sound_model ] && rm -rf $MODPATH/system/etc/firmware && NOT_REQ_SOUND_PATCH=1
 
 if [ $DPAS -eq 1 ]; then
     echo " - Installing Android System Intelligence" >>$logfile
@@ -541,7 +575,7 @@ if [ $DPAS -eq 1 ]; then
                     if [ $API -eq 31 ] || [ $API -eq 32 ]; then
                         $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-31.tar.xz -o dp-$API.tar.xz &>/proc/self/fd/$OUTFD
                     elif [ $API -ge 33 ]; then
-                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-$API.tar.xz -o dp-$API.tar.xz &>/proc/self/fd/$OUTFD
+                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asis-new-$API.tar.xz -o dp-$API.tar.xz &>/proc/self/fd/$OUTFD
                     else
                         $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz -O &>/proc/self/fd/$OUTFD
                     fi
@@ -563,7 +597,7 @@ if [ $DPAS -eq 1 ]; then
                 print ""
             fi
         fi
-        now_playing
+        #now_playing
         print "- Installing Android System Intelligence"
         print ""
         cp -f $MODPATH/files/PixeliflyDPS.apk $MODPATH/system/product/overlay/PixeliflyDPS.apk
@@ -624,15 +658,10 @@ if [ $DPAS -eq 1 ]; then
             fi
         fi
     fi
-    pm install --user 0 $MODPATH/system/product/priv-app/asi_up.apk &>/dev/null
-    [ $API -ge 31 ] && pm install --user 0 $MODPATH/system/product/priv-app/DeviceIntelligenceNetworkPrebuilt/*.apk &>/dev/null
-    for i in $ASI_OS_PERM; do
-        pm grant com.google.android.as.oss $i &>/dev/null
-    done
-    for i in $ASI_PERM; do
-        pm grant com.google.android.as $i &>/dev/null
-    done
+    pm install $MODPATH/system/product/priv-app/DevicePersonalizationPrebuiltPixel*/*.apk &>/dev/null
+    [ $API -ge 31 ] && pm install $MODPATH/system/product/priv-app/DeviceIntelligenceNetworkPrebuilt/*.apk &>/dev/null
     rm -rf $MODPATH/system/product/priv-app/asi_up.apk
+    pm set-permission-enforced android.permission.READ_DEVICE_CONFIG false
 else
     print ""
 fi
@@ -662,24 +691,6 @@ if [ -d /data/data/$DIALER ]; then
             fi
         done
 
-        case $CALL_SCREEN_CR in
-        "it")
-            CALL_SCREEN_NUM="22210"
-            ;;
-        "fr")
-            CALL_SCREEN_NUM="20801"
-            ;;
-        "ja")
-            CALL_SCREEN_NUM="44060"
-            ;;
-        "de")
-            CALL_SCREEN_NUM="26204"
-            ;;
-        "es")
-            CALL_SCREEN_NUM="21403"
-            ;;
-        esac
-
         for i in $DIALERFLAGS; do
             $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer' AND name='$i'"
             if [ $CUSTOM_CALL_SCREEN -eq 1 ] && [[ $i == "G__enable_revelio" || $i == "G__enable_revelio_r_api" || $i == "enable_revelio_transcript" || $i == "G__bypass_revelio_roaming_check" || $i == "G__enable_call_screen_saving_audio" || $i == "G__speak_easy_enabled" || $i == "G__enable_speakeasy_details" || $i == "G__speak_easy_bypass_locale_check" || $i == "G__speak_easy_use_soda_asr" ]]; then
@@ -689,7 +700,7 @@ if [ -d /data/data/$DIALER ]; then
                 continue
             fi
             $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.dialer', '', '$i', 0, 1, 0)"
-            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.dialer', '', '$i', 0, 1, 0)"
+            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, boolVal, committed) VALUES('com.google.android.dialer', '', '$i', 0, 1, 1)"
             $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='com.google.android.dialer' AND name='$i'"
         done
 
@@ -781,15 +792,9 @@ if [ -d /data/data/$DIALER ]; then
         fi
         carr_coun="$(echo $carr_coun_small | tr '[:lower:]' '[:upper:]')"
 
-        if [ ! -z $carr_coun ]; then
+        if [ ! -z $carr_coun ] && [ -z $(echo "US CA JP" | grep $carr_coun) ]; then
             echo " - Adding Country ($carr_coun) patch for Call Recording and Hold for me, Direct My Call" >>$logfile
             sed -i -e "s/YY/${carr_coun}/g" $MODPATH/files/com.google.android.dialer
-            sed -i -e "s/cc-CC/${full_lang}/g" $MODPATH/files/com.google.android.dialer
-        fi
-
-        if [ -z $(echo "GB IE JP US DE IT FR ES" | grep $carr_coun) ]; then
-            sed -i -e "s/kk-YT/${full_lang}/g" $MODPATH/files/com.google.android.dialer-custom
-            sed -i -e "s/kk/${carr_coun_small}/g" $MODPATH/files/com.google.android.dialer-custom
         fi
 
         # Remove old prompt to replace to use within overlay
@@ -942,13 +947,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
             fi
         fi
 
-        # $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox'"
-        # db_edit com.google.android.googlequicksearchbox boolVal 0 "45351541" "9670" "8888" "15052" "45363987" "45363985" "45359819"
-        # db_edit com.google.android.googlequicksearchbox boolVal 1 "9243" "16706" "85389" "45353510" "9542" "4474" "3166" "5770"
-        # db_edit com.google.android.googlequicksearchbox stringVal "Pixel,Pixel XL,Pixel 2,Pixel 2 XL,Pixel 3a,Pixel 3,Pixel 3XL,Pixel 4,Pixel 4 XL,Pixel 4a,Pixel 4a (5G),Pixel 5,Pixel 5a,Pixel 6,Pixel 6 Pro,Pixel 6a,Pixel 7,Pixel 7 Pro" '7235'
-        # db_edit com.google.android.googlequicksearchbox stringVal '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,' '13729'
-        # db_edit com.google.android.googlequicksearchbox stringVal 'Pixel 7 Pro,Pixel 7,Pixel 6a,Pixel 6,Pixel 6 Pro,Pixel 5,Pixel 3XL' '17074'
-        # db_edit com.google.android.googlequicksearchbox stringVal 'Oriole,oriole,Raven,Pixel 3 XL,raven,Pixel 6,Pixel 6 Pro,redfin,Redfin,Pixel 5,crosshatch,Pixel 3XL,Pixel 7 Pro,Pixel 7' '45353661'
+        db_edit com.google.android.googlequicksearchbox stringVal "Cheetah" "13477"
 
         cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
         cp -f $MODPATH/files/PixeliflyGA.apk $MODPATH/system/product/overlay/PixeliflyGA.apk
@@ -1253,7 +1252,10 @@ if [ $API -ge 29 ]; then
                         rm -rf /sdcard/Pixelify/backup/pl-$API.tar.xz
                         rm -rf /sdcard/Pixelify/version/pl-$API.txt
                         cd $MODPATH/files
-                        if [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
+                        if [ $LOS_FIX -eq 1 ]; then
+                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
+                            mv pl-los-33.tar.xz pl-$API.tar.xz
+                        elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
                             $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
                             mv pl-j-new-$API.tar.xz pl-$API.tar.xz
                         elif [ $NEW_PL -eq 1 ]; then
@@ -1307,7 +1309,10 @@ if [ $API -ge 29 ]; then
                 echo " - Downloading and Installing Pixel Launcher" >>$logfile
                 print ""
                 cd $MODPATH/files
-                if [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
+                if [ $LOS_FIX -eq 1 ]; then
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
+                    mv pl-los-33.tar.xz pl-$API.tar.xz
+                elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-32.tar.xz -O &>/proc/self/fd/$OUTFD
                     mv pl-j-new-$API.tar.xz pl-$API.tar.xz
                 elif [ $NEW_PL -eq 1 ]; then
@@ -1392,7 +1397,7 @@ if [ $API -ge 28 ]; then
     no_vk "ENABLE_GSI"
     if $VKSEL; then
         SI=$(find /system -name *SettingsIntelligence* | grep -v overlay | grep -v "\.")
-        db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__enable_wifi_driven_bootstrap" "RoutinesPrototype__is_action_notifications_enabled" "RoutinesPrototype__is_activities_enabled" "RoutinesPrototype__is_module_enabled" "RoutinesPrototype__is_manual_location_rule_adding_enabled" "RoutinesPrototype__is_routine_inference_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"
+        db_edit com.google.android.settings.intelligence boolVal 1 $GSS_FLAGS
         tar -xf $MODPATH/files/sig.tar.xz -C $MODPATH/system$product/priv-app
         # cp -f $MODPATH/files/PixelifySettingsIntelligenceGoogleOverlay.apk $MODPATH/system/product/overlay/PixelifySettingsIntelligenceGoogleOverlay.apk
         # REMOVE="$REMOVE $SI"
@@ -1451,7 +1456,8 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
 
     $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin'"
     if [ $DISABLE_GBOARD_GMS -eq 0 ]; then
-        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal 1 "grammer_checker_enable_language_detector" "enable_nav_redesign" "show_branding_on_space" "enable_grammar_checker" "emojify_enable_fallback_pattern" "enable_emojify_settings_option" "notify_emoji_candidate_availability" "enable_emojify_settings_option" "nga_enable_spoken_emoji_sticky_variant" "enable_emoji_predictor_tflite_engine" "enable_personalization_tracer" "enable_twiddler_multiword_engine" "enable_voice_ellipsis" "hide_composing_underline" "lm_personalization_enabled" "notify_emoji_candidate_availability" "enable_feature_split_brella" "tiresias_enabled" "enable_p13n_on_nwp_tflite_engine" "show_suggestions_for_selected_text_while_dictating" "enable_handle_emoticon_for_expression_candidates" "enable_expressive_concept_model" "show_contextual_emoji_kitchen_in_expression_moment" "enable_text_to_one_tap_expressions" "enable_expression_candidate_precaching_for_bitmoji" "enable_expression_content_cache" "enable_handle_bitmoji_for_expression_candidates" "enable_emoji_to_expression_tappable_ui" "enable_expression_moment_push_up_animation" "enable_handle_expression_moment_standard_emoji_kitchen" "enable_trigger_spell_check_in_composing" "enable_trigger_spell_check_in_sentence" "translate_new_ui" "auto_show_translate" "offline_translate" "enable_nga_ime_api" "enable_email_provider_completion" "enable_inline_suggestions_tooltip_v2" "crank_trigger_decoder_inline_prediction_first" "enable_multiword_suggestions_as_inline_from_crank_cifg" "enable_floating_keyboard_v2" "enable_multiword_predictions_from_user_history" "enable_single_word_suggestions_as_inline_from_crank_cifg" "enable_matched_predictions_as_inline_from_crank_cifg" "enable_single_word_predictions_as_inline_from_crank_cifg" "enable_inline_suggestions_space_tooltip" "enable_multiword_predictions_as_inline_from_crank_cifg" "enable_user_history_predictions_as_inline_from_crank_cifg" "crank_trigger_decoder_inline_completion_first" "enable_inline_suggestions_on_decoder_side" "enable_core_typing_experience_indicator_on_composing_text" "enable_inline_suggestions_on_client_side" "enable_core_typing_experience_indicator_on_candidates" "nga_enable_undo_delete" "nga_enable_sticky_mic" "nga_enable_spoken_emoji_sticky_variant" "nga_enable_mic_onboarding_animation" "nga_enable_mic_button_when_dictation_eligible" "enable_nga"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal 1 $GBOARD_FLAGS
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal $TENSOR "enable_edge_tpu"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 2000 "inline_suggestion_dismiss_tooltip_delay_time_millis"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 4 "inline_suggestion_experiment_version"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "https://www.gstatic.com/android/keyboard/spell_checker/experiment/memory_fix/metadata_cpu_2021102041.json" "grammar_checker_manifest_uri"
@@ -1464,10 +1470,10 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         print "    Vol Down += No"
         no_vk "G_LOGO"
         if $VKSEL; then
+            db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal 1 "show_branding_on_space"
             db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 0 "show_branding_interval_seconds"
             db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 86400000 "branding_fadeout_delay_ms"
         fi
-        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 3 "grammar_checker_min_sentence_length"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 3 "grammar_checker_min_sentence_length"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger,tw.nekomimi.nekogram,org.telegram.BifToGram" "emojify_app_allowlist"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "material3_theme" "enable_access_points_new_design" "enable_nga_language_download" "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
@@ -1511,42 +1517,51 @@ else
     print ""
 fi
 
+ui_print ""
+ui_print " - Patching GMS flags to enable features"
+
+# Android System Intelligence
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
+db_edit com.google.android.platform.device_personalization_services boolVal 1 $ASI_FLAGS
+db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
+# db_edit com.google.android.platform.device_personalization_services stringVal "de,en,es,fr,it,ja,hi,zh,ru,pl,pt,ko,th,tr,nl,zh_Hant" "Translate__chat_translate_languages"
+# db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" "Translate__interpreter_source_languages"
+# db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" "Translate__interpreter_target_languages"
+# db_edit com.google.android.platform.device_personalization_services stringVal "vi,ja,fa,ro,nl,mr,mt,ar,ms,it,eo,is,et,es,iw,zh,uk,af,id,ur,mk,cy,hi,el,be,pt,lt,hr,lv,hu,ht,te,de,bg,th,bn,tl,pl,tr,kn,sv,gl,ko,sw,cs,da,ta,gu,ka,sl,ca,sk,ga,sq,no,fi,ru,fr,en,zh_Hant" "Translate__text_to_text_language_list"
+# db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR "Translate__enable_opmv4_service" "Translate__enable_nextdoor" "Translate__characterset_lang_detection_enabled"
+
 # Digital Wellbeing
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
-db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "AmbientContextEventDetection__enable_ambient_context_event_detection" "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget" "HatsSurveys__enable_testing_mode" "WindDown__enable_wallpaper_dimming" "WalkingDetection__enable_outdoor_detection_v2" "Clockshine__enable_sleep_detection" "Clockshine__show_sleep_insights_screen" "Clockshine__show_manage_data_screen" "AutoDoNotDisturb__enable_auto_dnd_lottie_rect" "AutoDoNotDisturb__auto_dnd_synclet_enabled" "WebsiteUsage__display_website_usage" "HatsSurveys__enable_testing_mode"
+db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "BedtimeAmbientContext__enable_bedtime_ambient_context" "BedtimeAmbientContext__enable_bedtime_daily_insights_graph" "BedtimeAmbientContext__enable_bedtime_weekly_insights_graph" "BedtimeAmbientContext__show_ambient_context_promo_card" "BedtimeAmbientContext__show_ambient_context_awareness_notification" "AmbientContextEventDetection__enable_ambient_context_event_detection" "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget" "HatsSurveys__enable_testing_mode" "WindDown__enable_wallpaper_dimming" "WalkingDetection__enable_outdoor_detection_v2" "Clockshine__enable_sleep_detection" "Clockshine__show_sleep_insights_screen" "Clockshine__show_manage_data_screen" "AutoDoNotDisturb__enable_auto_dnd_lottie_rect" "AutoDoNotDisturb__auto_dnd_synclet_enabled" "WebsiteUsage__display_website_usage" "HatsSurveys__enable_testing_mode"
+
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing'"
+com.google.android.apps.wellbeing boolVal 1 "BedtimeAmbientContext__enable_bedtime_ambient_context" "BedtimeAmbientContext__enable_bedtime_daily_insights_graph" "BedtimeAmbientContext__enable_bedtime_weekly_insights_graph" "BedtimeAmbientContext__show_ambient_context_promo_card" "BedtimeAmbientContext__show_ambient_context_awareness_notification" "AmbientContextEventDetection__enable_ambient_context_event_detection"
 
 # Google translate
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.translate'"
 db_edit com.google.android.apps.translate boolVal 1 "Widgets__enable_quick_actions_widget" "Widgets__enable_saved_history_widget"
 
-# Google photos
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.photos'"
-db_edit com.google.android.apps.photos boolVal 1 "45353596" "45363145" "45357512" "45361445" "45357511" "45376295"
-db_edit com.google.android.apps.photos boolVal 0 "photos.backup.throttled_state"
-
-pref_patch 45353596 1 boolean $PHOTOS_PREF
-pref_patch 45363145 1 boolean $PHOTOS_PREF
-pref_patch 45357512 1 boolean $PHOTOS_PREF
-pref_patch 45361445 1 boolean $PHOTOS_PREF
-pref_patch 45357511 1 boolean $PHOTOS_PREF
-pref_patch photos.backup.throttled_state 0 boolean $PHOTOS_PREF
-
 # Google settings Services
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.settings.intelligence'"
 db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__enable_wifi_driven_bootstrap" "RoutinesPrototype__is_action_notifications_enabled" "RoutinesPrototype__is_activities_enabled" "RoutinesPrototype__is_module_enabled" "RoutinesPrototype__is_manual_location_rule_adding_enabled" "RoutinesPrototype__is_routine_inference_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"
 
-# Google settings Services
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.libraries.consentverifier#com.google.android.deskclock'"
-db_edit "com.google.android.libraries.consentverifier#com.google.android.deskclock" boolVal 1 "CollectionBasisVerifierFeatures__enable_all_features"
-
 # Fix Precise Location
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
-db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
-gms_edit_bool "com.google.android.platform.privacy" "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
+db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle" "enable_immersive_indicator"
 
 # Live Wallpapers
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
 db_edit com.google.pixel.livewallpaper stringVal "" "DownloadableWallpaper__blocking_module_list"
+
+# Google One
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.subscriptions.red.user'"
+db_edit com.google.android.apps.subscriptions.red.user boolVal 1 "633" "45373857" "618" "45358581"
+db_edit "com.google.android.libraries.internal.growth.growthkit#com.google.android.apps.subscriptions.red" stringVal "us" "Sync__override_country"
+
+# Google Recorder
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder#com.google.android.apps.recorder'"
+db_edit com.google.android.apps.recorder#com.google.android.apps.recorder boolVal 1 "Experiment__allow_speaker_labels_with_tts" "Experiment__enable_speaker_labels" "Experiment__enable_speaker_labels_editing" "Experiment__enable_speaker_labels_editing_in_playback"
+db_edit 'com.google.android.apps.recorder#com.google.android.apps.recorder' 'stringVal' 'mic' "Experiment__audio_source"
 
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do
@@ -1610,6 +1625,9 @@ mv $pix/app2.txt $pix/app.txt
 REMOVE="$(echo "$REMOVE" | tr ' ' '\n' | sort -u)"
 REPLACE="$REMOVE"
 
+settings put secure show_qr_code_scanner_setting true
+settings put secure lock_screen_show_qr_code_scanner true
+
 #Clean Up
 rm -rf $MODPATH/files
 rm -rf $MODPATH/spoof.prop
@@ -1622,8 +1640,9 @@ mv $MODPATH/module-uninstaller.prop $PIXELIFYUNS/module.prop
 mv $MODPATH/service-uninstaller.sh $PIXELIFYUNS/service.sh
 cp -f $MODPATH/deviceconfig.txt $PIXELIFYUNS/deviceconfig.txt
 cp -f $MODPATH/utils.sh $PIXELIFYUNS/utils.sh
-cp -f $MODPATH/vars.sh $PIXELIFYUNS/utils.sh
+cp -f $MODPATH/vars.sh $PIXELIFYUNS/vars.sh
 cp -r $MODPATH/addon $PIXELIFYUNS
+touch $PIXELIFYUNS/first
 
 mkdir -p $MODPATH/system/bin
 mv $MODPATH/pixelify.sh $MODPATH/system/bin/pixelify

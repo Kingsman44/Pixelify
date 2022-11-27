@@ -68,10 +68,13 @@ fetch_version() {
             DPVERSION=$(echo "$ver" | grep asi-new-31 | cut -d'=' -f2)
             DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-31.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         elif [ $API -eq 33 ]; then
-            DPVERSION=$(echo "$ver" | grep asi-new-33 | cut -d'=' -f2)
-            DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-33.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
+            DPVERSION=$(echo "$ver" | grep asis-new-33 | cut -d'=' -f2)
+            DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asis-new-33.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         fi
-        if [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
+        if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ]; then
+            PLVERSION=$(echo "$ver" | grep pl-los-$API | cut -d'=' -f2)
+            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
             PLVERSION=$(echo "$ver" | grep plx-32 | cut -d'=' -f2)
             PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-32.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         elif [ $NEW_PL -eq 1 ]; then
@@ -446,6 +449,7 @@ set_perm_app() {
         for i in $perm; do
             s=$(echo $i | grep name= | cut -d= -f2 | sed "s/'/\"/g")
             if [ ! -z $s ]; then
+                pm grant $name $s &>/dev/null
                 echo "        <permission name=$s/>" >>$path/etc/permissions/privapp-permissions-$name.xml
             fi
         done
@@ -472,16 +476,16 @@ oos_fix() {
         cp -rf $MODPATH/system/system_ext/. ../system
         cd /
         rm -rf $MODPATH/system/product $MODPATH/system/system_ext
+        mkdir -p $MODPATH/vendor
+        mv $MODPATH/system/overlay $MODPATH/vendor/overlay
         #copy overlays to system priv app they also work there.
-        for i in $MODPATH/system/overlay/*; do
+        for i in $MODPATH/vendor/overlay/*; do
             name=$i
-            name=${name/$MODPATH\/system\/overlay\//}
+            name=${name/$MODPATH\/vendor\/overlay\//}
             name=${name/.apk/}
             if [ -f $i ]; then
-                mkdir -p $MODPATH/system/priv-app/$name
-                mv $i $MODPATH/system/priv-app/$name
-            else
-                mv $i $MODPATH/system/priv-app
+                mkdir -p $MODPATH/vendor/overlay/$name
+                mv $i $MODPATH/vendor/overlay/$name
             fi
         done
         rm -rf $MODPATH/system/overlay
@@ -592,6 +596,7 @@ install_wallpaper() {
                     [ $API -eq 33 ] && mv $MODPATH/files/PixelThemesStub13.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
                     [ $API -le 32 ] && mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
                 fi
+                # pm install $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease/*.apk
                 WREM=0
             fi
         else
@@ -739,7 +744,7 @@ drop_sys() {
     for i in /system/product/etc/sysconfig/*; do
         file=$i
         file=${file/\/system\/product\/etc\/sysconfig\//}
-        if [ ! -z "$(grep PIXEL_2020_ $i)" ] || [ ! -z "$(grep PIXEL_2021_ $i)" ] || [ ! -z "$(grep PIXEL_2019_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2018_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2022_ $i)" ]; then
+        if [ ! -z "$(grep PIXEL_2020_ $i)" ] || [ ! -z "$(grep PIXEL_2021_ $i)" ] || [ ! -z "$(grep PIXEL_2019_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2018_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2017_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2022_ $i)" ]; then
             [ ! -f $MODPATH/system/product/etc/sysconfig/$file ] && cat /system/product/etc/sysconfig/$file | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD >$MODPATH/system/product/etc/sysconfig/$file
             echo " - Fixing Photos Original quality by editing $file in product" >>$logfile
         fi
@@ -748,11 +753,11 @@ drop_sys() {
         file=$i
         file=${file/\/system\/etc\/sysconfig\//}
         if [ ! -z "$(grep PIXEL_2020_ $i)" ] || [ ! -z "$(grep PIXEL_2021_ $i)" ] || [ ! -z "$(grep PIXEL_2019_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2018_PRELOAD $i)" ] || [ ! -z "$(grep PIXEL_2022_ $i)" ]; then
-            [ ! -f $MODPATH/system/product/etc/sysconfig/$file ] && cat /system/etc/sysconfig/$file | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD >$MODPATH/system/etc/sysconfig/$file
+            [ ! -f $MODPATH/system/product/etc/sysconfig/$file ] && cat /system/etc/sysconfig/$file | grep -v PIXEL_2020_ | grep -v PIXEL_2021_ | grep -v PIXEL_2022_ | grep -v PIXEL_2018_PRELOAD | grep -v PIXEL_2019_PRELOAD | grep -v PIXEL_2017_PRELOAD >$MODPATH/system/etc/sysconfig/$file
             echo " - Fixing Photos Original quality by editing $file in system" >>$logfile
         fi
     done
-    if [ -f /data/adb/modules/Pixelify/system/product/etc/sysconfig ]; then
+    if [ -d /data/adb/modules/Pixelify/system/product/etc/sysconfig ]; then
         for i in /data/adb/modules/Pixelify/system/product/etc/sysconfig/*; do
             file=$i
             file=${file/\/data\/adb\/modules\/Pixelify\/system\/product\/etc\/sysconfig\//}
@@ -762,7 +767,7 @@ drop_sys() {
             fi
         done
     fi
-    if [ -f /data/adb/modules/Pixelify/system/etc/sysconfig ]; then
+    if [ -d /data/adb/modules/Pixelify/system/etc/sysconfig ]; then
         for i in /data/adb/modules/Pixelify/system/etc/sysconfig/*; do
             file=$i
             file=${file/\/data\/adb\/modules\/Pixelify\/system\/etc\/sysconfig\//}
@@ -773,10 +778,12 @@ drop_sys() {
         done
     fi
     #if [ -z $exact_prop ]; then
+    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml

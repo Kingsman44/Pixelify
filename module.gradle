@@ -13,7 +13,7 @@ ext {
     moduleName = "Pixelify"
     moduleAuthor = "Kingsman44"
     moduleDescription = "Enables pixel exclusive features :- Call Screening, Live Translate, Direct Call, Google Dialer Call Recording, Extreme Battery Saver, Hold For Me, Gboard Smart Compose, Adaptive Connectivity, Adaptive Sound, Next generation assistant, Pixel LiveWallpapers, Google Fit Heart rate and many more..."
-    moduleVersion = "v2.2-beta-1"
+    moduleVersion = "v2.2-beta-2"
     moduleVersionCode = 20221014
 
    //Riru Properties

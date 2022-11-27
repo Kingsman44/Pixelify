@@ -14,3 +14,4 @@ build
 /out
 /riru/build
 /zygisk/build
+/module/files/system

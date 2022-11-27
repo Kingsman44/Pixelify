@@ -37,6 +37,7 @@ bootlooped() {
     #logcat -d >> /sdcard/Pixelify/boot_logs.txt
     rip="$(logcat -d)"
     rm -rf $MODDIR/boot_logs.txt
+    echo "$(getprop)" >>MODDIR/boot_logs.txt
     echo "$rip" >>$MODDIR/boot_logs.txt
     cp -Tf $MODDIR/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
     #echo "$rip" >> /sdcard/Pixelify/boot_logs.txt
@@ -45,73 +46,49 @@ bootlooped() {
 }
 
 check() {
-    VALUEA="$1"
-    VALUEB="$2"
-    RESULT=false
-    for i in $VALUEA; do
-        for j in $VALUEB; do
-            [ "$i" == "$j" ] && RESULT=true
+    TEXT1="$1"
+    TEXT2="$2"
+    result=false
+    for i in $TEXT1; do
+        for j in $TEXT2; do
+            [ "$i" == "$j" ] && result=true
         done
     done
-    $RESULT
+    $result
 }
 
 #HuskyDG@github's bootloop preventer
-MAIN_ZYGOTE_NICENAME=zygote
-MAIN_SYSUI_NICENAME=com.android.systemui
 
+# Wait for zygote starts
+sleep 5
+
+MAIN_ZYGOTE_NICENAME=zygote
 CPU_ABI=$(getprop ro.product.cpu.api)
 [ "$CPU_ABI" = "arm64-v8a" -o "$CPU_ABI" = "x86_64" ] && MAIN_ZYGOTE_NICENAME=zygote64
 
-# Wait for zygote to start
-sleep 5
 ZYGOTE_PID1=$(pidof "$MAIN_ZYGOTE_NICENAME")
-echo "1z is $ZYGOTE_PID1"
-
-# Wait for SystemUI to start
-sleep 10
-SYSUI_PID1=$(pidof "$MAIN_SYSUI_NICENAME")
-echo "1s is $SYSUI_PID1"
-
 sleep 15
 ZYGOTE_PID2=$(pidof "$MAIN_ZYGOTE_NICENAME")
-SYSUI_PID2=$(pidof "$MAIN_SYSUI_NICENAME")
-echo "2z is $ZYGOTE_PID2"
-echo "2s is $SYSUI_PID2"
-
-if check "$ZYGOTE_PID1" "$ZYGOTE_PID2"; then
-    echo "No zygote error on step 1, ok!"
-else
-    echo "Error on zygote step 1 but continue just to make sure..."
-fi
-
-if check "$SYSUI_PID1" "$SYSUI_PID2"; then
-    echo "No SystemUI error on step 1, ok!"
-else
-    echo "Error on SystemUI step 1 but continue just to make sure..."
-fi
-
-sleep 30
+sleep 15
 ZYGOTE_PID3=$(pidof "$MAIN_ZYGOTE_NICENAME")
-SYSUI_PID3=$(pidof "$MAIN_SYSUI_NICENAME")
-echo "3z is $ZYGOTE_PID3"
-echo "3s is $SYSUI_PID3"
 
-if check "$ZYGOTE_PID2" "$ZYGOTE_PID3"; then
-    echo "No zygote error on step 2, ok!"
-else if [ $(getprop sys.boot_completed) -eq 0 ]; then
-    echo "Error on zygote step 2 as well"
-    echo "Boot loop detected! Starting rescue script..."
-    bootlooped
+PIDS=0
+
+if check "$ZYGOTE_PID1" "$ZYGOTE_PID2" && check "$ZYGOTE_PID2" "$ZYGOTE_PID3"; then
+    if [ -z "$ZYGOTE_PID1" ] && [ "$(getprop init.svc.bootanim)" != "stopped" ]; then
+        bootlooped
+    else
+        PIDS=1
+    fi
 fi
 
-if check "$SYSUI_PID2" "$SYSUI_PID3"; then
-    echo "No SystemUI error on step 2, ok!"
-else if [ $(getprop sys.boot_completed) -eq 0 ]; then
-    echo "Error on SystemUI step 2 as well"
-    echo "Boot loop detected! Starting rescue script..."
-    bootlooped
+if [ $PIDS -eq 0 ]; then
+    sleep 15
+    ZYGOTE_PID4=$(pidof "$MAIN_ZYGOTE_NICENAME")
+    if check "$ZYGOTE_PID3" "$ZYGOTE_PID4"; then
+        # Set device config
+        set_device_config
+    elif [ "$(getprop init.svc.bootanim)" != "stopped" ]; then
+        disable_modules
+    fi
 fi
-
-# Set device config
-set_device_config

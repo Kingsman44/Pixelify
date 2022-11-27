@@ -13,13 +13,15 @@ using zygisk::Api;
 using zygisk::AppSpecializeArgs;
 using zygisk::ServerSpecializeArgs;
 
-static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpapers20", "com.snapchat.android", "ndroid.systemui"};
-static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.gms", "com.google.android.apps.wearables.maestro.companion"};
+static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpaper", "com.snapchat.android"};
+static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.apps.wearables.maestro.companion"};
 static std::vector<std::string> P1 = {"com.google.android.apps.photos"};
 static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper"};
 static std::vector<std::string> keep = {"com.google.android.GoogleCamera", "com.google.ar.core", "com.google.vr.apps.ornament", "com.google.android.apps.motionsense.bridge", "com.google.android.xx"};
 
 bool DEBUG = true;
+const char P7_FP[256] = "google/cheetah/cheetah:13/T1B3.221003.008/9245559:user/release-keys";
+const char BID[256] = "T1B3.221003.008";
 
 class pixelify : public zygisk::ModuleBase
 {
@@ -43,7 +45,7 @@ public:
         preSpecialize("system_server");
     }
 
-    void injectBuild(const char *package_name, const char *model1, const char *product1, const char *finger1)
+    void injectBuild(const char *package_name, const char *model1, const char *product1, const char *finger1, const char *id1)
     {
         if (env == nullptr)
         {
@@ -67,6 +69,7 @@ public:
         jstring brand = env->NewStringUTF("google");
         jstring manufacturer = env->NewStringUTF("Google");
         jstring finger = env->NewStringUTF(finger1);
+        jstring id = env->NewStringUTF(id1);
 
         if ((strcmp(model1, "") != 0) && (strcmp(model1, "") != 0))
         {
@@ -99,6 +102,11 @@ public:
             {
                 env->SetStaticObjectField(build_class, model_id, model);
             }
+            jfieldID build_id = env->GetStaticFieldID(build_class, "ID", "Ljava/lang/String;");
+            if (build_id != nullptr)
+            {
+                env->SetStaticObjectField(build_class, build_id, id);
+            }
         }
         if (strcmp(finger1, "") != 0)
         {
@@ -120,6 +128,7 @@ public:
             env->DeleteLocalRef(manufacturer);
             env->DeleteLocalRef(product);
             env->DeleteLocalRef(model);
+            env->DeleteLocalRef(id);
         }
         if (strcmp(finger1, "") != 0)
         {
@@ -192,19 +201,19 @@ private:
 
         if (type == 1)
         {
-            injectBuild(process, "Pixel 7 Pro", "cheetah", "google/cheetah/cheetah:13/TD1A.220804.009.A2/8940162:user/release-keys");
+            injectBuild(process, "Pixel 7 Pro", "cheetah", P7_FP, BID);
         }
         else if (type == 2)
         {
-            injectBuild(process, "Pixel 5", "raven", "google/raven/raven:13/TP1A.220624.021/8877034:user/release-keys");
+            injectBuild(process, "Pixel 5", "raven", P7_FP, BID);
         }
         else if (type == 3)
         {
-            injectBuild(process, "Pixel XL", "marlin", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys");
+            injectBuild(process, "Pixel XL", "marlin", "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys", "QP1A.191005.007");
         }
         else if (type == 4)
         {
-            injectBuild(process, "Pixel 6 Pro", "raven", "google/raven/raven:13/TP1A.220624.021/8877034:user/release-keys");
+            injectBuild(process, "Pixel 6 Pro", "raven", P7_FP, BID);
         }
 
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);

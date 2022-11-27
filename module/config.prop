@@ -25,9 +25,6 @@ UPDATE_DPS=1
 # Create Backup for Device Personalistaion Services
 BACKUP_DPS=1
 
-# Enable Google Now playing
-ENABLE_NOW_PLAYING=0
-
 # Google Dialer Features
 # Includes Call Recording, Hold for Me, Direct My Call
 ENABLE_DIALER_FEATURES=1
@@ -37,9 +34,6 @@ ADD_CALL_SCREENING_FILES=1
 
 # BAckup Lang Specific files for Call Screenining in DE,JP,IT,FR..
 BACKUP_CALL_SCREENING_FILES=1
-
-# Ok google fix Google hotword
-OK_GOOGLE_HOTWORD=0
 
 # Enable Next Generation Assistant
 ENABLE_NGA=1
@@ -86,15 +80,6 @@ UPDATE_PIXEL_LAUNCHER=1
 # Backup Pixel Launcher
 BACKUP_PIXEL_LAUNCHER=1
 
-# Pixel camera services
-ENABLE_PCS=0
-
-# Download updates of Pixel camera services.
-UPDATE_PCS=1
-
-# Pixel camera services backup
-BACKUP_PCS=1
-
 # Enable installation of Google settings intelligence
 ENABLE_GSI=0
 
@@ -107,5 +92,22 @@ ENABLE_EXTREME_BATTERY_SAVER=0
 # G Logo in Gboard
 G_LOGO=0
 
+# Depreciated features
+
 # Google San fonts
 GSAN_FONT=0
+
+# Pixel camera services
+ENABLE_PCS=0
+
+# Download updates of Pixel camera services.
+UPDATE_PCS=1
+
+# Pixel camera services backup
+BACKUP_PCS=1
+
+# Ok google fix Google hotword
+OK_GOOGLE_HOTWORD=0
+
+# Enable Google Now playing
+ENABLE_NOW_PLAYING=0
