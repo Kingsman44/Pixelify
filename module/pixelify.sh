@@ -22,7 +22,8 @@ case $option in
         rm -rf $DIR/system/etc/firmware
         rm -rf $DIR/system/product/overlay/PixeliflyNowPlaying.apk
     elif [ $sel == "hotword" ]; then
-        rm -rf $DIR/system/
+        rm -rf $DIR/system/**/*Hotword*
+        rm -rf $DIR/system/**/*hotword*
     else
         echo "x Invalid choice"
         ac=1
@@ -68,19 +69,19 @@ case $option in
         ac=1
     fi
     ;;
-"install")
+"enable")
     if [ $sel == "now-playing" ]; then
-        if [ -f $DIR/extras/nplaying.tar.xz ]; then
-            tar -xf $DIR/extras/nplaying.tar.xz -C $DIR/system
+        if [ -d $DIR/extras/nplaying ]; then
+            cp -r $DIR/extras/nplaying/. -C $DIR
             echo "- Success, Please Reboot to take effect !!"
         else
             echo "! File missing, cannot able to install now playing"
         fi
     elif [ $sel == "hotword" ]; then
         if [ $API -ge 30 ]; then
-            tar -xf $DIR/extras/hotword.tar.xz -C $DIR
+            cp -r  $DIR/extras/hotword/. $DIR
         else
-            tar -xf $DIR/extras/hotword-9.tar.xz -C $DIR/system$product/priv-app
+            cp -r  $DIR/extras/hotword-9/. $DIR
         fi
         echo "- Success, Please Reboot to take effect !!"
     else

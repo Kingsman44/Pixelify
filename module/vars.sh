@@ -66,6 +66,7 @@ PIXEL_SPOOF=0
 TARGET_LOGGING=0
 LOS_FIX=0
 REQ_FIX=0
+NEW_D_PL=0
 
 # Tensor
 if [[ "$(getprop ro.soc.model)" == "Tensor" || "$(getprop ro.soc.model)" == "GS201" ]]; then
@@ -79,23 +80,29 @@ else
 fi
 
 # Default Locations
+if [ -d /data/data/com.google.android.gms ]; then
+DE_DATA=/data/data
+else
+DE_DATA=/data/user/0
+fi
+
 PIXELIFYUNS=/data/adb/modules/PixelifyUninstaller
-FIT=/data/data/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
-TURBO=/data/data/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
+FIT=$DE_DATA/com.google.android.apps.fitness/shared_prefs/growthkit_phenotype_prefs.xml
+TURBO=$DE_DATA/com.google.android.apps.turbo/shared_prefs/phenotypeFlags.xml
 DIALER=com.google.android.dialer
-GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
-PL_PREF=/data/data/com.google.android.apps.nexuslauncher/shared_prefs/com.android.launcher3.prefs.xml
-NEW_GBOARD=/data/data/com.google.android.inputmethod.latin/shared_prefs/flag_override.xml
+GBOARD=$DE_DATA/com.google.android.inputmethod.latin/shared_prefs/flag_value.xml
+PL_PREF=$DE_DATA/com.google.android.apps.nexuslauncher/shared_prefs/com.android.launcher3.prefs.xml
+NEW_GBOARD=$DE_DATA/com.google.android.inputmethod.latin/shared_prefs/flag_override.xml
 FORCE_FILE="/sdcard/Pixelify/apps.txt"
-SPDB="/data/data/com.google.android.as/databases/superpacks.db"
-DIALER_PREF=/data/data/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
-GOOGLE_PREF=/data/data/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
-gms=/data/data/com.google.android.gms/databases/phenotype.db
-gser=/data/data/com.google.android.gsf/databases/gservices.db
-gah=/data/data/com.google.android.gms/databases/google_account_history.db
+SPDB="$DE_DATA/com.google.android.as/databases/superpacks.db"
+DIALER_PREF=$DE_DATA/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
+GOOGLE_PREF=$DE_DATA/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
+gms=$DE_DATA/com.google.android.gms/databases/phenotype.db
+gser=$DE_DATA/com.google.android.gsf/databases/gservices.db
+gah=$DE_DATA/com.google.android.gms/databases/google_account_history.db
 pix=/data/pixelify
 logfile=/sdcard/Pixelify/logs.txt
-PHOTOS_PREF=/data/data/com.google.android.apps.photos/shared_prefs/com.google.android.apps.photos.phenotype.xml
+PHOTOS_PREF=$DE_DATA/com.google.android.apps.photos/shared_prefs/com.google.android.apps.photos.phenotype.xml
 
 if [ $API -le 28 ]; then
     product=
@@ -179,8 +186,6 @@ Echo__smartspace_enable_eta_doordash
 Echo__smartspace_enable_eta_lyft
 Echo__smartspace_enable_food_delivery_eta
 Echo__smartspace_enable_grocery
-Echo__smartspace_enable_light_off_predictor
-Echo__smartspace_enable_light_predictor
 Echo__smartspace_enable_media_wake_lock_acquire
 Echo__smartspace_enable_nap
 Echo__smartspace_enable_nudge
@@ -377,9 +382,7 @@ enable_multiword_predictions_from_user_history
 enable_multiword_suggestions_as_inline_from_crank_cifg
 enable_nav_redesign
 enable_nga
-enable_nga_for_latin_ime
 enable_nga_ime_api
-enable_nga_language_download
 enable_nga_language_picker_on_monolang_keyboard
 enable_nga_punctuation_correction
 enable_ondevice_voice

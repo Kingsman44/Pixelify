@@ -187,6 +187,12 @@ else
 
     log "Service Started"
 
+    # @anirudhgupta109 github
+    # avoid breaking encryption, set shipping level to 32 for devices >=33 to allow for software attestation.
+    if [[ "$(getprop ro.product.first_api_level)" -ge 33 ]]; then
+        resetprop ro.product.first_api_level 32
+    fi
+
     # Call Screening
     cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
     # copy bootlogs to Pixelify folder if bootloop happened.

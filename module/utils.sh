@@ -59,7 +59,7 @@ fetch_version() {
             NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         fi
         LWVERSION=$(echo "$ver" | grep wallpaper | cut -d'=' -f2)
-        OSRVERSION=$(echo "$ver" | grep osr | cut -d'=' -f2)
+        OSRVERSION=$(echo "$ver" | grep os-new | cut -d'=' -f2)
         DPVERSION=$(echo "$ver" | grep dp-$API | cut -d'=' -f2)
         PCSVERSION=$(echo "$ver" | grep pcs | cut -d'=' -f2)
         PCSSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
@@ -71,7 +71,13 @@ fetch_version() {
             DPVERSION=$(echo "$ver" | grep asis-new-33 | cut -d'=' -f2)
             DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asis-new-33.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         fi
-        if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ]; then
+        if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
+            PLVERSION=$(echo "$ver" | grep pl-d-los-$API | cut -d'=' -f2)
+            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-los-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        elif [ $API -eq 33 ] && [ $NEW_D_PL -eq 1 ]; then
+            PLVERSION=$(echo "$ver" | grep pl-d-new-$API | cut -d'=' -f2)
+            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-new-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        elif [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ]; then
             PLVERSION=$(echo "$ver" | grep pl-los-$API | cut -d'=' -f2)
             PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
@@ -111,7 +117,7 @@ fetch_version() {
         echo "$DPVERSION" >>$pix/dp.txt
         echo "$OSRVERSION" >>$pix/osr.txt
         echo "$PLVERSION" >>$pix/pl-$API.txt
-        OSRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/osr.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        OSRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/os-new.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     else
         echo " ! Cannot able to fetch package version, using saved version instead" >>$logfile
@@ -628,7 +634,8 @@ osr_ins() {
                     rm -rf /sdcard/Pixelify/backup/osr.tar.xz
                     rm -rf /sdcard/Pixelify/version/osr.txt
                     cd $MODPATH/files
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/osr.tar.xz -O &>/proc/self/fd/$OUTFD
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/os-new.tar.xz -O &>/proc/self/fd/$OUTFD
+                    mv os-new.tar.xz osr.tar.xz
                     cd /
                     print ""
                     print "- Creating Backup"
@@ -676,7 +683,8 @@ osr_ins() {
                 echo " - Downloading and Installing Google offline speech recognition" >>$logfile
                 print "  Downloading Google offline speech recognition"
                 cd $MODPATH/files
-                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/osr.tar.xz -O &>/proc/self/fd/$OUTFD
+                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/os-new.tar.xz -O &>/proc/self/fd/$OUTFD
+                mv os-new.tar.xz osr.tar.xz
                 cd /
                 print " "
                 print "  Extracting Google offline speech recognition"

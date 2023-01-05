@@ -16,12 +16,12 @@ using zygisk::ServerSpecializeArgs;
 static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpaper", "com.snapchat.android"};
 static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.apps.wearables.maestro.companion"};
 static std::vector<std::string> P1 = {"com.google.android.apps.photos"};
-static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper"};
+static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper","com.google.android.as"};
 static std::vector<std::string> keep = {"com.google.android.GoogleCamera", "com.google.ar.core", "com.google.vr.apps.ornament", "com.google.android.apps.motionsense.bridge", "com.google.android.xx"};
 
 bool DEBUG = true;
-const char P7_FP[256] = "google/cheetah/cheetah:13/T1B3.221003.008/9245559:user/release-keys";
-const char BID[256] = "T1B3.221003.008";
+const char P7_FP[256] = "google/cheetah/cheetah:13/TQ1A.221205.011/9244662:user/release-keyss";
+const char BID[256] = "TQ1A.221205.011";
 
 class pixelify : public zygisk::ModuleBase
 {
@@ -71,42 +71,39 @@ public:
         jstring finger = env->NewStringUTF(finger1);
         jstring id = env->NewStringUTF(id1);
 
-        if ((strcmp(model1, "") != 0) && (strcmp(model1, "") != 0))
+        jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
+        if (brand_id != nullptr)
         {
-            jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
-            if (brand_id != nullptr)
-            {
-                env->SetStaticObjectField(build_class, brand_id, brand);
-            }
+            env->SetStaticObjectField(build_class, brand_id, brand);
+        }
 
-            jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER", "Ljava/lang/String;");
-            if (manufacturer_id != nullptr)
-            {
-                env->SetStaticObjectField(build_class, manufacturer_id, manufacturer);
-            }
+        jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER", "Ljava/lang/String;");
+        if (manufacturer_id != nullptr)
+        {
+            env->SetStaticObjectField(build_class, manufacturer_id, manufacturer);
+        }
 
-            jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT", "Ljava/lang/String;");
-            if (product_id != nullptr)
-            {
-                env->SetStaticObjectField(build_class, product_id, product);
-            }
+        jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT", "Ljava/lang/String;");
+        if (product_id != nullptr)
+        {
+            env->SetStaticObjectField(build_class, product_id, product);
+        }
 
-            jfieldID device_id = env->GetStaticFieldID(build_class, "DEVICE", "Ljava/lang/String;");
-            if (device_id != nullptr)
-            {
-                env->SetStaticObjectField(build_class, device_id, product);
-            }
+        jfieldID device_id = env->GetStaticFieldID(build_class, "DEVICE", "Ljava/lang/String;");
+        if (device_id != nullptr)
+        {
+            env->SetStaticObjectField(build_class, device_id, product);
+        }
 
-            jfieldID model_id = env->GetStaticFieldID(build_class, "MODEL", "Ljava/lang/String;");
-            if (model_id != nullptr)
-            {
-                env->SetStaticObjectField(build_class, model_id, model);
-            }
-            jfieldID build_id = env->GetStaticFieldID(build_class, "ID", "Ljava/lang/String;");
-            if (build_id != nullptr)
-            {
-                env->SetStaticObjectField(build_class, build_id, id);
-            }
+        jfieldID model_id = env->GetStaticFieldID(build_class, "MODEL", "Ljava/lang/String;");
+        if (model_id != nullptr)
+        {
+            env->SetStaticObjectField(build_class, model_id, model);
+        }
+        jfieldID build_id = env->GetStaticFieldID(build_class, "ID", "Ljava/lang/String;");
+        if (build_id != nullptr)
+        {
+            env->SetStaticObjectField(build_class, build_id, id);
         }
         if (strcmp(finger1, "") != 0)
         {
@@ -122,14 +119,11 @@ public:
             env->ExceptionClear();
         }
 
-        if ((strcmp(model1, "") != 0) && (strcmp(model1, "") != 0))
-        {
-            env->DeleteLocalRef(brand);
-            env->DeleteLocalRef(manufacturer);
-            env->DeleteLocalRef(product);
-            env->DeleteLocalRef(model);
-            env->DeleteLocalRef(id);
-        }
+        env->DeleteLocalRef(brand);
+        env->DeleteLocalRef(manufacturer);
+        env->DeleteLocalRef(product);
+        env->DeleteLocalRef(model);
+        env->DeleteLocalRef(id);
         if (strcmp(finger1, "") != 0)
         {
             env->DeleteLocalRef(finger);
@@ -192,7 +186,7 @@ private:
 
         if (strcmp(process, "com.google.android.gms:unstable") == 0 || strcmp(process, "com.google.android.gms.unstable") == 0)
         {
-            // injectBuild(process,"","","google/marlin/marlin:7.1.2/NJH47F/4146041:user/release-keys");
+            injectBuild(process,"Pixel 7 Pro","cheetah","", BID);
             type = 0;
         }
 

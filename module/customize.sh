@@ -154,7 +154,7 @@ tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 
 chmod 0755 $MODPATH/addon/*
 
-if [ -d /system_ext/oplus ] || [ ! -z "$(getprop ro.vivo.os.version)" ] || [ ! -z "$(getprop ro.oplus.image.system.version)" ]; then
+if [ -d /system_ext/oplus ] || [ ! -z "$(getprop ro.oplus.image.system.version)" ]; then
     REQ_FIX=1
 fi
 
@@ -223,6 +223,23 @@ if [ $API -eq 32 ]; then
         elif [ $(echo $sec_patch | cut -d- -f1) -ge 2023 ] && [ $API -eq 32 ]; then
             NEW_JN_PL=1
             NEW_PL=0
+        fi
+    fi
+fi
+
+# Dec patch 2022
+if [ $API -ge 33 ]; then
+    if [ $(echo $sec_patch | cut -d- -f1) -le 2021 ]; then
+        if [ $(date -d @$build_date +'%Y') -eq 2022 ] && [ $(date -d @$build_date +'%m' | cut -d- -f1) -ge 12 ]; then
+            NEW_D_PL=1
+        elif [ $(date -d @$build_date +'%Y') -ge 2023 ]; then
+            NEW_D_PL=1
+        fi
+    else
+        if [ $(echo $sec_patch | cut -d- -f1) -eq 2022 ] && [ $(echo $sec_patch | cut -d- -f2) -ge 12 ]; then
+            NEW_D_PL=1
+        elif [ $(echo $sec_patch | cut -d- -f1) -ge 2023 ]; then
+            NEW_D_PL=1
         fi
     fi
 fi
@@ -435,6 +452,8 @@ print ""
 print "- Installing Pixelify Module"
 print "- Extracting Files...."
 print ""
+print "- Please don't turn off screen between the installation"
+print ""
 echo "- Extracting Files ..." >>$logfile
 if [ $API -ge 28 ]; then
     tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
@@ -619,8 +638,10 @@ if [ $DPAS -eq 1 ]; then
                 echo " - Downloading and installing Android System Intelligence" >>$logfile
                 print ""
                 cd $MODPATH/files
-                if [ $API -ge 31 ]; then
+                if [ $API -eq 31 ] || [ $API -eq 32 ]; then
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-31.tar.xz -o dp-$API.tar.xz &>/proc/self/fd/$OUTFD
+                elif [ $API -ge 33 ]; then
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asis-new-$API.tar.xz -o dp-$API.tar.xz &>/proc/self/fd/$OUTFD
                 else
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz -O &>/proc/self/fd/$OUTFD
                 fi
@@ -1252,11 +1273,17 @@ if [ $API -ge 29 ]; then
                         rm -rf /sdcard/Pixelify/backup/pl-$API.tar.xz
                         rm -rf /sdcard/Pixelify/version/pl-$API.txt
                         cd $MODPATH/files
-                        if [ $LOS_FIX -eq 1 ]; then
+                        if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
+                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
+                            mv pl-d-los-33.tar.xz pl-$API.tar.xz
+                        elif [ $API -eq 33 ] && [ $NEW_D_PL -eq 1 ]; then
+                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
+                            mv pl-d-new-$API.tar.xz pl-d-$API.tar.xz
+                        elif [ $LOS_FIX -eq 1 ]; then
                             $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
                             mv pl-los-33.tar.xz pl-$API.tar.xz
                         elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
+                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-32.tar.xz -O &>/proc/self/fd/$OUTFD
                             mv pl-j-new-$API.tar.xz pl-$API.tar.xz
                         elif [ $NEW_PL -eq 1 ]; then
                             $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
@@ -1309,7 +1336,13 @@ if [ $API -ge 29 ]; then
                 echo " - Downloading and Installing Pixel Launcher" >>$logfile
                 print ""
                 cd $MODPATH/files
-                if [ $LOS_FIX -eq 1 ]; then
+                if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
+                    mv pl-d-los-33.tar.xz pl-$API.tar.xz
+                elif [ $API -eq 33 ] && [ $NEW_D_PL -eq 1 ]; then
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
+                    mv pl-d-new-$API.tar.xz pl-d-$API.tar.xz
+                elif [ $LOS_FIX -eq 1 ]; then
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
                     mv pl-los-33.tar.xz pl-$API.tar.xz
                 elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
@@ -1530,6 +1563,10 @@ db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_SMARTSPACE_ENHANC
 # db_edit com.google.android.platform.device_personalization_services stringVal "vi,ja,fa,ro,nl,mr,mt,ar,ms,it,eo,is,et,es,iw,zh,uk,af,id,ur,mk,cy,hi,el,be,pt,lt,hr,lv,hu,ht,te,de,bg,th,bn,tl,pl,tr,kn,sv,gl,ko,sw,cs,da,ta,gu,ka,sl,ca,sk,ga,sq,no,fi,ru,fr,en,zh_Hant" "Translate__text_to_text_language_list"
 # db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR "Translate__enable_opmv4_service" "Translate__enable_nextdoor" "Translate__characterset_lang_detection_enabled"
 
+# Bypass KeyAttestationCheck
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.gms.auth_account'"
+db_edit com.google.android.platform.systemui boolVal 0 "KeyAttestationCheck__enable_ka_check"
+
 # Digital Wellbeing
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
 db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "BedtimeAmbientContext__enable_bedtime_ambient_context" "BedtimeAmbientContext__enable_bedtime_daily_insights_graph" "BedtimeAmbientContext__enable_bedtime_weekly_insights_graph" "BedtimeAmbientContext__show_ambient_context_promo_card" "BedtimeAmbientContext__show_ambient_context_awareness_notification" "AmbientContextEventDetection__enable_ambient_context_event_detection" "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget" "HatsSurveys__enable_testing_mode" "WindDown__enable_wallpaper_dimming" "WalkingDetection__enable_outdoor_detection_v2" "Clockshine__enable_sleep_detection" "Clockshine__show_sleep_insights_screen" "Clockshine__show_manage_data_screen" "AutoDoNotDisturb__enable_auto_dnd_lottie_rect" "AutoDoNotDisturb__auto_dnd_synclet_enabled" "WebsiteUsage__display_website_usage" "HatsSurveys__enable_testing_mode"
@@ -1547,21 +1584,31 @@ db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__e
 
 # Fix Precise Location
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
-db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle" "enable_immersive_indicator"
+db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
+if [ $NEW_D_PL -eq 1 ]; then
+    db_edit com.google.android.platform.privacy boolVal 1 "safety_center_is_enabled"
+fi
 
 # Live Wallpapers
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
-db_edit com.google.pixel.livewallpaper stringVal "" "DownloadableWallpaper__blocking_module_list"
+#db_edit com.google.pixel.livewallpaper stringVal "" "DownloadableWallpaper__blocking_module_list"
+$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.pixel.livewallpaper', '', 'DownloadableWallpaper__blocking_module_list', 0, '', 0)"
 
 # Google One
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.subscriptions.red.user'"
 db_edit com.google.android.apps.subscriptions.red.user boolVal 1 "633" "45373857" "618" "45358581"
-db_edit "com.google.android.libraries.internal.growth.growthkit#com.google.android.apps.subscriptions.red" stringVal "us" "Sync__override_country"
+
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.libraries.internal.growth.growthkit#com.google.android.apps.subscriptions.red'"
+$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.libraries.internal.growth.growthkit#com.google.android.apps.subscriptions.red', '', 'Sync__override_country', 0, 'us', 0)"
 
 # Google Recorder
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder#com.google.android.apps.recorder'"
 db_edit com.google.android.apps.recorder#com.google.android.apps.recorder boolVal 1 "Experiment__allow_speaker_labels_with_tts" "Experiment__enable_speaker_labels" "Experiment__enable_speaker_labels_editing" "Experiment__enable_speaker_labels_editing_in_playback"
-db_edit 'com.google.android.apps.recorder#com.google.android.apps.recorder' 'stringVal' 'mic' "Experiment__audio_source"
+$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.apps.recorder#com.google.android.apps.recorder', '', 'Experiment__audio_source', 0, 'mic', 0)"
+
+# System
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.systemui'"
+db_edit com.google.android.platform.systemui boolVal 1 "clipboard_overlay_show_actions"
 
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do
@@ -1582,7 +1629,7 @@ fi
 if [ $API -ge 31 ]; then
     rm -rf $MODPATH/system/product/overlay/PixelifyPixel.apk
     rm -rf $MODPATH/system/product/overlay/PixeliflyApi30.apk
-    sed -i -e 's/<feature name="com.google.android.feature.ZERO_TOUCH" \/>/<!-- <feature name="com.google.android.feature.ZERO_TOUCH" \/> -->/g' $MODPATH/system/product/etc/sysconfig/pixelify.xml
+    sed -i -e 's/<feature name="com.google.android.feature.ZERO_TOUCH" \/>/<!-- <feature name="com.google.android.feature.ZERO_TOUCH" \/> -->/g' $MODPATH/system/product/etc/sysconfig/pixelifyexperience.xml
     if [ $WREM -eq 1 ]; then
         rm -rf $MODPATH/system/product/priv-app/WallpaperPickerGoogleRelease
     fi
