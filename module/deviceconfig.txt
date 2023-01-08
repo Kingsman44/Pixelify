@@ -66,7 +66,6 @@ device_personalization_services/Echo__smartspace_enable_dwb_bedtime_predictor=tr
 device_personalization_services/Echo__smartspace_enable_grocery=true
 device_personalization_services/Echo_smartspace__enable_flight_landing_smartspace_aiai=true
 device_personalization_services/Echo_smartspace__enable_hotel_smartspace_aiai=true
-device_personalization_services/Echo__smartspace_hide_light_aod_subtitle=true
 
 # Notification Assistant (DPS)
 device_personalization_services/NotificationAssistant__enable_service=true
@@ -115,6 +114,3 @@ privacy/permissions_hub_enabled=true
 privacy/permissions_hub_2_enabled=true
 privacy/privacy_dashboard_7_day_toggle=true
 privacy/warning_banner_enabled=true
-
-# Wallpaper
-wallpaper_content/G_WALLPAPER_GALLERY=true

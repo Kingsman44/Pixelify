@@ -682,7 +682,6 @@ if [ $DPAS -eq 1 ]; then
     pm install $MODPATH/system/product/priv-app/DevicePersonalizationPrebuiltPixel*/*.apk &>/dev/null
     [ $API -ge 31 ] && pm install $MODPATH/system/product/priv-app/DeviceIntelligenceNetworkPrebuilt/*.apk &>/dev/null
     rm -rf $MODPATH/system/product/priv-app/asi_up.apk
-    pm set-permission-enforced android.permission.READ_DEVICE_CONFIG false
 else
     print ""
 fi
@@ -1173,9 +1172,6 @@ if [ $TARGET_DEVICE_OP12 -eq 0 ]; then
     no_vk "ENABLE_BOOTANIMATION"
     if $VKSEL; then
         echo " - Installing Pixel Bootanimation" >>$logfile
-        if [ $TARGET_DEVICE_OP12 -eq 1 ]; then
-            REMOVE="$REMOVE /system/product/media/bootanimation.zip /system/product/media/bootanimation-dark.zip"
-        fi
         if [ -f /system/media/bootanimation.zip ]; then
             MEDIA_PATH=system/media
         else
@@ -1321,6 +1317,7 @@ if [ $API -ge 29 ]; then
         else
             echo " - Skipping Pixel Launcher" >>$logfile
             rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
+            rm -rf $MODPATH/system/product/overlay/Pixelifyroundshape.apk
         fi
     else
         print "  (Network Connection Needed)"
@@ -1393,15 +1390,18 @@ if [ $API -ge 29 ]; then
                 print ""
                 echo " ! Skipping Pixel Launcher due to no internet" >>$logfile
                 rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
+                rm -rf $MODPATH/system/product/overlay/Pixelifyroundshape.apk
             fi
         else
             echo " - Skipping Pixel Launcher" >>$logfile
             rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
+            rm -rf $MODPATH/system/product/overlay/Pixelifyroundshape.apk
         fi
     fi
 else
     echo " - Skipping Pixel Launcher" >>$logfile
     rm -rf $MODPATH/system/product/overlay/PixelLauncherOverlay.apk
+    rm -rf $MODPATH/system/product/overlay/Pixelifyroundshape.apk
 fi
 
 # Adding Google san font.
@@ -1422,7 +1422,7 @@ rm -rf $MODPATH/system/product/overlay/GInterOverlay.apk
 rm -rf $MODPATH/system/fonts
 
 # Google Settings service
-if [ $API -ge 28 ]; then
+if [ $API -ge 28 ] && [ $TARGET_DEVICE_OP12 -eq 0 ]; then
     print "  Do you want to install Google settings service?"
     # print "  (Battery Widget)"
     print "    Vol Up += Yes"
@@ -1568,11 +1568,10 @@ $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.gm
 db_edit com.google.android.platform.systemui boolVal 0 "KeyAttestationCheck__enable_ka_check"
 
 # Digital Wellbeing
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
-db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "BedtimeAmbientContext__enable_bedtime_ambient_context" "BedtimeAmbientContext__enable_bedtime_daily_insights_graph" "BedtimeAmbientContext__enable_bedtime_weekly_insights_graph" "BedtimeAmbientContext__show_ambient_context_promo_card" "BedtimeAmbientContext__show_ambient_context_awareness_notification" "AmbientContextEventDetection__enable_ambient_context_event_detection" "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget" "HatsSurveys__enable_testing_mode" "WindDown__enable_wallpaper_dimming" "WalkingDetection__enable_outdoor_detection_v2" "Clockshine__enable_sleep_detection" "Clockshine__show_sleep_insights_screen" "Clockshine__show_manage_data_screen" "AutoDoNotDisturb__enable_auto_dnd_lottie_rect" "AutoDoNotDisturb__auto_dnd_synclet_enabled" "WebsiteUsage__display_website_usage" "HatsSurveys__enable_testing_mode"
-
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing'"
-com.google.android.apps.wellbeing boolVal 1 "BedtimeAmbientContext__enable_bedtime_ambient_context" "BedtimeAmbientContext__enable_bedtime_daily_insights_graph" "BedtimeAmbientContext__enable_bedtime_weekly_insights_graph" "BedtimeAmbientContext__show_ambient_context_promo_card" "BedtimeAmbientContext__show_ambient_context_awareness_notification" "AmbientContextEventDetection__enable_ambient_context_event_detection"
+if [ $TARGET_DEVICE_OP12 -eq 0 ]; then
+    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
+    db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "BedtimeAmbientContext__enable_bedtime_ambient_context" "BedtimeAmbientContext__enable_bedtime_daily_insights_graph" "BedtimeAmbientContext__enable_bedtime_weekly_insights_graph" "BedtimeAmbientContext__show_ambient_context_promo_card" "BedtimeAmbientContext__show_ambient_context_awareness_notification" "AmbientContextEventDetection__enable_ambient_context_event_detection" "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget" "HatsSurveys__enable_testing_mode" "WindDown__enable_wallpaper_dimming" "WalkingDetection__enable_outdoor_detection_v2" "Clockshine__enable_sleep_detection" "Clockshine__show_sleep_insights_screen" "Clockshine__show_manage_data_screen" "AutoDoNotDisturb__enable_auto_dnd_lottie_rect" "AutoDoNotDisturb__auto_dnd_synclet_enabled" "WebsiteUsage__display_website_usage" "HatsSurveys__enable_testing_mode"
+fi
 
 # Google translate
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.translate'"
@@ -1584,14 +1583,13 @@ db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__e
 
 # Fix Precise Location
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
-db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
+db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled"
 if [ $NEW_D_PL -eq 1 ]; then
     db_edit com.google.android.platform.privacy boolVal 1 "safety_center_is_enabled"
 fi
 
 # Live Wallpapers
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
-#db_edit com.google.pixel.livewallpaper stringVal "" "DownloadableWallpaper__blocking_module_list"
 $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.pixel.livewallpaper', '', 'DownloadableWallpaper__blocking_module_list', 0, '', 0)"
 
 # Google One
@@ -1603,7 +1601,7 @@ $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, strin
 
 # Google Recorder
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder#com.google.android.apps.recorder'"
-db_edit com.google.android.apps.recorder#com.google.android.apps.recorder boolVal 1 "Experiment__allow_speaker_labels_with_tts" "Experiment__enable_speaker_labels" "Experiment__enable_speaker_labels_editing" "Experiment__enable_speaker_labels_editing_in_playback"
+#db_edit com.google.android.apps.recorder#com.google.android.apps.recorder boolVal 1 "Experiment__allow_speaker_labels_with_tts" "Experiment__enable_speaker_labels" "Experiment__enable_speaker_labels_editing" "Experiment__enable_speaker_labels_editing_in_playback"
 $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.apps.recorder#com.google.android.apps.recorder', '', 'Experiment__audio_source', 0, 'mic', 0)"
 
 # System
@@ -1657,6 +1655,15 @@ set_perm_recursive $MODPATH 0 0 0755 0644
 for i in $MODPATH/system/vendor/overlay $MODPATH/system$product/overlay $MODPATH/system$product/priv-app/* $MODPATH/system$product/app/*; do
     set_perm_recursive $i 0 0 0755 0644
 done
+
+# Regenerate overlay list
+rm -rf /data/resource-cache/overlays.list
+find /data/resource-cache/ -name "*Pixelify*" -exec rm -rf {} \;
+find /data/resource-cache/ -name "*PixelLauncherOverlay*" -exec rm -rf {} \;
+
+#make some permissions not enforced
+pm set-permission-enforced android.permission.READ_DEVICE_CONFIG false
+pm set-permission-enforced android.permission.SUSPEND_APPS. false
 
 # Fix unknown creation of data folder
 rm -rf $MODPATH/system/product/data

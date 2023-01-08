@@ -23,10 +23,14 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 - Android One
 - MiUI
 - FunTouchOS
-- OxygenOS
-- ColorOs
+- OxygenOS (Android 11 or Below)
+- ColorOs (Android 11 or below)
 - All stock android roms
 - Windows Subsystem Android
+
+### May or May not work Roms
+- OxygenOS (Android 12 or Above)
+- ColorOs (Android 12 or Above)
 
 ### Installation
 - Recommend to use magisk v24 or above from Pixelify v2

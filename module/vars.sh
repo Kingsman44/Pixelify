@@ -30,7 +30,7 @@ fi
 PCSVERSION=1
 NEW_JN_PL=0
 DPVERSIONP=1
-LWVERSIONP=1.6
+LWVERSIONP=1.8
 PLVERSIONP=1
 NGAVERSIONP=1.3
 
@@ -517,7 +517,6 @@ ro.spark.device
 ro.potato.device"
 elif [ $API -eq 33 ]; then
   overide_spoof="org.pixelexperience.device
-org.evolution.device
 ro.bliss.device
 ro.cherish.device
 ro.lighthouse.device
@@ -535,7 +534,8 @@ if [ $API -ge 32 ]; then
 ro.crdroid.build.version
 ro.catalyst.version
 ro.rice.version
-ro.voltage.version"
+ro.voltage.version
+org.evolution.device"
 
   pixel_spoof="org.eternityos.version
 org.lessaospos.version

@@ -240,13 +240,22 @@ else
     pref_patch 45361445 true boolean $PHOTOS_PREF
     pref_patch 45357511 true boolean $PHOTOS_PREF
     pref_patch photos.backup.throttled_state false boolean $PHOTOS_PREF
-
+    LOS_FIX=0
+    if [ $API -eq 33 ]; then
+        for i in "ro.lineage.device" "ro.crdroid.version" "ro.rice.version" "ro.miui.ui.version.code"; do
+            if [ ! -z "$(getprop $i)" ]; then
+                LOS_FIX=1
+                break
+            fi
+        done
+    fi
     if [ -f $MODDIR/first ]; then
         if [ -d /data/data/com.google.android.apps.nexuslauncher ]; then
             pm install $MODDIR/system/**/priv-app/WallpaperPickerGoogleRelease/WallpaperPickerGoogleRelease.apk
-            if [ ! -f $PL_PREF ]; then
-                echo "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>" >>$PL_PREF
-                echo '<map>
+            if [ $LOS_FIX -eq 1 ]; then
+                if [ ! -f $PL_PREF ]; then
+                    echo "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>" >>$PL_PREF
+                    echo '<map>
     <int name="launcher.home_bounce_count" value="3" />
     <boolean name="launcher.apps_view_shown" value="true" />
     <boolean name="pref_allowChromeTabResult" value="false" />
@@ -277,10 +286,11 @@ else
     <boolean name="pref_allowPlayResult" value="true" />
     <int name="launcher.all_apps_visited_count" value="10" />
 </map>' >>$PL_PREF
-            else
-                pref_patch pref_overview_action_suggestions false boolean $PL_PREF
+                else
+                    pref_patch pref_overview_action_suggestions false boolean $PL_PREF
+                fi
+                am force-stop com.google.android.apps.nexuslauncher
             fi
-            am force-stop com.google.android.apps.nexuslauncher
         fi
         rm -rf $MODDIR/first
     fi

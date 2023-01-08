@@ -8,7 +8,7 @@ ac=0
 . $DIR/utils.sh
 
 case $option in
-"--disable")
+"disable")
     if [ $sel == "pixellauncher" ] || [ $sel == "pl" ]; then
         rm -rf $DIR/system/**/priv-app/NexusLauncherRelease
         rm -rf $DIR/system/**/priv-app/*Launcher*
@@ -72,7 +72,7 @@ case $option in
 "enable")
     if [ $sel == "now-playing" ]; then
         if [ -d $DIR/extras/nplaying ]; then
-            cp -r $DIR/extras/nplaying/. -C $DIR
+            cp -r $DIR/extras/nplaying/. $DIR
             echo "- Success, Please Reboot to take effect !!"
         else
             echo "! File missing, cannot able to install now playing"

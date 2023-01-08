@@ -475,16 +475,16 @@ oos_fix() {
     if [ $TARGET_DEVICE_OP12 -eq 1 ]; then
         echo " - Apply fixup for OOS 12/ Color OS 12" >>$logfile
         print ""
-        print " -  Applying Fix for OOS 12"
+        print " -  Applying Compability Fixes"
         cd $MODPATH/system/product/
         cp -rf $MODPATH/system/product/. $MODPATH/system
         cd $MODPATH/system/system_ext/
         cp -rf $MODPATH/system/system_ext/. ../system
         cd /
         rm -rf $MODPATH/system/product $MODPATH/system/system_ext
-        mkdir -p $MODPATH/vendor
+        mkdir -p $MODPATH/vendor/overlay
         mv $MODPATH/system/overlay $MODPATH/vendor/overlay
-        #copy overlays to system priv app they also work there.
+        #Copy each apk on it on folder.
         for i in $MODPATH/vendor/overlay/*; do
             name=$i
             name=${name/$MODPATH\/vendor\/overlay\//}
@@ -492,8 +492,11 @@ oos_fix() {
             if [ -f $i ]; then
                 mkdir -p $MODPATH/vendor/overlay/$name
                 mv $i $MODPATH/vendor/overlay/$name
+                chmod 0755 $MODPATH/vendor/overlay/$name
+                chmod 0644 $MODPATH/vendor/overlay/$name/*
             fi
         done
+        chmod 0755 $MODPATH/vendor/overlay
         rm -rf $MODPATH/system/overlay
         REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
     fi
