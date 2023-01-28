@@ -803,10 +803,10 @@ if [ -d /data/data/$DIALER ]; then
             sleep 0.5
 
             ui_print "--------------------------------"
-            ui_print " [1] American         [en-US] "
-            ui_print " [2] Indian           [en-IN]"
-            ui_print " [3] Australian       [en-AU]"
-            ui_print " [4] Britain          [en-GB]"
+            ui_print " [1] American     [en-US] "
+            ui_print " [2] Indian       [en-IN] [BETA]"
+            ui_print " [3] Australian   [en-AU]"
+            ui_print " [4] Britain      [en-GB]"
             ui_print "--------------------------------"
 
             ui_print ""
@@ -843,7 +843,6 @@ if [ -d /data/data/$DIALER ]; then
                 lang="gb"
                 ;;
             esac
-            ui_print ""
             ui_print " - Selected: $P2 OPTION"
             ui_print ""
         fi
@@ -1043,7 +1042,11 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
                         rm -rf /sdcard/Pixelify/version/nga.txt
                         cd $MODPATH/files
                         if [ $ENABLE_OSR -eq 1 ] || [ $DOES_NOT_REQ_SPEECH_PACK -eq 1 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new.tar.xz -o nga.tar.xz &>/proc/self/fd/$OUTFD
+                            if [ $API -eq 30 ] || [ $API -eq 33 ]; then
+                                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new-$API.tar.xz -o nga.tar.xz &>/proc/self/fd/$OUTFD
+                            else
+                                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new-31.tar.xz -o nga.tar.xz &>/proc/self/fd/$OUTFD
+                            fi
                         else
                             $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga.tar.xz -o nga.tar.xz &>/proc/self/fd/$OUTFD
                         fi
@@ -1115,7 +1118,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
         fi
 
         db_edit com.google.android.googlequicksearchbox stringVal "Cheetah" "13477"
-        db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
+        [ $TENSOR -eq 0 ] && db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
         #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox' AND name='5470'"
         #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '5470', 0, x'$GOOGLEBIN', 0)"
 
@@ -1758,7 +1761,7 @@ $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.pl
 db_edit com.google.android.platform.systemui boolVal 1 "clipboard_overlay_show_actions"
 
 #Google TTS
-db_edit_bin com.google.android.apps.search.transcription.device#com.google.android.tts 11 $TTSBIN
+[ $TENSOR -eq 0 ] && db_edit_bin com.google.android.apps.search.transcription.device#com.google.android.tts 11 $TTSBIN
 
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do

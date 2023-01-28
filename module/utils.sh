@@ -51,9 +51,14 @@ fetch_version() {
     if [ $internet -eq 1 ]; then
         echo "- Fetching version of online packages" >>$logfile
         ver=$($MODPATH/addon/curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
-        if [ $ENABLE_OSR -eq 1 ]; then
-            NGAVERSION=$(echo "$ver" | grep ngsa | cut -d'=' -f2)
-            NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        if [ $ENABLE_OSR -eq 1 ] || [ $DOES_NOT_REQ_SPEECH_PACK -eq 1 ]; then
+            if [ $API -eq 30 ] || [ $API -eq 33 ]; then 
+                NGAVERSION=$(echo "$ver" | grep ngd-$API | cut -d'=' -f2)
+                NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+            else
+                NGAVERSION=$(echo "$ver" | grep ngd-31 | cut -d'=' -f2)
+                NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new-31.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+            fi
         else
             NGAVERSION=$(echo "$ver" | grep nga | cut -d'=' -f2)
             NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
