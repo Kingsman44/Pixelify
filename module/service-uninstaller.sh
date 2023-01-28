@@ -194,7 +194,7 @@ else
     fi
 
     # Call Screening
-    cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+    #cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
     # copy bootlogs to Pixelify folder if bootloop happened.
     [ -f /data/adb/modules/Pixelify/boot_logs.txt ] && rm -rf /sdcard/Pixelify/boot_logs.txt && mv /data/adb/modules/Pixelify/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
 
@@ -205,6 +205,9 @@ else
     for i in $update; do
         pm enable $i
     done
+
+    gacc="$(ls /data/data/com.google.android.gms/databases | grep portable_geller | cut -d_ -f3)"
+    db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
 
     if [ $(grep CallScreen $MAINDIR/var.prop | cut -d'=' -f2) -eq 1 ]; then
         mkdir -p /data/data/com.google.android.dialer/files/phenotype
@@ -251,46 +254,8 @@ else
     fi
     if [ -f $MODDIR/first ]; then
         if [ -d /data/data/com.google.android.apps.nexuslauncher ]; then
-            pm install $MODDIR/system/**/priv-app/WallpaperPickerGoogleRelease/WallpaperPickerGoogleRelease.apk
-            if [ $LOS_FIX -eq 1 ]; then
-                if [ ! -f $PL_PREF ]; then
-                    echo "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>" >>$PL_PREF
-                    echo '<map>
-    <int name="launcher.home_bounce_count" value="3" />
-    <boolean name="launcher.apps_view_shown" value="true" />
-    <boolean name="pref_allowChromeTabResult" value="false" />
-    <boolean name="pref_allowWebResultAga" value="true" />
-    <int name="ALL_APPS_SEARCH_CORPUS_PREFERENCE" value="206719" />
-    <boolean name="pref_allowWidgetsResult" value="false" />
-    <int name="migration_src_device_type" value="0" />
-    <boolean name="pref_search_show_keyboard" value="false" />
-    <boolean name="pref_allowPeopleResult" value="true" />
-    <boolean name="pref_enable_minus_one" value="true" />
-    <string name="migration_src_workspace_size">5,5</string>
-    <boolean name="pref_search_show_hidden_targets" value="false" />
-    <boolean name="pref_allowWebSuggestChrome" value="false" />
-    <boolean name="pref_allowPixelTipsResult" value="true" />
-    <string name="idp_grid_name">normal</string>
-    <boolean name="pref_allowScreenshotResult" value="true" />
-    <boolean name="pref_allowMemoryResult" value="true" />
-    <boolean name="pref_allowShortcutResult" value="true" />
-    <boolean name="pref_allowRotation" value="false" />
-    <boolean name="launcher.select_tip_seen" value="true" />
-    <boolean name="pref_allowWebResult" value="true" />
-    <boolean name="pref_allowSettingsResult" value="true" />
-    <int name="migration_src_hotseat_count" value="5" />
-    <int name="launcher.hotseat_discovery_tip_count" value="5" />
-    <boolean name="pref_add_icon_to_home" value="true" />
-    <string name="migration_src_db_file">launcher.db</string>
-    <boolean name="pref_overview_action_suggestions" value="false" />
-    <boolean name="pref_allowPlayResult" value="true" />
-    <int name="launcher.all_apps_visited_count" value="10" />
-</map>' >>$PL_PREF
-                else
-                    pref_patch pref_overview_action_suggestions false boolean $PL_PREF
-                fi
-                am force-stop com.google.android.apps.nexuslauncher
-            fi
+            #pm install $MODDIR/system/**/priv-app/WallpaperPickerGoogleRelease/WallpaperPickerGoogleRelease.apk
+            pl_fix
         fi
         rm -rf $MODDIR/first
     fi

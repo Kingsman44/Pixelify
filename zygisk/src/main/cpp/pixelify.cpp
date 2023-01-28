@@ -13,15 +13,54 @@ using zygisk::Api;
 using zygisk::AppSpecializeArgs;
 using zygisk::ServerSpecializeArgs;
 
-static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpaper", "com.snapchat.android"};
-static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.apps.wearables.maestro.companion"};
+static std::vector<std::string> P6 = {"com.google", "com.android.chrome", "com.android.vending"};
+static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.apps.wearables.maestro.companion", "com.google.android.gms", "com.nothing.smartcenter"};
 static std::vector<std::string> P1 = {"com.google.android.apps.photos"};
-static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper","com.google.android.as"};
-static std::vector<std::string> keep = {"com.google.android.GoogleCamera", "com.google.ar.core", "com.google.vr.apps.ornament", "com.google.android.apps.motionsense.bridge", "com.google.android.xx"};
+static std::vector<std::string> PkgList = {"com.google.pixel.livewallpaper", "com.google.android.apps.subscriptions.red", "com.breel.wallpaper", "com.snapchat.android", "com.google.android.googlequicksearchbox"};
+static std::vector<std::string> keep = {"com.google.android.apps.recorder", "com.google.android.GoogleCamera", "com.google.ar.core", "com.google.vr.apps.ornament", "com.google.android.apps.motionsense.bridge", "com.google.android.xx"};
 
 bool DEBUG = true;
-const char P7_FP[256] = "google/cheetah/cheetah:13/TQ1A.221205.011/9244662:user/release-keyss";
-const char BID[256] = "TQ1A.221205.011";
+const char P7_FP[256] = "google/cheetah/cheetah:13/TQ1A.230105.001.A2/9325679:user/release-keys";
+const char P7_BID[256] = "TQ1A.230105.001.A2";
+const char P6_FP[256] = "google/raven/raven:13/TQ1A.230105.002/9325679:user/release-keys";
+const char P6_BID[256] = "TQ1A.230105.002";
+const char P5_FP[256] = "google/redfin/redfin:13/TQ1A.230105.001/9292298:user/release-keys";
+const char P5_BID[256] = "TQ1A.230105.001";
+ /**
+static jboolean my_has_system_feature(JNIEnv *env,jobject obj, jstring name, jint version)
+{
+    // Use the JNI to get the package name
+    jclass activity_thread_class = env->FindClass("android/app/ActivityThread");
+    jmethodID current_package_name_method = env->GetStaticMethodID(activity_thread_class, "currentPackageName", "()Ljava/lang/String;");
+    jstring package_name = (jstring)env->CallStaticObjectMethod(activity_thread_class, current_package_name_method);
+    const char *package_name_str = env->GetStringUTFChars(package_name, nullptr);
+    // __android_log_print(ANDROID_LOG_ERROR, "MyModule", "Package name: %s", package_name_str);
+    // Use the JNI to check the package name and feature name
+    if (package_name_str != nullptr &&
+        strstr(package_name_str, "com.google.android.apps.photos") != nullptr &&
+        (strstr(env->GetStringUTFChars(name, nullptr), "PIXEL_2021_EXPERIENCE") != nullptr ||
+         strstr(env->GetStringUTFChars(name, nullptr), "PIXEL_2021_MIDYEAR_EXPERIENCE") != nullptr ||
+         strstr(env->GetStringUTFChars(name, nullptr), "PIXEL_2020_EXPERIENCE") != nullptr ||
+         strstr(env->GetStringUTFChars(name, nullptr), "PIXEL_2020_MIDYEAR_EXPERIENCE") != nullptr ||
+         strstr(env->GetStringUTFChars(name, nullptr), "PIXEL_2019_EXPERIENCE") != nullptr ||
+         strstr(env->GetStringUTFChars(name, nullptr), "PIXEL_2019_PRELOAD") != nullptr ||
+         strstr(env->GetStringUTFChars(name, nullptr), "PIXEL_2019_MIDYEAR_EXPERIENCE") != nullptr))
+    {
+        // Release the string resources
+        env->ReleaseStringUTFChars(package_name, package_name_str);
+        env->ReleaseStringUTFChars(name, env->GetStringUTFChars(name, nullptr));
+        // Return false if the package name and feature name match
+        return JNI_FALSE;
+    }
+    // Release the string resources
+    env->ReleaseStringUTFChars(package_name, package_name_str);
+    env->ReleaseStringUTFChars(name, env->GetStringUTFChars(name, nullptr));
+    // Call the original implementation of the method
+    jclass package_manager_class = env->FindClass("android/app/ApplicationPackageManager");
+    jmethodID original_method = env->GetMethodID(package_manager_class, "hasSystemFeature", "(Ljava/lang/String;I)Z");
+    return env->CallBooleanMethod(obj, env->GetMethodID(env->GetObjectClass(obj), "hasSystemFeature", "(Ljava/lang/String;I)Z"), name, version);
+}
+**/
 
 class pixelify : public zygisk::ModuleBase
 {
@@ -31,6 +70,29 @@ public:
         this->api = api;
         this->env = env;
     }
+
+    /**
+    void patch_sys()
+    {
+        jclass package_manager_class = env->FindClass("android/app/ApplicationPackageManager");
+        // Check that the class was found
+        if (package_manager_class == nullptr)
+        {
+            LOGE("Failed to find ApplicationPackageManager class");
+            return;
+        }
+        // Use the API handle to find the method we want to modify
+        jmethodID has_system_feature_method = env->GetMethodID(package_manager_class, "hasSystemFeature", "(Ljava/lang/String;I)Z");
+        // Check that the method was found
+        if (has_system_feature_method == nullptr)
+        {
+            LOGE("Failed to find hasSystemFeature method");
+            return;
+        }
+        LOGI("Patching HasSystemFeature for Google Photos");
+        env->SetMethodID(package_manager_class, "hasSystemFeature", "(Ljava/lang/String;I)Z", (void *)my_has_system_feature);
+    }
+    **/
 
     void preAppSpecialize(AppSpecializeArgs *args) override
     {
@@ -133,6 +195,7 @@ public:
 private:
     Api *api;
     JNIEnv *env;
+
     void preSpecialize(const char *process)
     {
         unsigned r = 0;
@@ -183,10 +246,15 @@ private:
                 break;
             }
         }
-
+        /**
+        if (package_name.find("com.google.android.apps.photos") != std::string::npos)
+        {
+            patch_sys();
+        }
+        **/
         if (strcmp(process, "com.google.android.gms:unstable") == 0 || strcmp(process, "com.google.android.gms.unstable") == 0)
         {
-            injectBuild(process,"Pixel 7 Pro","cheetah","", BID);
+            injectBuild(process, "Pixel 6 Pro", "raven", "", "");
             type = 0;
         }
 
@@ -195,11 +263,11 @@ private:
 
         if (type == 1)
         {
-            injectBuild(process, "Pixel 7 Pro", "cheetah", P7_FP, BID);
+            injectBuild(process, "Pixel 7 Pro", "cheetah", P7_FP, P7_BID);
         }
         else if (type == 2)
         {
-            injectBuild(process, "Pixel 5", "raven", P7_FP, BID);
+            injectBuild(process, "Pixel 5", "redfin", P5_FP, P5_BID);
         }
         else if (type == 3)
         {
@@ -207,7 +275,7 @@ private:
         }
         else if (type == 4)
         {
-            injectBuild(process, "Pixel 6 Pro", "raven", P7_FP, BID);
+            injectBuild(process, "Pixel 6 Pro", "raven", P6_FP, P6_BID);
         }
 
         api->setOption(zygisk::Option::DLCLOSE_MODULE_LIBRARY);

@@ -29,6 +29,21 @@ BACKUP_DPS=1
 # Includes Call Recording, Hold for Me, Direct My Call
 ENABLE_DIALER_FEATURES=1
 
+# 1 - English (en)
+# 2 - Hindi (hi)
+# 3 - Japanese (jp)
+# 4 - French (fr)
+# 5 - German (de)
+# 6 - Italian (it)
+# 7 - Spanish (es)
+CALL_SCREENING_LANG=1
+
+# 1 American (US)
+# 2 Indian (IN)
+# 3 Australian (AU)
+# 4 Britain (GB)
+ENGLISH_COUNTRY_ACCENT=1
+
 # Donwload lang Specific files for Call Screenining in DE,JP,IT,FR..
 ADD_CALL_SCREENING_FILES=1
 

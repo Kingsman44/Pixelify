@@ -15,6 +15,9 @@ android {
         minSdk min_sdk
         targetSdk target_sdk
         externalNativeBuild {
+            // ndkBuild {
+            //     path("src/main/cpp/external/Android.mk")
+            // }
             cmake {
                 arguments "-DMODULE_NAME:STRING=$moduleLibraryName";
             }

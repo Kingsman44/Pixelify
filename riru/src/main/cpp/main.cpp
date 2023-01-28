@@ -15,10 +15,10 @@
 
 #include <sys/system_properties.h>
 
-static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpapers20", "com.snapchat.android"};
-static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.gms", "com.google.android.apps.wearables.maestro.companion"};
+static std::vector<std::string> PkgList = {"com.google", "com.android.chrome", "com.android.vending", "com.breel.wallpaper", "com.snapchat.android"};
+static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.apps.wearables.maestro.companion"};
 static std::vector<std::string> P1 = {"com.google.android.apps.photos"};
-static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper","com.google.android.googlequicksearchbox"};
+static std::vector<std::string> P6 = {"com.google.pixel.livewallpaper","com.google.android.as"};
 static std::vector<std::string> keep = {"com.google.android.GoogleCamera", "com.google.ar.core", "com.google.vr.apps.ornament", "com.google.android.apps.motionsense.bridge", "com.google.android.xx"};
 
 bool DEBUG = false;
@@ -175,7 +175,7 @@ static void preSpecialize(const char *process, JNIEnv *env)
 
     if (type == 1)
     {
-        injectBuild(process, "Pixel 7 Pro", "cheetah", "google/cheetah/cheetah:13/TD1A.220804.009.A2/8940162:user/release-keys","google","Google", env);
+        injectBuild(process, "Pixel 7 Pro", "cheetah", "google/cheetah/cheetah:13/TQ1A.230105.001.A2/9325679:user/release-keys","google","Google", env);
     }
     else if (type == 2)
     {
@@ -187,7 +187,7 @@ static void preSpecialize(const char *process, JNIEnv *env)
     } 
     else if (type == 4)
     {
-        injectBuild(process, "Pixel 6 Pro", "raven", "google/raven/raven:13/TP1A.220624.021/8877034:user/release-keys","google","Google", env);
+        injectBuild(process, "Pixel 6 Pro", "raven", "google/cheetah/cheetah:13/TQ1A.230105.001.A2/9325679:user/release-keys","google","Google", env);
     }
     else
     {

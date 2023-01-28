@@ -30,8 +30,6 @@ set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${LINKER_FLAGS}")
 
 # find_package(REQUIRED CONFIG)
 
-include_directories(./)
-
 add_library(${MODULE_NAME} SHARED 
             pixelify.cpp
             module.h)

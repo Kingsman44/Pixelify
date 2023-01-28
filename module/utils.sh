@@ -286,15 +286,19 @@ chooseport() {
         fi
     done
     if ($(cat $TMPDIR/events 2>/dev/null | /system/bin/grep VOLUMEUP >/dev/null)); then
-        print ""
-        print "  Selected: Volume Up"
-        print ""
+        if [ $TURN_OFF_SEL_VOL_PROMPT -eq 0 ]; then
+            print ""
+            print "  Selected: Volume Up"
+            print ""
+        fi
         sed -i -e "s/${CURR} \[\-/${CURR} \[\O/g" $logfile
         return 0
     else
-        print ""
-        print "  Selected: Volume Down"
-        print ""
+        if [ $TURN_OFF_SEL_VOL_PROMPT -eq 0 ]; then
+            print ""
+            print "  Selected: Volume Down"
+            print ""
+        fi
         sed -i -e "s/${CURR} \[\-/${CURR} \[\X/g" $logfile
         return 1
     fi
@@ -313,15 +317,19 @@ chooseportold() {
             DOWN=$SEL
             break
         elif [ $SEL -eq $UP ]; then
-            print ""
-            print "  Selected: Volume Up"
-            print ""
+            if [ $TURN_OFF_SEL_VOL_PROMPT -eq 0]; then
+                print ""
+                print "  Selected: Volume Up"
+                print ""
+            fi
             sed -i -e "s/${CURR} \[\-/${CURR} \[\O/g" $logfile
             return 0
         elif [ $SEL -eq $DOWN ]; then
-            print ""
-            print "  Selected: Volume Down"
-            print ""
+            if [ $TURN_OFF_SEL_VOL_PROMPT -eq 0 ]; then
+                print ""
+                print "  Selected: Volume Down"
+                print ""
+            fi
             sed -i -e "s/${CURR} \[\-/${CURR} \[\X/g" $logfile
             return 1
         fi
@@ -359,6 +367,9 @@ no_vksel() {
 }
 
 db_edit() {
+    chgrp root $gms
+    chown root $gms
+    sleep .05
     type=$2
     val=$3
     name=$1
@@ -372,21 +383,34 @@ db_edit() {
         sleep .001
         $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)"
         sleep .001
-        $sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
-        sleep .05
-        # for j in $gacc; do
-        # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
-        # done
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 1)"
+        #sleep .001
+        #$sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
+        for j in $gacc; do
+            j=${j/.db/}
+            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
+            sleep .001
+        done
     done
+    chgrp $gmsowner $gms
+    chown $gmsowner $gms
     # echo "- $name patching done" >> $logfile
 }
 
-gms_edit_bool() {
-    pgnname=$1
-    shift
-    for i in $@; do
-        $sqlite $gms "UPDATE Flags SET boolVal='1' WHERE packageName='$pgnname' AND name='$i'"
+db_edit_bin() {
+    chgrp root $gms
+    chown root $gms
+    sleep 0.05
+    $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$1' AND name='$2'"
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('$1', '', '$2', 0, x'$3', 0)"
+    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('$1', '', '$2', 0, x'$3', 1)"
+    #$sqlite $gms "UPDATE Flags SET extensionVal=x'$3' WHERE packageName='$1' AND name='$2'"
+    for j in $gacc; do
+        j=${j/.db/}
+        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('$1', '$j', '$2', 0, x'$3', 0)"
     done
+    chgrp $gmsowner $gms
+    chown $gmsowner $gms
 }
 
 sound_trigger_patch() {
@@ -483,20 +507,20 @@ oos_fix() {
         cd /
         rm -rf $MODPATH/system/product $MODPATH/system/system_ext
         mkdir -p $MODPATH/vendor/overlay
-        mv $MODPATH/system/overlay $MODPATH/vendor/overlay
+        mv $MODPATH/system/overlay $MODPATH/system/vendor/overlay
         #Copy each apk on it on folder.
-        for i in $MODPATH/vendor/overlay/*; do
+        for i in $MODPATH/system/vendor/overlay/*; do
             name=$i
-            name=${name/$MODPATH\/vendor\/overlay\//}
+            name=${name/$MODPATH\/system\/vendor\/overlay\//}
             name=${name/.apk/}
             if [ -f $i ]; then
-                mkdir -p $MODPATH/vendor/overlay/$name
-                mv $i $MODPATH/vendor/overlay/$name
-                chmod 0755 $MODPATH/vendor/overlay/$name
-                chmod 0644 $MODPATH/vendor/overlay/$name/*
+                mkdir -p $MODPATH/system/vendor/overlay/$name
+                mv $i $MODPATH/system/vendor/overlay/$name
+                chmod 0755 $MODPATH/system/vendor/overlay/$name
+                chmod 0644 $MODPATH/system/vendor/overlay/$name/*
             fi
         done
-        chmod 0755 $MODPATH/vendor/overlay
+        chmod 0755 $MODPATH/system/vendor/overlay
         rm -rf $MODPATH/system/overlay
         REMOVE="$(echo $REMOVE | tr ' ' '\n' | grep -v '/product' | grep -v '/system_ext')"
     fi
@@ -517,6 +541,49 @@ install_tts() {
     rm -rf $MODPATH/system$product/app/GoogleTTS/oat
     cp -f $MODPATH/files/PixeliflyTTS.apk $MODPATH/system/product/overlay/PixeliflyTTS.apk
 
+}
+
+pl_fix() {
+    if [ $LOS_FIX -eq 1 ]; then
+        mkdir -p /data/data/com.google.android.apps.nexuslauncher
+        if [ ! -f $PL_PREF ]; then
+            echo "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>" >>$PL_PREF
+            echo '<map>
+    <int name="launcher.home_bounce_count" value="3" />
+    <boolean name="launcher.apps_view_shown" value="true" />
+    <boolean name="pref_allowChromeTabResult" value="false" />
+    <boolean name="pref_allowWebResultAga" value="true" />
+    <int name="ALL_APPS_SEARCH_CORPUS_PREFERENCE" value="206719" />
+    <boolean name="pref_allowWidgetsResult" value="false" />
+    <int name="migration_src_device_type" value="0" />
+    <boolean name="pref_search_show_keyboard" value="false" />
+    <boolean name="pref_allowPeopleResult" value="true" />
+    <boolean name="pref_enable_minus_one" value="true" />
+    <string name="migration_src_workspace_size">5,5</string>
+    <boolean name="pref_search_show_hidden_targets" value="false" />
+    <boolean name="pref_allowWebSuggestChrome" value="false" />
+    <boolean name="pref_allowPixelTipsResult" value="true" />
+    <string name="idp_grid_name">normal</string>
+    <boolean name="pref_allowScreenshotResult" value="true" />
+    <boolean name="pref_allowMemoryResult" value="true" />
+    <boolean name="pref_allowShortcutResult" value="true" />
+    <boolean name="pref_allowRotation" value="false" />
+    <boolean name="launcher.select_tip_seen" value="true" />
+    <boolean name="pref_allowWebResult" value="true" />
+    <boolean name="pref_allowSettingsResult" value="true" />
+    <int name="migration_src_hotseat_count" value="5" />
+    <int name="launcher.hotseat_discovery_tip_count" value="5" />
+    <boolean name="pref_add_icon_to_home" value="true" />
+    <string name="migration_src_db_file">launcher.db</string>
+    <boolean name="pref_overview_action_suggestions" value="false" />
+    <boolean name="pref_allowPlayResult" value="true" />
+    <int name="launcher.all_apps_visited_count" value="10" />
+</map>' >>$PL_PREF
+        else
+            pref_patch pref_overview_action_suggestions false boolean $PL_PREF
+        fi
+        am force-stop com.google.android.apps.nexuslauncher
+    fi
 }
 
 patch_gboard() {
@@ -788,7 +855,6 @@ drop_sys() {
             fi
         done
     fi
-    #if [ -z $exact_prop ]; then
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
@@ -798,8 +864,7 @@ drop_sys() {
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
-    #fi
+    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xmld
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
