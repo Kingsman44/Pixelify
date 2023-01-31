@@ -13,8 +13,6 @@ chmod 0755 $sqlite
 
 zygisk_enabled="$(magisk --sqlite "SELECT value FROM settings WHERE (key='zygisk')")"
 
-gmsowner="$(ls -l $gms | awk '{print $3}')"
-
 if [ "$MAGISK_VER_CODE" -ge 21000 ]; then
     MAGISK_CURRENT_RIRU_MODULE_PATH=$(magisk --path)/.magisk/modules/riru-core
 else
@@ -103,7 +101,7 @@ fi
 for i in $overide_spoof; do
     if [ ! -z $i ]; then
         kkk="$(getprop $i)"
-        if [ ! -z $kkk ] || [ $kkk == "redfin" ]; then
+        if [ ! -z $kkk ] || [ "$kkk" == "redfin" ]; then
             exact_prop="$i"
             spoof_message="  Note: This may break ota update of your rom"
             break
@@ -358,6 +356,8 @@ echo "
 chmod -R 0755 $MODPATH/addon
 chmod 0644 $MODPATH/files/*.xz
 
+# cp $gmsorg $gms
+
 gacc="$("$sqlite" "$gms" "SELECT DISTINCT(user) FROM Flags WHERE user != '';")"
 
 if [ $API -le 28 ]; then
@@ -420,6 +420,8 @@ else
 fi
 
 # Have user option to skip vol keys
+export TURN_OFF_SEL_VOL_PROMPT=0
+
 if [ "$VOL_KEYS" -eq 0 ]; then
     print "- Skipping Vol Keys -"
     if [ -f /sdcard/Pixelify/config.prop ]; then
@@ -735,7 +737,7 @@ if [ -d /data/data/$DIALER ]; then
             while true; do
                 ui_print " Current cursor:  $SM"
                 "$VKSEL" && SM="$((SM + 1))" || break
-                [[ "$SM" -gt "6" ]] && SM=1
+                [[ "$SM" -gt "7" ]] && SM=1
             done
         else
             SM=$(grep CALL_SCREENING_LANG= $vk_loc | cut -d= -f2)
@@ -754,6 +756,7 @@ if [ -d /data/data/$DIALER ]; then
                 fi
             fi
         fi
+        echo " - Country code detected '$carr_coun_small'" >>$logfile
         sed -i -e "s/YY/${carr_coun_small}/g" $MODPATH/files/com.google.android.dialer
         P1="$(echo $carr_coun_small | xxd -p)"
         P1=${P1/0a/}
@@ -889,7 +892,7 @@ if [ -d /data/data/$DIALER ]; then
                     if [ -z "$(ls $TTS_LOC)" ]; then
                         cd $MODPATH/system/product/tts/google/$TT_LANG
                         for i in $(ls); do
-                            j=${i/.zvoice}
+                            j=${i/.zvoice/}
                             r="$(echo $j | tr -dc '0-9')"
                             PACK_NAME="$PACK_NAME$TT_LANG:$j;$r,"
                             mkdir -p $TTS_LOC/$j
@@ -929,7 +932,7 @@ if [ -d /data/data/$DIALER ]; then
                             if [ -z "$(ls $TTS_LOC)" ]; then
                                 cd $MODPATH/system/product/tts/google/$TT_LANG
                                 for i in $(ls); do
-                                    j=${i/.zvoice}
+                                    j=${i/.zvoice/}
                                     r="$(echo $j | tr -dc '0-9')"
                                     PACK_NAME="$PACK_NAME$TT_LANG:$j;$r,"
                                     mkdir -p $TTS_LOC/$j
@@ -1647,6 +1650,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal $TENSOR "enable_edge_tpu"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 2000 "inline_suggestion_dismiss_tooltip_delay_time_millis"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 4 "inline_suggestion_experiment_version"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "https://www.gstatic.com/android/keyboard/spell_checker/prod/2023011201/metadata_cpu_2023011201.json" "grammar_checker_manifest_uri"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "en" "enable_emojify_language_tags"
         # G Logo
         print ""
@@ -1660,7 +1664,9 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
             db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 0 "show_branding_interval_seconds"
             db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 86400000 "branding_fadeout_delay_ms"
         fi
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 3 "grammar_checker_min_sentence_length"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger,tw.nekomimi.nekogram,org.telegram.BifToGram" "emojify_app_allowlist"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "material3_theme" "enable_access_points_new_design" "enable_nga_language_download" "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
     fi
 
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
@@ -1742,7 +1748,7 @@ fi
 
 # Live Wallpapers
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
-$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.pixel.livewallpaper', '', 'DownloadableWallpaper__blocking_module_list', 0, '', 0)"
+db_edit com.google.pixel.livewallpaper stringVal ""
 
 # Google One
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.subscriptions.red.user'"
@@ -1754,7 +1760,7 @@ $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, strin
 # Google Recorder
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder#com.google.android.apps.recorder'"
 #db_edit com.google.android.apps.recorder#com.google.android.apps.recorder boolVal 1 "Experiment__allow_speaker_labels_with_tts" "Experiment__enable_speaker_labels" "Experiment__enable_speaker_labels_editing" "Experiment__enable_speaker_labels_editing_in_playback"
-$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.apps.recorder#com.google.android.apps.recorder', '', 'Experiment__audio_source', 0, 'mic', 0)"
+#$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, stringVal, committed) VALUES('com.google.android.apps.recorder#com.google.android.apps.recorder', '', 'Experiment__audio_source', 0, 'mic', 0)"
 
 # System
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.systemui'"
@@ -1811,15 +1817,22 @@ for i in $MODPATH/system/vendor/overlay $MODPATH/system$product/overlay $MODPATH
     set_perm_recursive $i 0 0 0755 0644
 done
 
-gmsowner="$(ls -l $gms | awk '{print $3}')"
+# mv $gms $gmsorg
 
-if [ gmsowner=="root" ]; then
-    gmsowner="$(ls -l /data/data/com.google.android.gms/databases/metadata.db | awk '{print $3}')"
-    chgrp $gmsowner $gms
-    chown $gmsowner $gms
-fi
+# for i in $DE_DATA/com.google.android.gms/databases/*.db; do
+#     gmsowner="$(ls -l $i | awk '{print $3}')"
+#     if [ "$gmsowner" != "root" ]; then
+#         # Transfer ownership
+#         owner=$(stat -c %U $i)
+#         group=$(stat -c %G $i)
+#         chown $owner:$group $gmsorg
 
-chmod 0660 $gms
+#         # Transfer permissions
+#         permissions=$(stat -c %a $i)
+#         chmod $permissions $gmsorg
+#         break
+#     fi
+# done
 
 # Regenerate overlay list
 rm -rf /data/resource-cache/overlays.list

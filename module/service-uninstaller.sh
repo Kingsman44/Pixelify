@@ -20,15 +20,7 @@ gser=/data/data/com.google.android.gsf/databases/gservices.db
 
 disable="com.google.android.gms/com.google.android.gms.update.phone.PopupDialog"
 
-update="com.android.vending/com.google.android.finsky.systemupdate.SystemUpdateSettingsContentProvider
-com.android.vending/com.google.android.finsky.systemupdateactivity.SettingsSecurityEntryPoint
-com.android.vending/com.google.android.finsky.systemupdateactivity.SystemUpdateActivity
-com.google.android.gms/com.google.android.gms.update.phone.PopupDialog
-com.google.android.gms/com.google.android.gms.update.OtaSuggestionSummaryProvider
-com.google.android.gms/com.google.android.gms.update.SystemUpdateActivity
-com.google.android.gms/com.google.android.gms.update.SystemUpdateGcmTaskService
-com.google.android.gms/com.google.android.gms.update.SystemUpdateService
-com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.sleepinsights.ui.SleepInsightsActivity
+update="com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.sleepinsights.ui.SleepInsightsActivity
 com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.sleepinsights.ui.dailyinsights.SleepInsightsDailyCardsActivity
 com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.coughandsnore.consent.ui.CoughAndSnoreConsentActivity"
 
@@ -162,7 +154,7 @@ if [ ! -d /data/adb/modules/Pixelify ]; then
 
     #Remove callscreening patch
     chmod 0755 /data/data/com.google.android.dialer/files/phenotype
-    rm -rf chmod 0755 /data/data/com.google.android.dialer/files/phenotype/*
+    rm -rf /data/data/com.google.android.dialer/files/phenotype/*
 
     #Remove GMS patches
     $sqlite $gms "DELETE FROM FlagOverrides"
@@ -194,7 +186,7 @@ else
     fi
 
     # Call Screening
-    #cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+    cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
     # copy bootlogs to Pixelify folder if bootloop happened.
     [ -f /data/adb/modules/Pixelify/boot_logs.txt ] && rm -rf /sdcard/Pixelify/boot_logs.txt && mv /data/adb/modules/Pixelify/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
 

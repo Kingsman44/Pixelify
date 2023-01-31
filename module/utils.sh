@@ -322,7 +322,7 @@ chooseportold() {
             DOWN=$SEL
             break
         elif [ $SEL -eq $UP ]; then
-            if [ $TURN_OFF_SEL_VOL_PROMPT -eq 0]; then
+            if [ $TURN_OFF_SEL_VOL_PROMPT -eq 0 ]; then
                 print ""
                 print "  Selected: Volume Up"
                 print ""
@@ -372,8 +372,6 @@ no_vksel() {
 }
 
 db_edit() {
-    chgrp root $gms
-    chown root $gms
     sleep .05
     type=$2
     val=$3
@@ -381,6 +379,9 @@ db_edit() {
     shift
     shift
     shift
+    if [ $type == "stringVal" ]; then
+        val="'$val'"
+    fi
     # echo "- $name patching started" >> $logfile
     for i in $@; do
         # echo "Patching $i to $val" >> $logfile
@@ -392,19 +393,14 @@ db_edit() {
         #sleep .001
         #$sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
         for j in $gacc; do
-            j=${j/.db/}
             $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
             sleep .001
         done
     done
-    chgrp $gmsowner $gms
-    chown $gmsowner $gms
     # echo "- $name patching done" >> $logfile
 }
 
 db_edit_bin() {
-    chgrp root $gms
-    chown root $gms
     sleep 0.05
     $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$1' AND name='$2'"
     $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('$1', '', '$2', 0, x'$3', 0)"
@@ -414,8 +410,6 @@ db_edit_bin() {
         j=${j/.db/}
         $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('$1', '$j', '$2', 0, x'$3', 0)"
     done
-    chgrp $gmsowner $gms
-    chown $gmsowner $gms
 }
 
 sound_trigger_patch() {
