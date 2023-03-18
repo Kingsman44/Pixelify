@@ -1,7 +1,7 @@
 # 0 - Disable(No), 1 - Enable(Yes)
 
 # If module doesn't able to detect internet even it is turn on, then enable it will fix your internet issue
-FORCE_ENABLE_ONLINE=1
+FORCE_ENABLE_ONLINE=0
 
 # Disable Internal spoofing of particular rom
 DISABLE_INTERNAL_SPOOFING=0
@@ -49,6 +49,9 @@ ADD_CALL_SCREENING_FILES=1
 
 # BAckup Lang Specific files for Call Screenining in DE,JP,IT,FR..
 BACKUP_CALL_SCREENING_FILES=1
+
+# Remove Samsung Dialer
+ENABLE_S_DIALER=0
 
 # Enable Next Generation Assistant
 ENABLE_NGA=1

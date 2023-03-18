@@ -52,7 +52,7 @@ fetch_version() {
         echo "- Fetching version of online packages" >>$logfile
         ver=$($MODPATH/addon/curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
         if [ $ENABLE_OSR -eq 1 ] || [ $DOES_NOT_REQ_SPEECH_PACK -eq 1 ]; then
-            if [ $API -eq 30 ] || [ $API -eq 33 ]; then 
+            if [ $API -eq 30 ] || [ $API -eq 33 ]; then
                 NGAVERSION=$(echo "$ver" | grep ngd-$API | cut -d'=' -f2)
                 NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
             else
@@ -586,54 +586,54 @@ pl_fix() {
 }
 
 patch_gboard() {
-    bool_patch nga $GBOARD
-    bool_patch redesign $GBOARD
-    bool_patch lens $GBOARD
-    bool_patch generation $GBOARD
-    bool_patch multiword $GBOARD
-    bool_patch voice_promo $GBOARD
-    bool_patch silk $GBOARD
-    bool_patch enable_email_provider_completion $GBOARD
-    bool_patch enable_multiword_predictions $GBOARD
-    bool_patch_false disable_multiword_autocompletion $GBOARD
-    bool_patch enable_inline_suggestions_on_decoder_side $GBOARD
-    bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD
-    bool_patch enable_inline_suggestions_on_client_side $GBOARD
-    bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD
-    long_patch inline_suggestion_experiment_version 4 $GBOARD
-    long_patch user_history_learning_strategies 1 $GBOARD
-    long_patch crank_max_char_num_limit 100 $GBOARD
-    long_patch crank_min_char_num_limit 5 $GBOARD
-    long_patch keyboard_redesign 1 $GBOARD
-    bool_patch fast_access_bar $GBOARD
-    bool_patch tiresias $GBOARD
-    bool_patch agsa $GBOARD
-    bool_patch enable_voice $GBOARD
-    bool_patch personalization $GBOARD
-    bool_patch lm $GBOARD
-    bool_patch feature_cards $GBOARD
-    bool_patch dynamic_art $GBOARD
-    bool_patch multilingual $GBOARD
-    bool_patch show_suggestions_for_selected_text_while_dictating $GBOARD
-    #bool_patch enable_highlight_voice_reconversion_composing_text $GBOARD
-    #bool_patch enable_handling_concepts_for_contextual_bitmoji $GBOARD
-    bool_patch enable_preemptive_decode $GBOARD
-    bool_patch translate $GBOARD
-    bool_patch tflite $GBOARD
-    bool_patch enable_show_inline_suggestions_in_popup_view $GBOARD
-    bool_patch enable_nebulae_materializer_v2 $GBOARD
-    #bool_patch use_scrollable_candidate_for_voice $GBOARD
-    bool_patch_false force_key_shadows $GBOARD
-    bool_patch floating $GBOARD
-    bool_patch split $GBOARD
-    bool_patch grammar $GBOARD
-    bool_patch show_branding_on_space $GBOARD
-    bool_patch spell_checker $GBOARD
-    bool_patch deprecate_search $GBOARD
-    bool_patch hide_composing_underline $GBOARD
-    bool_patch emojify $GBOARD
-    bool_patch enable_grammar_checker $GBOARD
-    string_patch enable_emojify_language_tags "en" $GBOARD
+    # bool_patch nga $GBOARD
+    # bool_patch redesign $GBOARD
+    # bool_patch lens $GBOARD
+    # bool_patch generation $GBOARD
+    # bool_patch multiword $GBOARD
+    # bool_patch voice_promo $GBOARD
+    # bool_patch silk $GBOARD
+    # bool_patch enable_email_provider_completion $GBOARD
+    # bool_patch enable_multiword_predictions $GBOARD
+    # bool_patch_false disable_multiword_autocompletion $GBOARD
+    # bool_patch enable_inline_suggestions_on_decoder_side $GBOARD
+    # bool_patch enable_core_typing_experience_indicator_on_composing_text $GBOARD
+    # bool_patch enable_inline_suggestions_on_client_side $GBOARD
+    # bool_patch enable_core_typing_experience_indicator_on_candidates $GBOARD
+    # long_patch inline_suggestion_experiment_version 4 $GBOARD
+    # long_patch user_history_learning_strategies 1 $GBOARD
+    # long_patch crank_max_char_num_limit 100 $GBOARD
+    # long_patch crank_min_char_num_limit 5 $GBOARD
+    # long_patch keyboard_redesign 1 $GBOARD
+    # bool_patch fast_access_bar $GBOARD
+    # bool_patch tiresias $GBOARD
+    # bool_patch agsa $GBOARD
+    # bool_patch enable_voice $GBOARD
+    # bool_patch personalization $GBOARD
+    # bool_patch lm $GBOARD
+    # bool_patch feature_cards $GBOARD
+    # bool_patch dynamic_art $GBOARD
+    # bool_patch multilingual $GBOARD
+    # bool_patch show_suggestions_for_selected_text_while_dictating $GBOARD
+    # #bool_patch enable_highlight_voice_reconversion_composing_text $GBOARD
+    # #bool_patch enable_handling_concepts_for_contextual_bitmoji $GBOARD
+    # bool_patch enable_preemptive_decode $GBOARD
+    # bool_patch translate $GBOARD
+    # bool_patch tflite $GBOARD
+    # bool_patch enable_show_inline_suggestions_in_popup_view $GBOARD
+    # bool_patch enable_nebulae_materializer_v2 $GBOARD
+    # #bool_patch use_scrollable_candidate_for_voice $GBOARD
+    # bool_patch_false force_key_shadows $GBOARD
+    # bool_patch floating $GBOARD
+    # bool_patch split $GBOARD
+    # bool_patch grammar $GBOARD
+    # bool_patch show_branding_on_space $GBOARD
+    # bool_patch spell_checker $GBOARD
+    # bool_patch deprecate_search $GBOARD
+    # bool_patch hide_composing_underline $GBOARD
+    # bool_patch emojify $GBOARD
+    # bool_patch enable_grammar_checker $GBOARD
+    # string_patch enable_emojify_language_tags "en" $GBOARD
     cp -Tf $GBOARD $NEW_GBOARD
 }
 
@@ -854,16 +854,20 @@ drop_sys() {
             fi
         done
     fi
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xmld
+    if [ $KEEP_PIXEL_2021 -eq 0 ]; then
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+        touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
+        touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
+        touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
+        touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+    else
+        echo " - Not removing Pixel 2021 experience as roms already hide for gphotos" >>$logfile
+    fi
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
@@ -915,5 +919,20 @@ ok_google_hotword() {
                 tar -xf $MODPATH/files/hotword-9.tar.xz -C $MODPATH/system$product/priv-app
             fi
         fi
+    fi
+}
+
+remove_samsung_dialer() {
+    print ""
+    print "  Note: It will be back when you uninstall or reinstall select NO"
+    print "  Do you want to Remove Samsung Dialer?"
+    print "   Vol Up += Yes"
+    print "   Vol Down += No"
+    no_vk "ENABLE_S_DIALER"
+    if $VKSEL; then
+        mkdir -p "$MODPATH/system/priv-app/SamsungDialer"
+        touch $MODPATH/system/priv-app/SamsungDialer/SamsungDialer.apk
+        mkdir -p "$MODPATH/system/priv-app/SamsungInCallUI"
+        touch $MODPATH/system/priv-app/SamsungInCallUI/SamsungInCallUI.apk
     fi
 }

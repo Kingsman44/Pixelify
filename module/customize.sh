@@ -104,6 +104,7 @@ for i in $overide_spoof; do
         if [ ! -z $kkk ] || [ "$kkk" == "redfin" ]; then
             exact_prop="$i"
             spoof_message="  Note: This may break ota update of your rom"
+            KEEP_PIXEL_2021=1
             break
         fi
     fi
@@ -116,6 +117,7 @@ if [ -z $exact_prop ]; then
             if [ ! -z $kkk ] || [ $kkk == "redfin" ]; then
                 exact_prop="ro.product.device"
                 spoof_message="  Note: This may cause issue to Google camera"
+                KEEP_PIXEL_2021=1
                 break
             fi
         fi
@@ -132,6 +134,25 @@ if [ -z $exact_prop ]; then
             fi
         fi
     done
+fi
+
+if [ $KEEP_PIXEL_2021 -eq 0 ] && [ $API -eq 33 ]; then
+    for i in $PIXEL_2021_ROMS; do
+        if [ ! -z $i ]; then
+            kkk="$(getprop $i)"
+            if [ ! -z $kkk ]; then
+                KEEP_PIXEL_2021=1
+                break
+            fi
+        fi
+    done
+    if [ $KEEP_PIXEL_2021 -eq 0 ] && [ ! -z "$(getprop ro.custom.version | grep PixelOS)" ]; then
+        KEEP_PIXEL_2021=1
+    fi
+fi
+
+if [ $API -le 32 ]; then
+    KEEP_PIXEL_2021=0
 fi
 
 # if [ -z $exact_prop ]; then
@@ -163,6 +184,10 @@ if [ $API -ge 31 ] && [ $REQ_FIX -eq 1 ]; then
     TARGET_DEVICE_OP12=1
 elif [ $API -ge 31 ] && [ ! -z "$(getprop ro.build.version.oneui)" ]; then
     TARGET_DEVICE_ONEUI=1
+fi
+
+if [ $TARGET_DEVICE_OP12 -eq 1 ] && [ $API -eq 33 ]; then
+    LOS_FIX=1
 fi
 
 online
@@ -521,7 +546,9 @@ if [ $TENSOR -eq 1 ]; then
     fi
 elif [ $MODULE_TYPE -eq 2 ] || [ $MODULE_TYPE -eq 3 ]; then
     echo "- Enabling Unlimited storage" >>$logfile
-    drop_sys
+    if [ $TARGET_USE_GPHOTOS_FUNC_OVERRIDE -eq 0 ]; then
+        drop_sys
+    fi
 else
     print "  Do you want to Spoof your device to Pixel 5/Pixel 6 Pro?"
     print "   Vol Up += Yes"
@@ -752,9 +779,14 @@ if [ -d /data/data/$DIALER ]; then
             if [ -z $carr_coun_small ]; then
                 carr_coun_small="$(getprop gsm.sim.operator.iso-country | cut -d, -f2)"
                 if [ -z $carr_coun_small ]; then
-                    carr_coun_small="us"
+                    echo " - Unable to detect Country using 'in' as default" >>$logfile
+                    carr_coun_small="in"
                 fi
             fi
+        fi
+        if [ -z $carr_coun_small ]; then
+            echo " - Unable to detect Country using 'in' as default" >>$logfile
+            carr_coun_small="in"
         fi
         echo " - Country code detected '$carr_coun_small'" >>$logfile
         sed -i -e "s/YY/${carr_coun_small}/g" $MODPATH/files/com.google.android.dialer
@@ -851,7 +883,8 @@ if [ -d /data/data/$DIALER ]; then
         fi
         TURN_OFF_SEL_VOL_PROMPT=0
         TT_LANG="$(echo $P2 | tr '[:upper:]' '[:lower:]')"
-        sed -i -e "s/UU-FF/$P2/g" $MODPATH/files/com.google.android.dialer
+        echo " - Selected $P2 callscreening language" >>$logfile
+        sed -i -e "s/UU-FF/${P2}/g" $MODPATH/files/com.google.android.dialer
         P2="$(echo $P2 | xxd -p)"
         P2=${P2/0a/}
         CSBIN=0a140a02${P1}120e0a0c0a05${P2}12030a0102
@@ -885,7 +918,7 @@ if [ -d /data/data/$DIALER ]; then
                 mkdir -p $MODPATH/system/product/tts/google
                 tar -xf /sdcard/Pixelify/backup/callscreen-$lang.tar.xz -C $MODPATH/system/product/tts/google
                 #install TTS Pack
-                if [ -d /data/user_de/0/com.google.android.tts ]; then
+                if [ -d /data/user_de/0/com.google.android.tts ] && [[ $lang == "hi-IN" || $lang == "en-IN" ]]; then
                     TTS_LOC=/data/user_de/0/com.google.android.tts/files/superpacks/$TT_LANG
                     [ ! -d $TTS_LOC ] && mkdir -p $TTS_LOC
                     PACK_NAME="1#"
@@ -925,7 +958,7 @@ if [ -d /data/data/$DIALER ]; then
                         cd /
                         tar -xf $MODPATH/files/callscreen-$lang.tar.xz -C $MODPATH/system/product/tts/google
                         #install TTS Pack
-                        if [ -d /data/user_de/0/com.google.android.tts ]; then
+                        if [ -d /data/user_de/0/com.google.android.tts ] && [[ $lang == "hi-IN" || $lang == "en-IN" ]]; then
                             TTS_LOC=/data/user_de/0/com.google.android.tts/files/superpacks/$TT_LANG
                             [ ! -d $TTS_LOC ] && mkdir -p $TTS_LOC
                             PACK_NAME="1#"
@@ -980,8 +1013,7 @@ if [ -d /data/data/$DIALER ]; then
         mkdir -p /data/data/com.google.android.dialer/files/phenotype
         chmod 0500 /data/data/com.google.android.dialer/files/phenotype
         cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
-        cp -Tf $MODPATH/$DIALER /data/data/com.google.android.dialer/files/phenotype/$DIALER
-        chmod 0600 /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+        chmod 0660 /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
         am force-stop $DIALER
 
         if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
@@ -1003,6 +1035,8 @@ if [ -d /data/data/$DIALER ]; then
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
             rm -rf $MODPATH/system$product/priv-app/GoogleDialer/oat
         fi
+
+        [ ! -z "$(getprop ro.oneui.version)" ] && [ $API -ge 31 ] && remove_samsung_dialer
     else
         rm -rf $MODPATH/system$product/overlay/PixelifyGD.apk
         chmod 755 /data/data/com.google.android.dialer/files/phenotype
@@ -1121,7 +1155,9 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
         fi
 
         db_edit com.google.android.googlequicksearchbox stringVal "Cheetah" "13477"
+        #db_edit com.google.android.googlequicksearchbox boolVal 1 10040 10579 11627 14759 15114 16197 16347 16464 45351462 45352335 45353388 45353425 45354090 45355242 45355425 45357281 45357460 45357462 45357463 45357466 45357467 45357468 45357469 45357470 45357471 45357508 45358425 45368123 45368150 45368483 45374247 45375269 45386105 8674 9449 10596 3174 45357539 45358426 45360742 45372547 45372935 45373820 45374858 45376106 45380073 45380867 45385075 45385287 45386702 7882 8932 9418
         [ $TENSOR -eq 0 ] && db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
+        db_edit_bin com.google.android.apps.search.assistant.device#com.google.android.googlequicksearchbox 45377874 $GSPOOF
         #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox' AND name='5470'"
         #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '5470', 0, x'$GOOGLEBIN', 0)"
 
@@ -1647,11 +1683,13 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
     $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.inputmethod.latin#com.google.android.inputmethod.latin'"
     if [ $DISABLE_GBOARD_GMS -eq 0 ]; then
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal 1 $GBOARD_FLAGS
-        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal $TENSOR "enable_edge_tpu"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin boolVal $TENSOR "enable_edge_tpu" "lm_personalization_enabled"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 2000 "inline_suggestion_dismiss_tooltip_delay_time_millis"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 4 "inline_suggestion_experiment_version"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "https://www.gstatic.com/android/keyboard/spell_checker/prod/2023011201/metadata_cpu_2023011201.json" "grammar_checker_manifest_uri"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "en" "enable_emojify_language_tags"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 2 "nga_backspace_behavior"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 301153970 "nga_min_version_code_for_streaming_rpc"
         # G Logo
         print ""
         print "  Do you want enable G logo in google keyboard?"
@@ -1664,9 +1702,9 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
             db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 0 "show_branding_interval_seconds"
             db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 86400000 "branding_fadeout_delay_ms"
         fi
-        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 3 "grammar_checker_min_sentence_length"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "com.android.mms,com.discord,com.facebook.katana,com.facebook.lite,com.facebook.orca,com.google.android.apps.dynamite,com.google.android.apps.messaging,com.google.android.youtube,com.instagram.android,com.snapchat.android,com.twitter.android,com.verizon.messaging.vzmsgs,com.viber.voip,com.whatsapp,com.zhiliaoapp.musically,jp.naver.line.android,org.telegram.messenger,tw.nekomimi.nekogram,org.telegram.BifToGram" "emojify_app_allowlist"
-        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 1 "material3_theme" "enable_access_points_new_design" "enable_nga_language_download" "user_history_learning_strategies" "keyboard_redesign_subset_features_new_user_timestamp"
+        pm enable com.google.android.googlequicksearchbox/com.google.android.apps.search.assistant.surfaces.dictation.service.endpoint.AssistantDictationService &>/dev/null
+        am broadcast -a grpc.io.action.BIND -n com.google.android.googlequicksearchbox/com.google.android.apps.search.assistant.surfaces.dictation.service.endpoint.AssistantDictationService &>/dev/null
     fi
 
     if [ -z $(pm list packages -s com.google.android.inputmethod.latin) ] && [ -z "$(cat $pix/apps_temp.txt | grep gboard)" ]; then
@@ -1714,7 +1752,7 @@ ui_print " - This may take a minute or two"
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
 db_edit com.google.android.platform.device_personalization_services boolVal 1 $ASI_FLAGS
 db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_QUICK_LAUNCH_V2" "GBOARD_UPDATE_ENTER_KEY" "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
-db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR "Translate__enable_opmv4_service"
+db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR "Translate__enable_opmv4_service" "VisualCortex__enable_control_system"
 if [ $TENSOR -eq 0 ]; then
     db_edit_bin com.google.android.platform.device_personalization_services SpeechPack__downloadable_language_packs_raw $ASIBIN
 # $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='SpeechPack__downloadable_language_packs_raw'"

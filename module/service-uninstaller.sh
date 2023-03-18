@@ -219,7 +219,8 @@ else
     pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.battery.impl.usage.PeriodicJobReceiver -a android.intent.action.MAIN
     sleep .5
     pm enable -n com.google.android.settings.intelligence/com.google.android.settings.intelligence.modules.batterywidget.impl.BatteryAppWidgetProvider -a android.intent.action.MAIN
-
+    pm enable com.google.android.googlequicksearchbox/com.google.android.apps.search.assistant.surfaces.dictation.service.endpoint.AssistantDictationService
+    am broadcast -a grpc.io.action.BIND -n com.google.android.googlequicksearchbox/com.google.android.apps.search.assistant.surfaces.dictation.service.endpoint.AssistantDictationService
     am force-stop com.google.android.settings.intelligence
 
     settings put global settings_enable_clear_calling true
