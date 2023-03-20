@@ -76,7 +76,11 @@ fetch_version() {
             DPVERSION=$(echo "$ver" | grep asis-new-33 | cut -d'=' -f2)
             DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asis-new-33.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         fi
-        if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
+
+        if [ $API -eq 33 ] && [ $NEW_M_PL -eq 1 ]; then
+            PLVERSION=$(echo "$ver" | grep pl-m-$API | cut -d'=' -f2)
+            PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-m-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        elif [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
             PLVERSION=$(echo "$ver" | grep pl-d-los-$API | cut -d'=' -f2)
             PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-los-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         elif [ $API -eq 33 ] && [ $NEW_D_PL -eq 1 ]; then

@@ -214,16 +214,12 @@ fi
 
 sec_patch="$(getprop ro.build.version.security_patch)"
 build_date="$(getprop ro.build.date.utc)"
-# Greater then DEC patch 2022 or Android version 12L or greater
+
 if [ $API -eq 33 ]; then
-    for i in "ro.lineage.device" "ro.crdroid.version" "ro.rice.version" "ro.miui.ui.version.code"; do
-        if [ ! -z "$(getprop $i)" ]; then
-            LOS_FIX=1
-            break
-        fi
-    done
+    LOS_FIX=1
 fi
 
+# Greater then DEC patch 2022 or Android version 12L or greater
 if [ $API -ge 32 ]; then
     NEW_PL=1
 elif [ $(echo $sec_patch | cut -d- -f1) -ge 2022 ] && [ $API -ge 31 ]; then
@@ -253,6 +249,8 @@ if [ $API -eq 32 ]; then
     fi
 fi
 
+NEW_M_PL=0
+
 # Dec patch 2022
 if [ $API -ge 33 ]; then
     if [ $(echo $sec_patch | cut -d- -f1) -le 2021 ]; then
@@ -262,10 +260,14 @@ if [ $API -ge 33 ]; then
             NEW_D_PL=1
         fi
     else
-        if [ $(echo $sec_patch | cut -d- -f1) -eq 2022 ] && [ $(echo $sec_patch | cut -d- -f2) -ge 12 ]; then
+        if [ $(echo $sec_patch | cut -d- -f1) -eq 2023 ] && [ $(echo $sec_patch | cut -d- -f2) -ge 3 ]; then
+            NEW_M_PL=1
+        elif [ $(echo $sec_patch | cut -d- -f1) -eq 2022 ] && [ $(echo $sec_patch | cut -d- -f2) -ge 12 ]; then
             NEW_D_PL=1
-        elif [ $(echo $sec_patch | cut -d- -f1) -ge 2023 ]; then
+        elif [ $(echo $sec_patch | cut -d- -f1) -eq 2023 ]; then
             NEW_D_PL=1
+        elif [ $(echo $sec_patch | cut -d- -f1) -ge 2024 ]; then
+            NEW_M_PL=1
         fi
     fi
 fi
@@ -1461,7 +1463,10 @@ if [ $API -ge 29 ]; then
                         rm -rf /sdcard/Pixelify/backup/pl-$API.tar.xz
                         rm -rf /sdcard/Pixelify/version/pl-$API.txt
                         cd $MODPATH/files
-                        if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
+                        if [ $API -eq 33 ] && [ $NEW_M_PL -eq 1 ]; then
+                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-m-33.tar.xz -O &>/proc/self/fd/$OUTFD
+                            mv pl-m-33.tar.xz pl-$API.tar.xz
+                        elif [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
                             $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
                             mv pl-d-los-33.tar.xz pl-$API.tar.xz
                         elif [ $API -eq 33 ] && [ $NEW_D_PL -eq 1 ]; then
