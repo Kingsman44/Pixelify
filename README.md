@@ -1,9 +1,9 @@
 # PIXELIFY MAGISK MODULE
 Enable Pixel Ui and Some Exclusive Features.<br>
 
-<a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.1-brown.svg" width="150"></a>
+<a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.2-brown.svg" width="150"></a>
+<a href="https://www.pling.com/p/2004615/"><img src="https://img.shields.io/badge/Download-Submodules-brown.svg" width="200" height="30"></a>
 <br><br>
-<img src="https://img.shields.io/github/downloads/Kingsman44/Pixelify/total">
 <a href="https://forum.xda-developers.com/t/magisk-pixelify.4415387/"><img src="https://img.shields.io/badge/XDA_Thread-brown.svg"></a>
 <a href="https://photos.app.goo.gl/jBPm3zTHHhc67Pdy7"><img src="https://img.shields.io/badge/Screenshots-red.svg"></a>
 <a href="https://t.me/pixelifysupport"><img src="https://img.shields.io/badge/Telegram-Support_Group-blue.svg"></a>
@@ -23,14 +23,18 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 - Android One
 - MiUI
 - FunTouchOS
-- OxygenOS (Android 11 or Below)
-- ColorOs (Android 11 or below)
+- OxygenOS
+- ColorOs
 - All stock android roms
 - Windows Subsystem Android
 
-### May or May not work Roms
-- OxygenOS (Android 12 or Above)
-- ColorOs (Android 12 or Above)
+### Pixelify Sub Modules <br>
+Is Pixelify not working correctly or too big for your phone, Pixelify provide some sub module for standalone features
+- Call Screening 
+- Now Playing (Android System Inteligence required)
+- Google Hotword
+- Google Photos Unlimited Backup
+- Google Bootanimation
 
 ### Installation
 - Recommend to use magisk v24 or above from Pixelify v2
@@ -46,8 +50,9 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 - (If you have any problem placing config.prop there then you also can extract and update config.prop inside the packages it automatically use it.) 
 
 ### Zygisk and Riru spoofing configuration
-- Pixel 5:- Google TTS, Google Play services, Pixel Buds
+- Pixel 5:- Google TTS, Google Play services, Pixel Buds, Nothing Smart Center
 - Pixel XL:- Google Photos
+- Pixel 7 Pro:- Google app, Google one, Breel Wallpaper, Snapchat
 - Pixel 6 Pro:- Rest Google apps except (all Google camera package)
 <br><br>**Note** :- Zygisk spoofing can't overide PixelProp Utils.
 
@@ -70,9 +75,9 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 - Works on almost all roms.
 
 ## ⭐ Pixel Features
-### Pixel 6 Features Enables
--   Pixel 6 Live Wallpapers*
--   Magic Eraser (<a href="https://t.me/google_nws/864">USE THIS APK</a>)(7+)
+### Pixel 7 Features Enables
+-   Pixel 6 & Pixel 7 Live Wallpapers*
+-   Magic Eraser
 -   Google Dialer Direct Call (12+)
 -   New At a Glance feature (12+ & Dec+ Patch) 
 -   Google Quick Pharse*
@@ -113,16 +118,11 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 * - Requires Spoofing to Pixel device
 
 ### Call Screening Supported languages other than English US <br>
-**(Before you install the module, your country's language needs to be set as default system language and your SIM card needs to be from the same country.)**
-<br> **Note: Automatic call screening aren't supported by these languages**
 - Italian (IT)
 - Japanese (JP)
 - Spain (ES)
 - France (FR)
 - Germany (DE)
-
-## ⭐ Guide to enable / Faqs / Troubleshooting
-- [https://telegra.ph/Pixelify-Troubleshooting-and-FAQ-05-08)
 
 ## Contribute to project
 - Reporting bugs with logs
@@ -132,14 +132,14 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 - Donation
 
 ## Thanks to the following project contributors
-- <a href="https://github.com/HiFiiDev">@HifiiDev, </a> <a href="https://github.com/ChrisvanChip, ">@ChrisvanChip</a> <a href="https://github.com/Anant-Strong">and @anant-strong</a>
+- <a href="https://github.com/HiFiiDev">@HifiiDev, </a> <a href="https://github.com/theritikchoure">@theritikchoure,</a> <a href="https://github.com/ChrisvanChip">@ChrisvanChip</a> <a href="https://github.com/Anant-Strong">and @anant-strong</a>
  for Pull Requests that got merged 
-- Johannes Drechsler, David Cash, Hendrik Roggenbuck for Donation
+- Johannes Drechsler, David Cash, Hendrik Roggenbuck, Ravijot Dhadial, Skyler Coles for Donation
 - Pixelify Support Group Members for testing beta versions
 
-### Donation link
+### Donation
 - **Paypal link** - [https://paypal.me/shivan999?country.x=IN&locale.x=en_GB](https://paypal.me/shivan999?country.x=IN&locale.x=en_GB)
-- **UPI id (India only)** - shivan.0972@okhdfcbank
+- **UPI id (India only)** - shivan.0972@okicici
 
 ## ⭐ Credits
 - Google to creating these awesome features
@@ -149,9 +149,49 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 - [Freak07](https://forum.xda-developers.com/m/freak07.3428502/) for Adaptive Sound
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 - [HuskyDG](https://github.com/HuskyDG) for intial Riru Port, Bootloop saver
+- [Saitama](https://github.com/saitamasahil) Fixing Pixel Launcher crashes
 - Pixelify Support Group Members for testing beta versions
 
 ## ⭐ ChangeLogs
+
+### Version 2.2
+- Added small Pixelify script to remove backup and disable pixel launcher without reinstalling
+- Added support of NGA Resources in Android 13,12L,12,11
+- Bootloop fixed on OxygenOS 13 & ColorOS 13
+- Enabled Always On Display in settings
+- Enabled Clip-Board-Overlay (A13)
+- Enabled Live Bloom Wallpapers
+- Enabled Pixel 3/4a Live Wallpapers
+- Fixed Android System Intelligence crashes (A13)
+- Fixed Google Recorder transcription for OEMS Roms
+- Fixed Internal Spoof override for Evolution X A13
+- Fixed Phones automatically reboot and Pixelify Disabled
+- Fixed Pixel Launcher Crash on December Patches
+- Fixed Pixel Launcher Crash on OxygenOS 12
+- Fixed Riru Library for Pixel 6 models
+- Fixed Uninstaller may taking cpu in background for some users
+- Fixed crashes of styles and wallpapers on some ROMs (a13)
+- Fixed incompatible version speech pack given by Google Offline Speech pack
+- Fixed module disabled by default
+- Fixed translation showing unknown languages
+- Fixes for Assistant Voice Typing (NGA Tying)
+- Fixes for Bootloop saver
+- Fixes for Call Screening & Added More Call screening Languages
+- Fixes for Call recording on google dialer
+- Fixes for Google apps crashing on oppo color os, and Vivo phones (a13,a12)
+- Fixes for Pixel launcher crash on OOS (12)
+- Fixes for Pixel launcher recent crash on some customs roms(Thanks to @@saitama_96) a13
+- Fully Fixed Precise location disable caused by GMS
+- Google Hotword is removed for now
+- Grammar checker fixed for Fr-Fr, Es-Es
+- Internal Spoofing is now supported for more roms (13/12L)
+- No volume key installation will be aborted if config is not placed /sdcard/Pixelify/config.prop
+- Pixelify won't grant more permissions to Google play services
+- Removed Installation of Offline Speech Pack from Pixelify
+- Support for Pixel 7 Phones
+- Updated Android System Intelligence to T19.pixel6 (13)
+- Updated Live Wallpaper to v2.0 (Pokemon SideKick live wall exist too)
+- More small fixes
 
 ### Version 2.1
 - Support for OxygenOS & Color OS 12, 12L, 13.
