@@ -1155,10 +1155,10 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
         fi
 
         db_edit com.google.android.googlequicksearchbox stringVal "Cheetah" "13477"
-        #db_edit com.google.android.googlequicksearchbox boolVal 1 10040 10579 11627 14759 15114 16197 16347 16464 45351462 45352335 45353388 45353425 45354090 45355242 45355425 45357281 45357460 45357462 45357463 45357466 45357467 45357468 45357469 45357470 45357471 45357508 45358425 45368123 45368150 45368483 45374247 45375269 45386105 8674 9449 10596 3174 45357539 45358426 45360742 45372547 45372935 45373820 45374858 45376106 45380073 45380867 45385075 45385287 45386702 7882 8932 9418
+        #db_edit com.google.android.googlequicksearchbox boolVal 1  10579 11627 14759 15114 16197 16347 16464 45351462 45352335 45353388 45353425 45354090 45355242 45355425 45357281 45357460 45357462 45357463 45357466 45357467 45357468 45357469 45357470 45357471 45357508 45358425 45368123 45368150 45368483 45374247 45375269 45386105 8674 9449 10596 3174 45357539 45358426 45360742 45372547 45372935 45373820 45374858 45376106 45380073 45380867 45385075 45385287 45386702 7882 8932 9418
         [ $TENSOR -eq 0 ] && db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
         db_edit_bin com.google.android.apps.search.assistant.device#com.google.android.googlequicksearchbox 45377874 $GSPOOF
-        #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.googlequicksearchbox' AND name='5470'"
+        #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.g10040oogle.android.googlequicksearchbox' AND name='5470'"
         #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.googlequicksearchbox', '', '5470', 0, x'$GOOGLEBIN', 0)"
 
         cp -f $MODPATH/files/nga.xml $MODPATH/system$product/etc/sysconfig/nga.xml
@@ -1759,10 +1759,6 @@ if [ $TENSOR -eq 0 ]; then
 # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', 'SpeechPack__downloadable_language_packs_raw', 0, x'$ASIBIN', 0)"
 fi
 
-# Bypass KeyAttestationCheck
-$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.gms.auth_account'"
-db_edit com.google.android.platform.systemui boolVal 0 "KeyAttestationCheck__enable_ka_check"
-
 # Digital Wellbeing
 if [ $TARGET_DEVICE_OP12 -eq 0 ]; then
     $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
@@ -1780,9 +1776,6 @@ db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__e
 # Fix Precise Location
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
 db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled"
-if [ $NEW_D_PL -eq 1 ]; then
-    db_edit com.google.android.platform.privacy boolVal 1 "safety_center_is_enabled"
-fi
 
 # Live Wallpapers
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
