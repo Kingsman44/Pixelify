@@ -383,23 +383,56 @@ db_edit() {
     shift
     shift
     shift
+    OFLAGS="$("$sqlite" "$gms" "SELECT * FROM FlagOverrides WHERE packageName='$name';")"
     if [ $type == "stringVal" ]; then
         val="'$val'"
     fi
     # echo "- $name patching started" >> $logfile
     for i in $@; do
         # echo "Patching $i to $val" >> $logfile
-        $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'"
-        sleep .001
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)"
-        sleep .001
-        $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 1)"
-        #sleep .001
-        #$sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
-        for j in $gacc; do
-            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)"
+        FF="$(echo \"$OFLAGS\" | grep $i | head -1)"
+        UPDATEFLAGS=0
+        if [ -z "$FF" ]; then
+            UPDATEFLAGS=1
+        elif [ "$(echo \"$FF\" | cut -d\| -f6)" != "$val" ]; then
+            UPDATEFLAGS=1
+            rm -rf $MODPATH/sql.txt
+            touch $MODPATH/sql.txt
+            $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'" &>$MODPATH/sql.txt
+            if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
+                echo "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'" >>$MODPATH/flags.txt
+                echo "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)" >>$MODPATH/flags.txt
+                UPDATEFLAGS=0
+            fi
+            #else
+            #print "Already Present $i"
+        fi
+        if [ $UPDATEFLAGS -eq 1 ]; then
+            #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'"
+            #sleep .001
+            rm -rf $MODPATH/sql.txt
+            touch $MODPATH/sql.txt
+            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
+            #print "adding $i"
+            if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
+                #print "Error adding $i"
+                echo "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)" >>$MODPATH/flags.txt
+            fi
             sleep .001
-        done
+            #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 1)"
+            #sleep .001
+            #$sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
+            for j in $gacc; do
+                rm -rf $MODPATH/sql.txt
+                touch $MODPATH/sql.txt
+                $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
+                if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
+                    #print "Error adding $i"
+                    echo "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)" >>$MODPATH/flags.txt
+                fi
+                sleep .001
+            done
+        fi
     done
     # echo "- $name patching done" >> $logfile
 }
@@ -862,16 +895,22 @@ drop_sys() {
         rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
         rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
         rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
-        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
-        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
         touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
         touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
         touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
         touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+        touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+    elif [ $KEEP_PIXEL_2020 -eq 1 ]; then
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
         touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
     else
         echo " - Not removing Pixel 2021 experience as roms already hide for gphotos" >>$logfile
     fi
+
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
     touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
@@ -938,5 +977,59 @@ remove_samsung_dialer() {
         touch $MODPATH/system/priv-app/SamsungDialer/SamsungDialer.apk
         mkdir -p "$MODPATH/system/priv-app/SamsungInCallUI"
         touch $MODPATH/system/priv-app/SamsungInCallUI/SamsungInCallUI.apk
+    fi
+}
+
+# Function to check the existence of a property
+check_prop() {
+    if [ -n "$(getprop $1)" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+check_rom_type() {
+    ONEUI_PROP="ro.build.version.sdl"
+    OXYGENOS_PROP="ro.oxygen.version"
+    MIUI_PROP="ro.miui.ui.version.name"
+    COLOROS_PROP="ro.build.version.opporom"
+    REALMEUI_PROP="ro.realm.version"
+    FUNTOUCHOS_PROP="ro.vivo.os.build.display.id"
+    FLYMEOS_PROP="ro.build.display.id"
+    EMUI_PROP="ro.build.version.emui"
+    ZENUI_PROP="ro.build.asus.version"
+
+    # Check each Android skin
+    if check_prop $ONEUI_PROP; then
+        print "Android OS: OneUI"
+        ROM_TYPE="oneui"
+    elif check_prop $OXYGENOS_PROP; then
+        print "Android OS: OxygenOS"
+        ROM_TYPE="oos"
+    elif check_prop $MIUI_PROP; then
+        print "Android OS: MIUI"
+        ROM_TYPE="miui"
+    elif check_prop $COLOROS_PROP; then
+        print "Android OS: ColorOS"
+        ROM_TYPE="coloros"
+    elif check_prop $REALMEUI_PROP; then
+        print "Android OS: realme UI"
+        ROM_TYPE="realmeui"
+    elif check_prop $FUNTOUCHOS_PROP; then
+        print "Android OS: Funtouch OS"
+        ROM_TYPE="funtouch"
+    elif check_prop $FLYMEOS_PROP; then
+        print "Android OS: Flyme OS"
+        ROM_TYPE="flyme"
+    elif check_prop $EMUI_PROP; then
+        ROM_TYPE="emui"
+        print "Android OS: EMUI"
+    elif check_prop $ZENUI_PROP; then
+        ROM_TYPE="zenui"
+        print "Android OS: ZenUI"
+    else
+        ROM_TYPE="custom"
+        print "Android OS: Custom ROM or stock experience"
     fi
 }

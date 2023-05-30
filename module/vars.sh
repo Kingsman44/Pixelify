@@ -70,7 +70,9 @@ REQ_FIX=0
 NEW_D_PL=0
 TURN_OFF_SEL_VOL_PROMPT=0
 KEEP_PIXEL_2021=0
+KEEP_PIXEL_2020=0
 TARGET_USE_GPHOTOS_FUNC_OVERRIDE=0
+USE_P_PATCH=0
 
 # Tensor
 if [[ "$(getprop ro.soc.model)" == "Tensor" || "$(getprop ro.soc.model)" == "GS201" ]]; then
@@ -90,6 +92,12 @@ else
   DE_DATA=/data/user/0
 fi
 
+if [ $API -ge 30 ]; then
+    app=/data/app/*
+else
+    app=/data/app
+fi
+
 if [ -z $sqlite ]; then
   if [ ! -z $MODPATH ]; then
     sqlite=$MODPATH/addon/sqlite3
@@ -97,6 +105,12 @@ if [ -z $sqlite ]; then
     sqlite=/data/adb/modules/Pixelify/addon/sqlite3
   fi
   chmod 0755 $sqlite
+fi
+
+if [ $API -le 28 ]; then
+  product=
+else
+  product=/product
 fi
 
 PIXELIFYUNS=/data/adb/modules/PixelifyUninstaller
@@ -110,12 +124,13 @@ FORCE_FILE="/sdcard/Pixelify/apps.txt"
 SPDB="$DE_DATA/com.google.android.as/databases/superpacks.db"
 DIALER_PREF=$DE_DATA/com.google.android.dialer/shared_prefs/dialer_phenotype_flags.xml
 GOOGLE_PREF=$DE_DATA/com.google.android.googlequicksearchbox/shared_prefs/GEL.GSAPrefs.xml
-#gmsorg=$DE_DATA/com.google.android.gms/databases/phenotype.db
 gms=$DE_DATA/com.google.android.gms/databases/phenotype.db
 gser=$DE_DATA/com.google.android.gsf/databases/gservices.db
 gah=$DE_DATA/com.google.android.gms/databases/google_account_history.db
 pix=/data/pixelify
 logfile=/sdcard/Pixelify/logs.txt
+VELVET_APK=$app/com.google.android.googlequicksearchbox*/base.apk
+PHOTOS_APK=$app/com.google.android.apps.photos*/base.apk
 PHOTOS_PREF=$DE_DATA/com.google.android.apps.photos/shared_prefs/com.google.android.apps.photos.phenotype.xml
 
 #BIN
@@ -129,78 +144,51 @@ REVBIN=0a0b686f6c2d776176656e65740a0b6a6d702d776176656e65740a0b6a61622d776176656
 TKBIN=0a0a746b2d646174617365741276124068747470733a2f2f73746f726167652e676f6f676c65617069732e636f6d2f6469616c65722d746b2f70726f642f746b5f646174617365745f7631352e7a697020bab7332a28663031323836396639636435316562376531336262363230663331353364333861346164366461373a04646174611880a305500f6a08080010022080f524
 GSPOOF=0a064f72696f6c650a066f72696f6c650a05526176656e0a08506978656c20362a0a08506978656c20372a0a08506978656c20352a
 
-if [ $API -le 28 ]; then
-  product=
-else
-  product=/product
-fi
-
 # Patching flags
 ASI_FLAGS="AmbientContext__enable
-AmbientContext__enable_quick_tap
 Captions__enable_augmented_modality
 Captions__enable_augmented_modality_input
 Captions__text_transform_augmented_input
 Cell__enable_cell	
-Cell__enable_pnb_aggregation
 Cell__enable_search_events
 Cell__enable_smartspace_events
 EchoSearch__enable_dota
 EchoSearch__enable_dota_asset
-EchoSearch__enable_horizontal_people_shortcuts
-EchoSearch__enable_packer_fallback_targets_parallel_run
-EchoSearch__enable_pnb
-EchoSearch__enable_search_fa_logging
-EchoSearch__enable_shortcut_filter
-EchoSmartspace__check_notification_visibility
-EchoSmartspace__enable_add_internal_feedback_button
 EchoSmartspace__enable_flight_landing_smartspace_aiai
 EchoSmartspace__enable_hotel_smartspace_aiai
 EchoSmartspace__enable_media_recs_for_driving
 EchoSmartspace__enable_predictor_expiration
 EchoSmartspace__runtastic_check_pause_action
-EchoSmartspace__runtastic_is_ongoing_default_true
 EchoSmartspace__smartspace_enable_daily_forecast
 EchoSmartspace__smartspace_enable_timely_reminder
 EchoSmartspace__strava_check_stop_action
 EchoSmartspace__enable_agsa_settings_read	
-EchoSmartspace__enable_cross_feature_rank_dedup_twiddler	
-EchoSmartspace__enable_dimensional_logging	
+EchoSmartspace__enable_cross_feature_rank_dedup_twiddler
 EchoSmartspace__enable_encode_subcard_into_smartspace_target_id
-EchoSmartspace__enable_ring_channels_regex	
-EchoSmartspace__enable_ring_using_ui_template
+EchoSmartspace__enable_ring_channels_regex
 Echo__avatar_enable_feature
 Echo__enable_headphones_suggestions_from_agsa
 Echo__enable_people_module
 Echo__enable_widget_recommendations
-Echo__toast_enable_mdd
-Echo__search_enable_all_fallback_results
-Echo__search_enable_allowlist
 Echo__search_enable_app_fetcher_v2
 Echo__search_enable_app_search_tips
 Echo__search_enable_app_usage_stats_ranking
-Echo__search_enable_application_header_type
 Echo__search_enable_apps
-Echo__search_enable_appsearch_tips_ranking_improvement
 Echo__search_enable_assistant_quick_phrases_settings
 Echo__search_enable_bc_smartspace_settings
 Echo__search_enable_bc_translate_settings
 Echo__search_enable_eventstore
 Echo__search_enable_everything_else_above_web
-Echo__search_enable_fetcher_optimization_using_result_types
-Echo__search_enable_filter_pending_jobs
 Echo__search_enable_mdp_play_results
 Echo__search_enable_play
 Echo__search_enable_play_alleyoop
 Echo__search_enable_scraping
 Echo__search_enable_search_in_app_icon
-Echo__search_enable_settings_corpus
 Echo__search_enable_shortcuts
 Echo__search_enable_superpacks_app_terms
 Echo__search_enable_superpacks_play_results
 Echo__search_enable_top_hit_row
 Echo__search_enable_widget_corpus
-Echo__search_play_enable_spell_correction
 Echo__smartspace_dedupe_fast_pair_notification
 Echo__smartspace_enable_async_icon
 Echo__smartspace_enable_battery_notification_parser
@@ -241,11 +229,7 @@ Echo_smartspace__enable_flight_landing_smartspace_aiai
 Echo_smartspace__enable_hotel_smartspace_aiai
 Echo_smartspace__smartspace_enable_daily_forecast
 Echo_smartspace__smartspace_enable_timely_reminder
-FederatedAssistant__enable_speech_personalization_caching
-FederatedAssistant__enable_speech_personalization_inference
-FederatedAssistant__enable_speech_personalization_training
 Hopper__enable_active_notification_tracker
-Hopper__enable_auto_expiration
 Hopper__enable_connector
 Hopper__enable_conversation_blocklist
 Hopper__enable_observer
@@ -255,26 +239,9 @@ Hopper__enable_smart_reply
 Hopper__enable_text_predictor
 Hopper__enable_time_based_expiration
 NowPlaying__youtube_export_enabled
-Notification__enable_journey_feature_vectors	
-Notification__enable_mdd_playsnapshot	
-Notification__enable_notification_collection	
-Notification__enable_notification_journey
 Overview__enable_lens_r_overview_long_press
 Overview__enable_lens_r_overview_select_mode
 Overview__enable_lens_r_overview_translate_action
-People__enable_call_log_signals
-People__enable_contacts
-People__enable_dictation_client
-People__enable_hybrid_hotseat_client
-People__enable_notification_common
-People__enable_notification_signals
-People__enable_package_tracker
-People__enable_people_pecan
-People__enable_people_search_content
-People__enable_priority_suggestion_client
-People__enable_profile_signals
-People__enable_sharesheet_client
-People__enable_sms_signals
 QuickTapMdd__enable_quick_tap
 QuickTap__enable_quick_tap
 Screenshot__can_use_gms_core_to_save_boarding_pass
@@ -295,16 +262,13 @@ SmartDictation__enable_biasing_for_interests_model
 SmartDictation__enable_biasing_for_past_correction
 SmartDictation__enable_biasing_for_screen_context
 SmartDictation__enable_selection_filtering
-SmartRecCompose__enable_aiai_tc_generator
 SmartRecCompose__enable_compose_action_filter
-SmartRecCompose__enable_compose_tc
 SmartRecCompose__enable_deep_clu_model
 SmartRecOverviewChips__enable_action_boost_generator
 SmartRecOverviewChips__enable_matchmaker_generator
 SmartRecOverviewChips__enable_reflection_generator
 SmartRecOverviewChips__enable_settings_card_generator
 SmartRecOverviewChips__enable_smartrec_for_overview_chips
-SmartRecPixelSearch__enable_aiai_tc_generator
 SmartRecPixelSearch__enable_all_fallbacks
 SmartRecPixelSearch__enable_appaction_generator
 SmartRecPixelSearch__enable_assistant_geller_data_index
@@ -312,7 +276,6 @@ SmartRecPixelSearch__enable_assistant_generator
 SmartRecPixelSearch__enable_assistant_personalized_deeplinks
 SmartRecPixelSearch__enable_assistant_vertical_generator
 SmartRecPixelSearch__enable_chrometab_generator
-SmartRecPixelSearch__enable_corpora_via_search_context
 SmartRecPixelSearch__enable_entity_annotation_generator
 SmartRecPixelSearch__enable_entity_based_action_generation
 SmartRecPixelSearch__enable_gboard_suggestion
@@ -323,30 +286,24 @@ SmartRecPixelSearch__enable_screenshot_thumbnail_cache
 SmartRecPixelSearch__enable_search_on_contacts
 SmartRecPixelSearch__enable_spelling_correction
 SmartRecPixelSearch__enable_search_system_pointer_generator	
-SmartRecPixelSearch__enable_sys_pointer_nearby_share	
-SmartRecPixelSearch__enable_sys_pointer_password_mgr	
-SmartRecPixelSearch__enable_sys_pointer_photos
-SmartRecPixelSearch__enable_sys_pointer_videos	
-SmartRecPixelSearch__promote_sys_pointer_in_psb
 SpeechPack__speech_recognition_service_settings_enabled	
 SpeechPack__enable_mdd_download_notifications
 SpeechPack__use_mdd_download_system
 SmartRecQuickSearchBox__enable_action_boost_generator
-SmartSelect__enable_smart_select_paste_package_signal
-SmartSelect__enable_smart_select_training_manager_populations
 SpeechPack__speech_recognition_service_settings_enabled
 Translate__translation_service_enabled
 Translate__beta_audio_to_text_languages_in_live_caption
-EchoAvatar__job_scheduler_enable
-EchoAvatar__module_enable
 EchoSearch__enable_appsearch_photos_corpus
-EchoSearch__enable_appsearch_photos_corpus_app_preview
-EchoSearch__enable_appsearch_photos_corpus_app_srp_preview
 EchoSmartspace__smartspace_enable_tomorrow_forecast
 SmartRecPixelSearch__enable_search_on_photos
 SmartRecPixelSearch__enable_search_on_files
 EchoSmartspace__enable_optin_bedtime_adjustment_provider
-EchoSearch__enable_dynamic_web"
+EchoSmartspace__enable_weather_data_extras
+EchoSmartspace__enable_fitbit_notifications
+EchoSmartspace__smartspace_enable_cross_device_alarm
+SpeechRecognitionService__skip_model_download_user_confirmation
+WallpaperEffects__enable_cinematic_effect
+WallpaperEffects__enable_cinematic_mdd"
 
 DIALERFLAGS="G__enable_atlas
 enable_atlas_call_audio_state_verification
@@ -473,91 +430,6 @@ RoutinesPrototype__is_module_enabled
 RoutinesPrototype__is_manual_location_rule_adding_enabled
 RoutinesPrototype__is_routine_inference_enabled
 RoutinesPrototype__is_slices_enabled"
-
-S_HUB_FLAGS="45351680
-45351680
-45353325
-45353325
-45354067
-45354067
-45354137
-45354137
-45354219
-45354219
-45354289
-45354289
-45354290
-45354290
-45354291
-45354291
-45354292
-45354292
-45355361
-45355361
-45356900
-45356900
-45356902
-45356902
-45357909
-45357909
-45359057
-45359057
-45359104
-45359104
-45359152
-45359152
-45359153
-45359153
-45359172
-45359172
-45359404
-45359404
-45359407
-45359407
-45362747
-45362747
-45351680
-45353325
-45354067
-45354137
-45354219
-45354289
-45354290
-45354291
-45354292
-45355361
-45356900
-45356902
-45357909
-45359057
-45359104
-45359152
-45359153
-45359172
-45359404
-45359407
-45362747
-45351680
-45353325
-45354067
-45354137
-45354219
-45354289
-45354290
-45354291
-45354292
-45355361
-45356900
-45356902
-45357909
-45359057
-45359104
-45359152
-45359153
-45359172
-45359404
-45359407
-45362747"
 
 overide_spoof=""
 spoof_message=""

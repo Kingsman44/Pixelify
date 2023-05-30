@@ -39,6 +39,15 @@ set_device_config() {
     done <$MODDIR/deviceconfig.txt
 }
 
+update_sql() {
+    while read p; do
+        if [ ! -z "$(echo $p)" ]; then
+            $sqlite $gms "$p"
+        fi
+    done <$MODDIR/sql.txt 
+    rm -rf $MODDIR/sql.txt   
+}
+
 log() {
     date=$(date +%y/%m/%d)
     tim=$(date +%H:%M:%S)
@@ -227,6 +236,8 @@ else
     settings put secure show_qr_code_scanner_setting true
     set_device_config
 
+    [ -f $MODDIR/sql.txt ] && update_sql
+    
     patch_gboard
     am force-stop com.google.android.dialer com.google.android.inputmethod.latin
 
@@ -251,6 +262,9 @@ else
             pl_fix
         fi
         rm -rf $MODDIR/first
+    fi
+    if [ -f $MODDIR/photos_patch ]; then
+        sed -i -e 's/com.google.android.feature.PIXEL_2021_EXPERIENCE/com.google.android.feature.PIXEL_2024_EXPERIENCE/g' $PHOTOS_APK
     fi
 fi
 
