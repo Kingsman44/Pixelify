@@ -14,11 +14,11 @@ using zygisk::ServerSpecializeArgs;
 
 // Spoofing apps
 static std::vector<std::string> P1 = {"com.google.android.apps.photos", "com.google.ar.core", "com.google.vr.apps.ornament"};
-static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.apps.wearables.maestro.companion", "com.nothing.smartcenter","com.google.android.googlequicksearchbox:interactor"};
-static std::vector<std::string> P6 = {"com.google"};
-static std::vector<std::string> P7 = {"com.google.pixel.livewallpaper", "com.google.android.apps.subscriptions.red", "com.breel.wallpaper", "com.snapchat.android", "com.google.android.gms", "com.google.android.googlequicksearchbox","com.google.process.gapps","com.google.process.gservices"};
+static std::vector<std::string> P5 = {"com.google.android.tts", "com.google.android.apps.wearables.maestro.companion", "com.nothing.smartcenter","com.google.android.gms"};
+static std::vector<std::string> P6 = {"com.google","com.android.vending"};
+static std::vector<std::string> P7 = {"com.google.pixel.livewallpaper", "com.google.android.apps.subscriptions.red", "com.breel.wallpaper", "com.snapchat.android", "com.google.android.googlequicksearchbox","com.google.process.gapps","com.google.process.gservices"};
 static std::vector<std::string> PFold = {"com.google.android.apps.subscriptions.red"};
-static std::vector<std::string> keep = {"com.google.android.apps.recorder", "com.google.android.GoogleCamera", "com.google.android.apps.motionsense.bridge", "com.google.android.gms.chimera", "com.google.android.gms.update", "com.android.camera", "com.google.android.xx", "com.google.android.googlequicksearchbox:HotwordDetectionService","com.google.android.as:nonpersistent","com.google.android.apps.mesagging:rcs","com.google.android.googlequicksearchbox:assistant"};
+static std::vector<std::string> keep = {"com.google.android.apps.recorder", "com.google.android.GoogleCamera", "com.google.android.apps.motionsense.bridge", "com.google.android.gms.chimera", "com.google.android.gms.update", "com.android.camera", "com.google.android.xx", "com.google.android.googlequicksearchbox:HotwordDetectionService","com.google.android.apps.mesagging:rcs"};
 
 // Fingerprint
 const char P1_FP[256] = "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys";

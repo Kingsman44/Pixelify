@@ -193,6 +193,7 @@ fi
 
 # Clean up old logs
 rm -rf $logfile
+rm -rf $flaglogfile
 
 # Logs initial format
 echo "=============
@@ -253,7 +254,7 @@ if [ $ENABLE_OSR -eq 1 ] || [ $DOES_NOT_REQ_SPEECH_PACK -eq 1 ]; then
 fi
 
 # Fetch Security patch and Build Date of ROM
-sec_patch=$(date -d $(getprop ro.build.version.security_patch)  +%s)
+sec_patch=$(date -d $(getprop ro.build.version.security_patch) +%s)
 build_date=$(getprop ro.build.date.utc)
 
 # USE Recents fix Pixel Launcher for Android 13
@@ -261,51 +262,33 @@ if [ $API -eq 33 ]; then
     LOS_FIX=1
 fi
 
-# Fetch Pixel Launcher Version required
-NEW_PL=0
-
 # Set Does Pixel Launcher Requires new Package
 if [ $API -eq 31 ]; then
     # Check if the security patch is greater than or equal to December 2021
     if [ $sec_patch -ge $(date -d 2021-12-01 +%s) ]; then
-        NEW_PL=1
+        PL_VERSION="dec_2021"
     fi
-elif [ $API -ge 32 ]; then
-    NEW_PL=1
-fi
-
-# Set Does Pixel Launcher Requires June Package
-if [ $API -eq 32 ]; then
-    # Check if the security patch is greater than or equal to June 2022
+elif [ $API -eq 32 ]; then
     if [ $sec_patch -ge $(date -d 2022-06-01 +%s) ] || [ $build_date -ge $(date -d 2022-06-01 +%s) ]; then
-        NEW_JN_PL=1
-        NEW_PL=0
+        PL_VERSION="jun_2022"
     fi
-fi
-
-NEW_M_PL=0
-
-# Set Does Pixel Launcher Requires December 22 or May 23 package
-if [ $API -ge 33 ]; then
-    if [ $sec_patch -ge $(date -d 2023-05-01 +%s) ] || [ $build_date -ge $(date -d 2023-05-01 +%s) ]; then
-        NEW_M_PL=1
+elif [ $API -eq 33 ]; then
+    if [ $sec_patch -ge $(date -d 2023-08-01 +%s) ] || [ $build_date -ge $(date -d 2023-08-01 +%s) ]; then
+        PL_VERSION="aug_2023"
+    elif [ $sec_patch -ge $(date -d 2023-07-01 +%s) ] || [ $build_date -ge $(date -d 2023-07-01 +%s) ]; then
+        PL_VERSION="jul_2023"
+    elif [ $sec_patch -ge $(date -d 2023-05-01 +%s) ] || [ $build_date -ge $(date -d 2023-05-01 +%s) ]; then
+        PL_VERSION="may_2023"
     elif [ $sec_patch -ge $(date -d 2022-12-01 +%s) ] || [ $build_date -ge $(date -d 2022-12-01 +%s) ]; then
-        NEW_D_PL=1
+        PL_VERSION="dec_2022"
     fi
 fi
 
-# Set logs for Pixel launcher package type
-if [ $NEW_M_PL -eq 1 ]; then
-    echo "- Pixel Launcher version required: A13 May" >>$logfile
-elif [ $NEW_D_PL -eq 1 ]; then
-    echo "- Pixel Launcher version required: A13 December" >>$logfile
-elif [ $NEW_JN_PL -eq 1 ]; then
-    echo "- Pixel Launcher version required: A12L Jun" >>$logfile
-elif [ $NEW_PL -eq 1 ]; then
-    echo "- Pixel Launcher version required: New" >>$logfile
-else
-    echo "- Pixel Launcher version required: Normal" >>$logfile
+if [ $LOS_FIX -eq 1 ]; then
+    PL_VERSION="los_$PL_VERSION"
 fi
+
+echo "- Pixel Launcher version required for sdk $API: $PL_VERSION" >>$logfile
 
 #save device info in logs
 echo "
@@ -318,13 +301,21 @@ Magisk version: $MAGISK_VER_CODE
 " >>$logfile
 
 # Set version and size when Pixelify is launcher (used when device doesn't use internet)
-if [ $API -eq 33 ]; then
+if [ $API -eq 34 ]; then
+    echo "Android version: 14" >>$logfile
+    WNEED=1
+    DPSIZE="33 Mb"
+    WSIZE="6 Mb"
+    PLSIZE="11 Mb"
+    DPVERSIONP=1
+    PLVERSIONP=1
+elif [ $API -eq 33 ]; then
     echo "Android version: 13" >>$logfile
     WNEED=1
-    DPSIZE="52 Mb"
+    DPSIZE="35 Mb"
     WSIZE="2.2 Mb"
     PLSIZE="11 Mb"
-    DPVERSIONP=2.6
+    DPVERSIONP=3.6
     PLVERSIONP=1
 elif [ $API -eq 32 ]; then
     echo "Android version: 12.1 (12L)" >>$logfile
@@ -372,6 +363,8 @@ elif [ $API -eq 28 ]; then
     DPVERSIONP=1
     WNEED=1
 fi
+WLPVERSIONP=1
+WLPSIZE="3 Mb"
 
 # Fetch latest version
 fetch_version
@@ -383,6 +376,7 @@ LWVERSION=$(cat $pix/pixel.txt)
 DPVERSION=$(cat $pix/dp.txt)
 PCSVERSION=$(cat $pix/pcs.txt)
 PLVERSION=$(cat $pix/pl-$API.txt)
+WLPVERSION=$(cat $pix/wlp-$API.txt)
 
 # Fixes for Pixel 4 devices, it gets hang when Android System intelligence gets spoofed to another pixel
 if [ "$(getprop ro.product.vendor.name)" == "coral" ] || [ "$(getprop ro.product.vendor.name)" == "flame" ]; then
@@ -430,6 +424,7 @@ print "- Detected Arch: $ARCH"
 print "- Detected SDK : $API"
 RAM=$(grep MemTotal /proc/meminfo | tr -dc '0-9')
 print "- Detected Ram: $RAM"
+check_rom_type
 print ""
 
 # remove pinning of Google camera, as it is not recommended to use for device less than 6gb ram
@@ -571,14 +566,12 @@ if [ $TENSOR -eq 1 ]; then
         rm -rf $MODPATH/zygisk $MODPATH/zygisk_1
     fi
 
-# If Installation mode is Zygisk or Riru, Drop PIXEL_EXPERIENCES to support unlimited storage 
+# If Installation mode is Zygisk or Riru, Drop PIXEL_EXPERIENCES to support unlimited storage
 elif [ $MODULE_TYPE -eq 2 ] || [ $MODULE_TYPE -eq 3 ]; then
     echo "- Enabling Unlimited storage" >>$logfile
-    if [ $TARGET_USE_GPHOTOS_FUNC_OVERRIDE -eq 0 ]; then
-        drop_sys
-    fi
+    drop_sys
 else
-# As there is No option for Particular apps spooifng with zygsik or Riru, go with legacy one
+    # As there is No option for Particular apps spooifng with zygsik or Riru, go with legacy one
     print "  Do you want to Spoof your device to Pixel 5/Pixel 6 Pro?"
     print "   Vol Up += Yes"
     print "   Vol Down += No"
@@ -666,7 +659,7 @@ if [ $DPAS -eq 1 ]; then
                     echo " - Downloading and installing new backup for Android System Intelligence" >>$logfile
                     cd $MODPATH/files
                     rm -rf /sdcard/Pixelify/backup/dp-$API.tar.xz /sdcard/Pixelify/backup/dp-net-$API.tar.xz /sdcard/Pixelify/version/dp.txt /sdcard/Pixelify/version/dp-$API.txt
-                    # Fetch and download Android system Intelligence 
+                    # Fetch and download Android system Intelligence
                     if [ $API -eq 31 ] || [ $API -eq 32 ]; then
                         $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-31.tar.xz -o dp-$API.tar.xz &>/proc/self/fd/$OUTFD
                     elif [ $API -ge 33 ]; then
@@ -696,7 +689,7 @@ if [ $DPAS -eq 1 ]; then
         #now_playing
         print "- Installing Android System Intelligence"
         print ""
-        # Copy Android System Intelligence overlay to grant default permissions 
+        # Copy Android System Intelligence overlay to grant default permissions
         cp -f $MODPATH/files/PixelifyDPS.apk $MODPATH/system/product/overlay/PixelifyDPS.apk
         tar -xf /sdcard/Pixelify/backup/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
         echo dp-$API >$pix/app2.txt
@@ -718,7 +711,7 @@ if [ $DPAS -eq 1 ]; then
                 echo " - Downloading and installing Android System Intelligence" >>$logfile
                 print ""
                 cd $MODPATH/files
-                # Fetch and download Android System intelligence 
+                # Fetch and download Android System intelligence
                 if [ $API -eq 31 ] || [ $API -eq 32 ]; then
                     $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-31.tar.xz -o dp-$API.tar.xz &>/proc/self/fd/$OUTFD
                 elif [ $API -ge 33 ]; then
@@ -733,7 +726,7 @@ if [ $DPAS -eq 1 ]; then
                 # copy Android system intelligence overlay to give defualt permissions
                 cp -f $MODPATH/files/PixelifyDPS.apk $MODPATH/system/product/overlay/PixelifyDPS.apk
 
-                # Extract Android system Intelligence 
+                # Extract Android system Intelligence
                 tar -xf $MODPATH/files/dp-$API.tar.xz -C $MODPATH/system$product/priv-app
                 echo dp-$API >$pix/app2.txt
 
@@ -956,6 +949,12 @@ if [ -d /data/data/$DIALER ]; then
         #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer'"
         if [ $ISEN_US -eq 1 ]; then
             db_edit com.google.android.dialer boolVal 1 $CALL_SCREEN_FLAGS $DIALERFLAGS $CS_REV
+            db_edit com.google.android.dialer.directboot#com.google.android.dialer boolVal 1 "45381881"
+            db_edit com.google.android.dialer.directboot#com.google.android.dialer intVal 1 "45409315"
+            db_edit com.google.android.dialer.directboot#com.google.android.dialer intVal 2 "45414559"
+            #db_edit com.google.android.dialer.directboot#com.google.android.dialer stringVal "SPAM_FILTER_DISCLOSURE_17" 45399401
+            #db_edit com.google.android.dialer.directboot#com.google.android.dialer stringVal "SPAM_FILTER_LEAVE_MESSAGE_DEFAULT_VARIANT" 45415110
+            db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45381883 $DOBBYCONFIG
         else
             db_edit com.google.android.dialer boolVal 1 $CALL_SCREEN_FLAGS $DIALERFLAGS $CS_LANG
         fi
@@ -970,11 +969,16 @@ if [ -d /data/data/$DIALER ]; then
         # $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer' AND name='atlas_enabled_business_number_country_codes'"
         # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.dialer', '', 'atlas_enabled_business_number_country_codes', 0, x'$ATSBIN', 0)"
         db_edit_bin com.google.android.dialer G__atlas_mdd_ph_config $ATLASBIN
+        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45413189 $ATLASBIN
+        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45402582 $TKBIN
         db_edit_bin com.google.android.dialer Xatu__lp_preferences $XATUBIN
         db_edit_bin com.google.android.dialer atlas_enabled_business_number_country_codes $ATSBIN
+        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45413213 $ATSBIN
         db_edit_bin com.google.android.dialer Revelio__supported_voices $REVBIN
         [ $ISEN_US -eq 0 ] && db_edit_bin com.google.android.dialer CallScreenI18n__call_screen_i18n_config $CSBIN
         db_edit_bin com.google.android.dialer G__tk_mdd_ph_config $TKBIN
+        db_edit_bin com.google.android.dialer model_download_group_config $XATUCONFIGBIN
+        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45417183 $XATUCONFIGBIN
         # Patching Ends
 
         # Install language pack
@@ -1079,11 +1083,11 @@ if [ -d /data/data/$DIALER ]; then
         cp -r $MODPATH/files/callrec/* /data/data/com.google.android.dialer/files/callrecordingprompt
 
         # Updated patched com.google.android.dialer
-        mkdir -p /data/data/com.google.android.dialer/files/phenotype
-        chmod 0500 /data/data/com.google.android.dialer/files/phenotype
-        cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
-        chmod 0660 /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
-        am force-stop $DIALER
+        # mkdir -p /data/data/com.google.android.dialer/files/phenotype
+        # chmod 0500 /data/data/com.google.android.dialer/files/phenotype
+        # cp -Tf $MODPATH/files/$DIALER $MODPATH/$DIALER
+        # chmod 0660 /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+        # am force-stop $DIALER
 
         # make Google dialer as system app
         if [ -z $(pm list packages -s $DIALER) ] && [ ! -f /data/adb/modules/Pixelify/system/product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
@@ -1092,17 +1096,17 @@ if [ -d /data/data/$DIALER ]; then
             print "- Making Google Dialer a system app"
             echo " - Making Google Dialer a system app" >>$logfile
             print ""
-            cp -r ~/$app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
+            cp -r $app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
             rm -rf $MODPATH/system$product/priv-app/GoogleDialer/oat
         # Remake google dialer as system app if Pixelify made it system app
-        elif [ -f /data/adb/modules/Pixelify/system/product/app/GoogleDialer/GoogleDialer.apk ]; then
+        elif [ -f /data/adb/modules/Pixelify/system$product/priv-app/GoogleDialer/GoogleDialer.apk ]; then
             print ""
             print "- Google Dialer is not installed as a system app !!"
             print "- Making Google Dialer a system app"
             echo " - Making Google Dialer a system app" >>$logfile
             print ""
-            cp -r ~/$app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
+            cp -r $app/com.google.android.dialer*/. $MODPATH/system$product/priv-app/GoogleDialer
             mv $MODPATH/system$product/priv-app/GoogleDialer/base.apk $MODPATH/system$product/priv-app/GoogleDialer/GoogleDialer.apk
             rm -rf $MODPATH/system$product/priv-app/GoogleDialer/oat
         fi
@@ -1243,6 +1247,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
         db_edit com.google.android.googlequicksearchbox stringVal "Cheetah" "13477"
         #db_edit com.google.android.googlequicksearchbox boolVal 1  10579 11627 14759 15114 16197 16347 16464 45351462 45352335 45353388 45353425 45354090 45355242 45355425 45357281 45357460 45357462 45357463 45357466 45357467 45357468 45357469 45357470 45357471 45357508 45358425 45368123 45368150 45368483 45374247 45375269 45386105 8674 9449 10596 3174 45357539 45358426 45360742 45372547 45372935 45373820 45374858 45376106 45380073 45380867 45385075 45385287 45386702 7882 8932 9418
         [ $TENSOR -eq 0 ] && db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
+        db_edit com.google.android.libraries.search.googleapp.device#com.google.android.googlequicksearchbox boolVal 1 45410632 45410315 45369077
         db_edit_bin com.google.android.apps.search.assistant.device#com.google.android.googlequicksearchbox 45377874 $GSPOOF
         #sed -i -e 's/com.google.android.feature.PIXEL_2021_EXPERIENCE/com.google.android.feature.PIXEL_2019_EXPERIENCE/g' $VELVET_APK
         #am force-stop com.google.android.googlequicksearchbox
@@ -1279,11 +1284,11 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
             print "- Making Google a system app"
             echo " - Making Google a system app" >>$logfile
             print ""
-            if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
-                cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
+            if [ -f $app/com.google.android.googlequicksearchbox*/base.apk ]; then
+                cp -r $app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
                 mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
             else
-                cp -r ~/data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
+                cp -r /data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
             fi
             rm -rf $MODPATH/system/product/priv-app/Velvet/oat
             #mv $MODPATH/files/privapp-permissions-com.google.android.googlequicksearchbox.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.googlequicksearchbox.xml
@@ -1295,11 +1300,11 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
                 print "- Making Google a system app"
                 echo " - Making Google a system app" >>$logfile
                 print ""
-                if [ -f /$app/com.google.android.googlequicksearchbox*/base.apk ]; then
-                    cp -r ~/$app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
+                if [ -f $app/com.google.android.googlequicksearchbox*/base.apk ]; then
+                    cp -r $app/com.google.android.googlequicksearchbox*/. $MODPATH/system/product/priv-app/Velvet
                     mv $MODPATH/system/product/priv-app/Velvet/base.apk $MODPATH/system/product/priv-app/Velvet/Velvet.apk
                 else
-                    cp -r ~/data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
+                    cp -r data/adb/modules/Pixelify/system$product/priv-app/Velvet/. $MODPATH/system$product/priv-app/Velvet
                 fi
                 rm -rf $MODPATH/system/product/priv-app/Velvet/oat
             fi
@@ -1373,7 +1378,7 @@ if [ $API -ge 28 ]; then
             pm enable -n com.google.pixel.livewallpaper/com.google.pixel.livewallpaper.pokemon.wallpapers.PokemonWallpaper -a android.intent.action.MAIN &>/dev/null
             mkdir -p $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64
             cp -f $MODPATH/system$product/lib64/libgdx.so $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64/libgdx.so
-            install_wallpaper
+            install_wallpaper_with_backup
             WALL_DID=1
         else
             echo " - Using old backup Pixel Wallpapers" >>$logfile
@@ -1431,7 +1436,7 @@ if [ $API -ge 28 ]; then
                 pm enable -n com.google.pixel.livewallpaper/com.google.pixel.livewallpaper.pokemon.wallpapers.PokemonWallpaper -a android.intent.action.MAIN &>/dev/null
                 mkdir -p $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64
                 cp -f $MODPATH/system$product/lib64/libgdx.so $MODPATH/system$product/app/WallpapersBReel2020/lib/arm64/libgdx.so
-                install_wallpaper
+                install_wallpaper_with_backup
                 WALL_DID=1
             else
                 print " ! No internet detected"
@@ -1557,27 +1562,8 @@ if [ $API -ge 29 ]; then
                         rm -rf /sdcard/Pixelify/backup/pl-$API.tar.xz
                         rm -rf /sdcard/Pixelify/version/pl-$API.txt
                         cd $MODPATH/files
-                        if [ $API -eq 33 ] && [ $NEW_M_PL -eq 1 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-m-33.tar.xz -O &>/proc/self/fd/$OUTFD
-                            mv pl-m-33.tar.xz pl-$API.tar.xz
-                        elif [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
-                            mv pl-d-los-33.tar.xz pl-$API.tar.xz
-                        elif [ $API -eq 33 ] && [ $NEW_D_PL -eq 1 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                            mv pl-d-new-$API.tar.xz pl-d-$API.tar.xz
-                        elif [ $LOS_FIX -eq 1 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
-                            mv pl-los-33.tar.xz pl-$API.tar.xz
-                        elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-32.tar.xz -O &>/proc/self/fd/$OUTFD
-                            mv pl-j-new-$API.tar.xz pl-$API.tar.xz
-                        elif [ $NEW_PL -eq 1 ]; then
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                            mv pl-new-$API.tar.xz pl-$API.tar.xz
-                        else
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                        fi
+                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/PixelLauncher/$API/$PL_VERSION.tar.xz -O &>/proc/self/fd/$OUTFD
+                        mv $PL_VERSION.tar.xz pl-$API.tar.xz
                         cd /
                         print "- Creating Backup"
                         print ""
@@ -1604,7 +1590,7 @@ if [ $API -ge 29 ]; then
             fi
 
             if [ $WALL_DID -eq 0 ]; then
-                install_wallpaper
+                install_wallpaper_with_backup
             fi
         else
             echo " - Skipping Pixel Launcher" >>$logfile
@@ -1625,24 +1611,8 @@ if [ $API -ge 29 ]; then
                 echo " - Downloading and Installing Pixel Launcher" >>$logfile
                 print ""
                 cd $MODPATH/files
-                if [ $API -eq 33 ] && [ $LOS_FIX -eq 1 ] && [ $NEW_D_PL -eq 1 ]; then
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
-                    mv pl-d-los-33.tar.xz pl-$API.tar.xz
-                elif [ $API -eq 33 ] && [ $NEW_D_PL -eq 1 ]; then
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-d-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                    mv pl-d-new-$API.tar.xz pl-d-$API.tar.xz
-                elif [ $LOS_FIX -eq 1 ]; then
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-los-33.tar.xz -O &>/proc/self/fd/$OUTFD
-                    mv pl-los-33.tar.xz pl-$API.tar.xz
-                elif [ $NEW_JN_PL -eq 1 ] && [ $API -eq 32 ]; then
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-j-new-32.tar.xz -O &>/proc/self/fd/$OUTFD
-                    mv pl-j-new-$API.tar.xz pl-$API.tar.xz
-                elif [ $NEW_PL -eq 1 ]; then
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                    mv pl-new-$API.tar.xz pl-$API.tar.xz
-                else
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pl-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                fi
+                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/PixelLauncher/$API/$PL_VERSION.tar.xz -O &>/proc/self/fd/$OUTFD
+                mv $PL_VERSION.tar.xz pl-$API.tar.xz
                 cd /
                 print ""
                 print "- Installing Pixel Launcher"
@@ -1673,7 +1643,7 @@ if [ $API -ge 29 ]; then
                 fi
 
                 if [ $WALL_DID -eq 0 ]; then
-                    install_wallpaper
+                    install_wallpaper_with_backup
                 fi
             else
                 print " ! No internet detected"
@@ -1811,7 +1781,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         print "- GBoard is not installed as a system app !!"
         print "- Making Gboard a system app"
         echo " - Making Google Keyboard a system app" >>$logfile
-        cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
+        cp -r $app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         #mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
@@ -1820,7 +1790,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         print "- GBoard is not installed as a system app !!"
         echo " - Making Google Keyboard as system app" >>$logfile
         print "- Making Gboard a system app"
-        cp -r ~/$app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
+        cp -r $app/com.google.android.inputmethod.latin*/. $MODPATH/system/product/app/LatinIMEGooglePrebuilt
         mv $MODPATH/system/product/app/LatinIMEGooglePrebuilt/base.apk $MODPATH/system/product/app/LatinIMEGooglePrebuilt/LatinIMEGooglePrebuilt.apk
         rm -rf $MODPATH/system/product/app/LatinIMEGooglePrebuilt/oat
         #mv $MODPATH/files/privapp-permissions-com.google.android.inputmethod.latin.xml $MODPATH/system/product/etc/permissions/privapp-permissions-com.google.android.inputmethod.latin.xml
@@ -1849,22 +1819,60 @@ ui_print " - Patching GMS flags to enable features"
 ui_print " - This may take a minute or two"
 
 # Android System Intelligence
-#$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services'"
+$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name LIKE 'Echo__search_%'"
 db_edit com.google.android.platform.device_personalization_services boolVal 1 $ASI_FLAGS
-#db_edit com.google.android.platform.launcher boolVal 1 "ENABLE_QUICK_LAUNCH_V2" "GBOARD_UPDATE_ENTER_KEY" "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
+db_edit com.google.android.platform.launcher boolVal 1 "enable_quick_launch_v2" "ENABLE_QUICK_LAUNCH_V2" "GBOARD_UPDATE_ENTER_KEY" "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
 #db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR "Translate__enable_opmv4_service" "VisualCortex__enable_control_system"
 if [ $TENSOR -eq 0 ]; then
     db_edit_bin com.google.android.platform.device_personalization_services SpeechPack__downloadable_language_packs_raw $ASIBIN
 # $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='SpeechPack__downloadable_language_packs_raw'"
 # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', 'SpeechPack__downloadable_language_packs_raw', 0, x'$ASIBIN', 0)"
 fi
+db_edit_bin com.google.android.platform.device_personalization_services WallpaperEffects__cinematic_models_mdd_manifest_config $WLPEFFECTCONFIG
+#Translate
+db_edit com.google.android.platform.device_personalization_services stringVal "com.google.android.talk" "Translate__app_blocklist"
+db_edit com.google.android.platform.device_personalization_services stringVal "en,fr,it,de,ja,es" Translate__audio_to_text_language_list
+db_edit com.google.android.platform.device_personalization_services stringVal "ja" "Translate__beta_audio_to_text_languages_in_live_caption"
+db_edit com.google.android.platform.device_personalization_services boolVal 1 "Translate__blue_chip_translate_enabled"
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__characterset_lang_detection_enabled
+db_edit com.google.android.platform.device_personalization_services stringVal "de,en,es,fr,it,ja,hi,zh,ru,pl,pt,ko,th,tr,nl,zh_Hant,sv,da,vi,ar,fa" Translate__chat_translate_languages
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__copy_to_translate_enabled
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__differentiate_simplified_and_traditional_chinese
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__disable_session_state
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__disable_translate_without_system_animation
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_chronicle_migration
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_default_langid_model
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_dictionary_langid_detection
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_language_profile_quick_update
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_nextdoor
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__enable_opmv4_service
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_spa_setting
+db_edit com.google.android.platform.device_personalization_services stringVal "af,ar,be,bg,bn,ca,cs,cy,da,de,el,eo,es,et,fa,fi,fr,ga,gl,hi,hr,ht,hu,id,is,it,ja,ko,lt,lv,mk,mr,ms,mt,nl,no,pl,pt,ro,ru,sk,sl,sq,sv,sw,ta,te,th,tl,tr,uk,ur,vi,zh,en" Translate__image_to_text_language_list
+db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" Translate__interpreter_source_languages
+db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" Translate__interpreter_target_languages
+db_edit com.google.android.platform.device_personalization_services stringVal "de,en,fr,it,ja,es" Translate__live_captions_translate_languages
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__replace_auto_translate_copied_text_enabled SimpleStorage__disable_live_translate_dao_provider
+db_edit com.google.android.platform.device_personalization_services stringVal "vi,ja,fa,ro,nl,mr,mt,ar,ms,it,eo,is,et,es,iw,zh,uk,af,id,ur,mk,cy,hi,el,be,pt,lt,hr,lv,hu,ht,te,de,bg,th,bn,tl,pl,tr,kn,sv,gl,ko,sw,cs,da,ta,gu,ka,sl,ca,sk,ga,sq,no,fi,ru,fr,en,zh_Hant,fil" Translate__text_to_text_language_list
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__translation_service_enabled
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__translator_expiration_enabled
+db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__use_translate_kit_streaming_api
+db_edit com.google.android.platform.device_personalization_services stringVal "https://www.gstatic.com/safecomms/superpacks/manifests/phishing-5.json" Safecomms__hades_config_url
+db_edit com.google.android.platform.device_personalization_services stringVal "en-US;en-GB;en-CA;en-IE;en-AU;en-SG;en-IN;fr-FR;fr-CA;fr-BE;fr-CH;it-IT;it-CH;de-DE;de-AT;de-BE;de-CH;ja-JP;es-ES;es-US" Captions__available_for_download Captions__supported_languages
+db_edit com.google.android.platform.device_personalization_services intVal 20221227 Captions__new_model_version_advanced
+db_edit com.google.android.platform.device_personalization_services intVal 20210623 Captions__new_model_version
+db_edit com.google.android.platform.device_personalization_services intVal 20200112 Captions__model_version_v1_2
+db_edit com.google.android.platform.device_personalization_services intVal 20190613 Captions__model_version_v1
+db_edit com.google.android.platform.device_personalization_services stringVal "https://storage.googleapis.com/captions/%{NAMESPACE}_%{VERSION}_manifest.json" Captions__manifest_url_template
 
 # Digital Wellbeing
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
 db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget" "HatsSurveys__enable_testing_mode" "WindDown__enable_wallpaper_dimming" "WalkingDetection__enable_outdoor_detection_v2" "Clockshine__enable_sleep_detection" "Clockshine__show_sleep_insights_screen" "Clockshine__show_manage_data_screen" "WebsiteUsage__display_website_usage"
 
 # Google messages
-db_edit com.google.android.apps.messaging#com.google.android.apps.messaging boolVal 1  "bugle_phenotype__enable_additional_functionalities_for_magic_compose" "bugle_phenotype__enable_combined_magic_compose" "bugle_phenotype__enable_magic_compose_view" "bugle_phenotype__magic_compose_enabled_in_xms"
+db_edit com.google.android.apps.messaging#com.google.android.apps.messaging boolVal 1 "bugle_phenotype__enable_additional_functionalities_for_magic_compose" "bugle_phenotype__enable_combined_magic_compose" "bugle_phenotype__enable_magic_compose_view" "bugle_phenotype__magic_compose_enabled_in_xms" "45414981" "bugle_phenotype__enable_home_screen_redesign"
+
+# Google Contacts
+db_edit com.google.android.contacts#com.google.android.contacts boolVal 1 "45402053"
 
 # Google translate
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.translate'"
@@ -1876,14 +1884,45 @@ db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__e
 
 # Fix Precise Location
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
-db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled"
+db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
 
 # Live Wallpapers
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
 db_edit com.google.pixel.livewallpaper stringVal "" DownloadableWallpaper__blocking_module_list
 
+#turbo
+db_edit com.google.android.apps.turbo boolVal 1 $TURBO_FLAGS
+
 # Google Recorder
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder#com.google.android.apps.recorder'"
+
+# Calendar New widget Theme
+db_edit com.google.android.calendar boolVal 1 "Gm3Widget_Enabled"
+
+# Google cast
+db_edit com.google.android.gms.cast boolVal 1 $CAST_FLAGS
+
+# Qr Code
+db_edit com.google.android.gms.vision boolVal 1 $QR_SCANNER_FLAGS
+
+# Fitness
+db_edit com.google.android.gms.fitness boolVal 1 $FITNESS_FLAGS
+
+# Google Keep
+db_edit com.google.android.keep#com.google.android.keep boolVal 1 45372155 45357152
+
+# Google Play Store
+db_edit com.google.android.finsky.regular boolVal 1 RetailMode__is_force_enabled
+db_edit com.google.android.finsky.stable boolVal 1 RetailMode__is_force_enabled MaterialNextDynamicTheming__killswitch_dynamic_theming_bottomnavbar_flag
+
+# Google Text to speech
+#db_edit com.google.android.tts#com.google.android.tts boolVal 1 $
+
+# Google Phenotype
+db_edit com.google.android.gms.phenotype boolVal 1 PhenotypeFeature__allow_gmscore_to_override_flags
+
+# Google multidevice
+db_edit com.google.android.gms.multideice#com.google.android.gms boolVal 1 MultideviceSettingsConfig__enable_link_your_devices
 
 # System
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.systemui'"
@@ -1976,7 +2015,8 @@ rm -rf $MODPATH/inc.prop
 mkdir -p $PIXELIFYUNS
 mv $MODPATH/module-uninstaller.prop $PIXELIFYUNS/module.prop
 mv $MODPATH/service-uninstaller.sh $PIXELIFYUNS/service.sh
-mv $MODPATH/flags.txt $PIXELIFYUNS/sql.txt
+cp -r $MODPATH/flags_* $PIXELIFYUNS
+rm -rf $MODPATH/flags_*
 cp -f $MODPATH/deviceconfig.txt $PIXELIFYUNS/deviceconfig.txt
 cp -f $MODPATH/utils.sh $PIXELIFYUNS/utils.sh
 cp -f $MODPATH/vars.sh $PIXELIFYUNS/vars.sh

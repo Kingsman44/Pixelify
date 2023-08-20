@@ -5,6 +5,7 @@
 # This will make sure your module will still work
 # if Magisk change its mount point in the future
 MODDIR=${0%/*}
+MODPATH=$MODDIR
 
 . $MODDIR/vars.sh
 . $MODDIR/utils.sh
@@ -40,12 +41,43 @@ set_device_config() {
 }
 
 update_sql() {
-    while read p; do
-        if [ ! -z "$(echo $p)" ]; then
-            $sqlite $gms "$p"
+    for folder in "flag_boolVal" "flag_stringVal" "flag_intVal" "flag_floatVal"; do
+        if [ -d $MODPATH/$folder ]; then
+            type="$(echo $folder | cut -d_ -f2)"
+            names=$(ls $MODPATH/$folder)
+            for name in $names; do
+                flags=$(ls $MODPATH/$folder/$name)
+                for flag in $flags; do
+                    value="$(cat $MODPATH/$folder/$name/$flag)"
+                    rm -rf $MODPATH/$folder/$name/$flag
+                    db_edit "$name" "$type" "$value" "$flag"
+                done
+                if [ -z "$(ls $MODPATH/$folder/$name)" ]; then
+                    rm -rf $MODPATH/$folder/$name
+                fi
+            done
+            if [ -z "$(ls $MODPATH/$folder)" ]; then
+                rm -rf $MODPATH/$folder
+            fi
         fi
-    done <$MODDIR/sql.txt 
-    rm -rf $MODDIR/sql.txt   
+    done
+    if [ -d $MODPATH/flag_bin ]; then
+        names=$(ls $MODPATH/flag_bin)
+        for name in $names; do
+            flags=$(ls $MODPATH/flag_bin/$name)
+            for flag in $flags; do
+                value="$(cat $MODPATH/flag_bin/$name/$flag)"
+                rm -rf $MODPATH/flag_bin/$name/$flag
+                db_edit_bin "$name" "$flag" "$value"
+            done
+            if [ -z "$(ls $MODPATH/flag_bin/$name)" ]; then
+                rm -rf $MODPATH/flag_bin/$name
+            fi
+        done
+        if [ -z "$(ls $MODPATH/flag_bin)" ]; then
+            rm -rf $MODPATH/flag_bin
+        fi
+    fi
 }
 
 log() {
@@ -195,7 +227,7 @@ else
     fi
 
     # Call Screening
-    cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+    #cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
     # copy bootlogs to Pixelify folder if bootloop happened.
     [ -f /data/adb/modules/Pixelify/boot_logs.txt ] && rm -rf /sdcard/Pixelify/boot_logs.txt && mv /data/adb/modules/Pixelify/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
 
@@ -210,12 +242,12 @@ else
     gacc="$(ls /data/data/com.google.android.gms/databases | grep portable_geller | cut -d_ -f3)"
     db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
 
-    if [ $(grep CallScreen $MAINDIR/var.prop | cut -d'=' -f2) -eq 1 ]; then
-        mkdir -p /data/data/com.google.android.dialer/files/phenotype
-        cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
-        chmod 500 /data/data/com.google.android.dialer/files/phenotype
-        am force-stop com.google.android.dialer
-    fi
+    # if [ $(grep CallScreen $MAINDIR/var.prop | cut -d'=' -f2) -eq 1 ]; then
+    #     mkdir -p /data/data/com.google.android.dialer/files/phenotype
+    #     cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
+    #     chmod 500 /data/data/com.google.android.dialer/files/phenotype
+    #     am force-stop com.google.android.dialer
+    # fi
 
     if [ $(grep Live $MAINDIR/var.prop | cut -d'=' -f2) -eq 1 ]; then
         pm enable -n com.google.pixel.livewallpaper/com.google.pixel.livewallpaper.pokemon.wallpapers.PokemonWallpaper -a android.intent.action.MAIN
@@ -232,12 +264,16 @@ else
     am broadcast -a grpc.io.action.BIND -n com.google.android.googlequicksearchbox/com.google.android.apps.search.assistant.surfaces.dictation.service.endpoint.AssistantDictationService
     am force-stop com.google.android.settings.intelligence
 
+    $sqlite /data/data/com.google.android.as/databases/superpacks.db "UPDATE pending_downloads SET requires_idle='0'"
+    $sqlite /data/data/com.google.android.as/databases/superpacks.db "UPDATE pending_downloads SET requires_charging='0'"
+    $sqlite /data/data/com.google.android.as/databases/superpacks.db "UPDATE pending_downloads SET requires_unmetered_network='0'"
+
     settings put global settings_enable_clear_calling true
     settings put secure show_qr_code_scanner_setting true
     set_device_config
 
-    [ -f $MODDIR/sql.txt ] && update_sql
-    
+    update_sql
+
     patch_gboard
     am force-stop com.google.android.dialer com.google.android.inputmethod.latin
 

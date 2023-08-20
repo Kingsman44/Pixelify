@@ -77,6 +77,15 @@ BACKUP_OSR=1
 # Download Styles and Wallpapers
 DOWN_WGA=0
 
+# Install Styles and Wallpapers
+ENABLE_WLP=1
+
+# Download and install Styles and Wallpapers
+DOWNLOAD_WLP=0
+
+# Backup Styles and Wallpapers
+BACKUP_WLP=0
+
 # Install/ Download Google LiveWallpapers
 ENABLE_LIVE_WALLPAPERS=1
 
