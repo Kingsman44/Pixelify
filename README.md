@@ -1,5 +1,5 @@
 # PIXELIFY MAGISK MODULE
-Enable Pixel Ui and Some Exclusive Features.<br>
+A Magisk Module which enables Pixel UI and some exclusive features.<br>
 
 <a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.2-brown.svg" width="150"></a>
 <a href="https://www.pling.com/p/2004615/"><img src="https://img.shields.io/badge/Download-Submodules-brown.svg" width="200" height="30"></a>
@@ -9,27 +9,27 @@ Enable Pixel Ui and Some Exclusive Features.<br>
 <a href="https://t.me/pixelifysupport"><img src="https://img.shields.io/badge/Telegram-Support_Group-blue.svg"></a>
 
 ## ⭐ Requirements
-- **Android Version: Android 7.0 to Android 13**
-- **Arm64 device**
+- **Supported Android Versions: Android 7.0 to Android 13**
+- **ARM64 device**
 - **Volume Keys (optional)**
-- **Internet for NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
-- **Zygisk or Riru (Recommended but not compulsary)**
-- **Note: flash zip on magisk only not twrp**
+- **Internet for downloading NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
+- **Magisk v24 or above from Pixelify v2+**
+- **Zygisk or Riru (Recommended but not mandatory)**
+- **NOTE: Flash the module zip file in the Magisk Manager app only; flashing the module in TWRP or any other recovery won't work.**
 
 ### Supported Roms
-- OneUi
-- Custom Roms
+- OneUI
+- AOSP Based Roms
 - Pixel Stock
 - Android One
-- MiUI
+- MIUI
 - FunTouchOS
 - OxygenOS
-- ColorOs
-- All stock android roms
-- Windows Subsystem Android
+- ColorOS
+- Windows Subsystem for Android
 
 ### Pixelify Sub Modules <br>
-Is Pixelify not working correctly or too big for your phone, Pixelify provide some sub module for standalone features
+If the main Pixelify module is not functioning properly, or is too big for your phone, Pixelify module also provides some sub-modules for standalone features:
 - Call Screening 
 - Now Playing (Android System Inteligence required)
 - Google Hotword
@@ -38,15 +38,15 @@ Is Pixelify not working correctly or too big for your phone, Pixelify provide so
 
 ### Installation
 - Recommend to use magisk v24 or above from Pixelify v2
-- If Volume keys are working then ignore no_vk files otherwise check Installation without Volume Keys
-- Enable zygisk
+- If volume keys of your phone are working, then ignore "no_vk" files, otherwise check Installation without Volume Keys section.
+- Enable Zygisk/Riru
 - Flash Module
 - Enjoy
 
 ### Installation without Volume Keys
 - Use packages with Pixelify-${version}-no_VK.zip
-- Place config.prop to internal storage>Pixelify (/sdcard/Pixelify/config.prop)
-- Edit prop according what you want to select
+- Place config.prop in your internal storage>Pixelify (/sdcard/Pixelify/config.prop)
+- Edit the prop file according to what features you want
 - (If you have any problem placing config.prop there then you also can extract and update config.prop inside the packages it automatically use it.) 
 
 ### Zygisk and Riru spoofing configuration
@@ -61,13 +61,13 @@ Is Pixelify not working correctly or too big for your phone, Pixelify provide so
 - Open Source
 - Works with Riru as well as Zygisk
 - Works with most of Android version (Nougat to 13)
-- Uses Dynamic spoofing (Riru & Zygisk) to only Google apps to prevent crashes and other issues
-- Provides most of Pixel Features
-- Installation is can be optional
+- Uses Dynamic spoofing (Riru & Zygisk) for only Google apps to prevent crashes and other issues
+- Provides most of the Pixel exclusive features
+- Installation of features is optional
 - Supports (720p,1080p,1440p) Google bootanimation
-- Allows to created backup for online pixelify packages
+- Allows creation of backup of online Pixelify packages
 - Also provides some unreleased Pixel Features
-- Create Google keyboard, Google app, Google Text to speech, Google Dialer as system app if not installed
+- Creates Google keyboard, Google app, Google Text to speech, Google Dialer as system app if not installed
 - Dynamic Permission generation of apps installed by pixelify
 - Config as well as Volume key installation
 - Patches Flags to force enable pixel features
@@ -142,7 +142,7 @@ Is Pixelify not working correctly or too big for your phone, Pixelify provide so
 - **UPI id (India only)** - shivan.0972@okicici
 
 ## ⭐ Credits
-- Google to creating these awesome features
+- Google for creating these awesome features
 - [topjohnwu](https://github.com/topjohnwu) for Magisk
 - [#TeamFiles](https://t.me/modulesrepo) for so many themed icons for Pixel Launcher android 12
 - [Kdrag0n](https://github.com/kdrag0n) for SimpleDeviceConfig
