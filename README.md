@@ -1,12 +1,13 @@
 # PIXELIFY MAGISK MODULE
 A Magisk Module which enables Pixel UI and some exclusive features.<br>
 
-<a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v2.2-brown.svg" width="150"></a>
+<a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v3.0-brown.svg" width="150"></a>
 <a href="https://www.pling.com/p/2004615/"><img src="https://img.shields.io/badge/Download-Submodules-brown.svg" width="200" height="30"></a>
 <br><br>
 <a href="https://forum.xda-developers.com/t/magisk-pixelify.4415387/"><img src="https://img.shields.io/badge/XDA_Thread-brown.svg"></a>
 <a href="https://photos.app.goo.gl/jBPm3zTHHhc67Pdy7"><img src="https://img.shields.io/badge/Screenshots-red.svg"></a>
 <a href="https://t.me/pixelifysupport"><img src="https://img.shields.io/badge/Telegram-Support_Group-blue.svg"></a>
+<a href="https://paypal.me/shivan999?country.x=IN&locale.x=en_GB"><img src="https://img.shields.io/badge/PayPal-donation-blue.svg"></a>
 
 ## ⭐ Requirements
 - **Supported Android Versions: Android 7.0 to Android 13**
@@ -36,12 +37,55 @@ If the main Pixelify module is not functioning properly, or is too big for your 
 - Google Photos Unlimited Backup
 - Google Bootanimation
 
-### Installation
-- Recommend to use magisk v24 or above from Pixelify v2
-- If volume keys of your phone are working, then ignore "no_vk" files, otherwise check Installation without Volume Keys section.
-- Enable Zygisk/Riru
-- Flash Module
-- Enjoy
+### Installation instructions for v3
+- Make Sure Play Store not installing when Pixelify is installing.
+-  Magisk is Recommend
+- If using KSU, install KSU zygisk module first
+- Add Google Play Services and inside com.google.android.gms.unstable in DenyList.
+- On installation, If see error when installing Google Photos, then unistalling updates of google apps
+
+### After Installations (For First Time Pixelify Installation):-
+1) Playstore
+- Clear Playstore data
+- Open Playstore for 5-10 secs
+- Force Stop Playstore
+- Update Google App (For NGA & NGA Voice Typing)
+- Untick Auto Updates for Google Photos, Android System Intelligence (Don't Update these app from playstore)
+
+2)  Google Dialer
+- Clear Data
+- Open it for 5-10 secs
+- Force Stop Google Dialer
+- Open Google Dialer
+
+3) Google App
+- After Updating Google app from playstore
+- Launch Google Assistant
+- Let it Download and setup everything
+- After setting up, automatically NGA Voice should work.
+
+4) If NGA Voice typing not working then
+- Set main Language of phone and Gboard to Supported NGA Languages
+- Download 50xx Voice Pack in Google app
+- Restart
+
+5) Google Photos
+- Clear Data
+- Make sure connected to WiFi
+- You may receive Updating Photos Editor, wait for it.
+- Google Photos may download around 300-400mb only with WiFi
+
+*Note:* Photos editor tool struck  Editing Tool will install soon 
+- First Wait for sometimes and connect with WiFi
+- Reboot
+- if still not fixed (Reinstall Pixelify;- sometimes flags doesn't get patched due to gms performing action on database)
+
+Working of Magic Editor, New Automatic Call Screening depends on Device, Kernel.
+
+If Some features not working,
+- Make Sure to Select YES for Disable Internal Spoofing
+- Check file /sdcard/Pixelify/flaglog.txt
+if you find Status: Error xxxxx on some flags, then you may need to reinstall pixelify.
 
 ### Installation without Volume Keys
 - Use packages with Pixelify-${version}-no_VK.zip
@@ -50,9 +94,9 @@ If the main Pixelify module is not functioning properly, or is too big for your 
 - (If you have any problem placing config.prop there then you also can extract and update config.prop inside the packages it automatically use it.) 
 
 ### Zygisk and Riru spoofing configuration
-- Pixel 5:- Google TTS, Google Play services, Pixel Buds, Nothing Smart Center
+- Pixel 5:- Google TTS, Google Play services, Pixel Buds, Nothing Smart Center, Netflix
 - Pixel XL:- Google Photos
-- Pixel 7 Pro:- Google app, Google one, Breel Wallpaper, Snapchat
+- Pixel 8 Pro:- Google app, Google one, Breel Wallpaper, Snapchat, Adobe Light Room
 - Pixel 6 Pro:- Rest Google apps except (all Google camera package)
 <br><br>**Note** :- Zygisk spoofing can't overide PixelProp Utils.
 
@@ -75,13 +119,17 @@ If the main Pixelify module is not functioning properly, or is too big for your 
 - Works on almost all roms.
 
 ## ⭐ Pixel Features
-### Pixel 7 Features Enables
+### Pixel 7 & 8 Features Enables
 -   Pixel 6 & Pixel 7 Live Wallpapers*
 -   Magic Eraser
+-   Magic Editor
+-   Audio Eraser
+-   ProofHead
 -   Google Dialer Direct Call (12+)
 -   New At a Glance feature (12+ & Dec+ Patch) 
 -   Google Quick Pharse*
 -   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
+-   Personalised Speech Recognition
 -   Call Caption Typing (12+)
 -   Live Captions different language
 
@@ -96,6 +144,7 @@ If the main Pixelify module is not functioning properly, or is too big for your 
 -   Google Dialer Call Screening
 -   Google Dialer Hold for me
 -   Google Dialer Call Recording (Device depended for working)
+-   Google Dialer Automatic Call Screening
 -   Google Digital Wellbeing Heads up
 -   Google Duo features
 -   Google Fit Heart rate
@@ -150,9 +199,50 @@ If the main Pixelify module is not functioning properly, or is too big for your 
 - [Pranav Pandey](https://forum.xda-developers.com/m/pranav-pandey.3962236/) for BreelWallpaper2020 Port
 - [HuskyDG](https://github.com/HuskyDG) for intial Riru Port, Bootloop saver
 - [Saitama](https://github.com/saitamasahil) Fixing Pixel Launcher crashes
+- [Gapps Flag Leaks](https://t.me/GappsLeaks) AssembleDebug For some flags
 - Pixelify Support Group Members for testing beta versions
 
 ## ⭐ ChangeLogs
+### Version 3.0
+- Added Proofhead
+- Added New automatic Call Screening (en-US)
+- Added Audio Eraser
+- Added Magic Editor
+- Fixed Call Recording
+- Added option for Auto switching Assitant typing
+- Fixed Google dialer lag on some phones.
+- Readded Google Fonts
+- Removed Battery Health Services from Pixelify
+- More Fixes for safety net
+- Fixed For Zygisk detection for KSU
+- Android 14 support
+- Pixel Launcher crashes fixes for roms
+- Enabled Loud sound alerts
+- Enabled Ai Magic Wallpaper (Android 14)
+- Fixed Permission Controller Crashing on some roms or device
+- Updated Pixel Launcher, Styles and Wallpaper, Android System Intelligence
+- Added option to backup styles and Wallpaper
+- Added Option to install Pixel 8 Google Photos
+- Added Flag logs of installation in /sdcard/Pixelify/flaglogs.txt
+- Fixed Bug when not able to turn Google, Gboard as system app
+- Fixes for Live Captions not downloading
+- Fixed Google photos Unlimited Backup not working in AOSPA
+- Fixed Ok Google
+- Updated Spoofing
+- Added Netflix in spoofing to enable HDR 
+- Fixed Issue Automatic Battery Saver mode turning on and not turning off
+- Fixes for RCS for some users
+- Fixed Adaptive Sound not showing in Some roms
+- Fixed Warning showing Empty XML in logs
+- Some Background crashes fixes
+- Fixes Web search not working in Pixel launcher search
+- Battery Improvements
+- Added Scan Text option in Gboard
+- Removed Call Recording voice
+- Added Call Recording Indicator
+- Added Effects for Google Photos Video Editing
+- Added 'Silence' Quick Phrase
+- Minor Bug fixes & Improvements
 
 ### Version 2.2
 - Added small Pixelify script to remove backup and disable pixel launcher without reinstalling

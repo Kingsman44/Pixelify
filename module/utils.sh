@@ -1101,9 +1101,9 @@ gphotos8() {
         tar -xf /sdcard/Pixelify/backup/gphotos8.tar.xz -C $MODPATH/gphotos
         pm install $MODPATH/gphotos/*.apk
         rm -rf $MODPATH/gphotos
+        print "- Please Disable Google Photos Auto Update on Playstore"
     else
         print "  (NOTE: It requires for Pixel 8 Features)"
-        print ""
         print "  (Network Connection Needed)"
         print "  Do you want to install and Download Google Photos"
         print "  Size: $GPH8SIZE"
@@ -1124,6 +1124,7 @@ gphotos8() {
                 tar -xf $MODPATH/files/gphotos8.tar.xz -C $MODPATH/gphotos
                 pm install $MODPATH/gphotos/*.apk
                 rm -rf $MODPATH/gphotos
+                print "- Please Disable Google Photos Auto Update on Playstore"
 
                 print ""
                 print "  Do you want to create backup of Google Photos"
