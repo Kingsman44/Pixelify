@@ -52,7 +52,7 @@ fetch_version() {
         echo "- Fetching version of online packages" >>$logfile
         ver=$($MODPATH/addon/curl -s https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/version.txt)
         if [ $ENABLE_OSR -eq 1 ] || [ $DOES_NOT_REQ_SPEECH_PACK -eq 1 ]; then
-            if [ $API -eq 30 ] || [ $API -eq 33 ]; then
+            if [ $API -eq 30 ] || [ $API -ge 33 ]; then
                 NGAVERSION=$(echo "$ver" | grep ngd-$API | cut -d'=' -f2)
                 NGASIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/nga-new-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
             else
@@ -67,6 +67,8 @@ fetch_version() {
         OSRVERSION=$(echo "$ver" | grep os-new | cut -d'=' -f2)
         DPVERSION=$(echo "$ver" | grep dp-$API | cut -d'=' -f2)
         PCSVERSION=$(echo "$ver" | grep pcs | cut -d'=' -f2)
+        GPH8VERSION=$(echo "$ver" | grep gph8 | cut -d'=' -f2)
+        GPH8SIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/gphotos8.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         PCSSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pcs.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/dp-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         if [ $API -eq 31 ] || [ $API -eq 32 ]; then
@@ -76,11 +78,16 @@ fetch_version() {
             DPVERSION=$(echo "$ver" | grep asis-new-33 | cut -d'=' -f2)
             DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asis-new-33.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         elif [ $API -eq 34 ]; then
-            DPVERSION=$(echo "$ver" | grep asi-new-34 | cut -d'=' -f2)
-            DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asi-new-34.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
+            DPVERSION=$(echo "$ver" | grep asis-new-34 | cut -d'=' -f2)
+            DPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/asis-new-34.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
         fi
-        WLPVERSION="$(echo "$ver" | grep wpg-$API | cut -d'=' -f2)"
-        WLPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb)"
+        if [ $REQ_NEW_WLP -eq 1 ]; then
+            WLPVERSION="$(echo "$ver" | grep wpg-new-$API | cut -d'=' -f2)"
+            WLPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-new-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        else
+            WLPVERSION="$(echo "$ver" | grep wpg-$API | cut -d'=' -f2)"
+            WLPSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
+        fi
         PLVERSION=$(echo "$ver" | grep pl_$API-$PL_VERSION | cut -d'=' -f2)
         PLSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/PixelLauncher/$API/$PL_VERSION.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         if [ -z "$PLVERSION" ]; then
@@ -103,6 +110,10 @@ fetch_version() {
             echo "! Cannot fetch latest version of Live Wallpapers" >>$logfile
             WLPVERSION=$WLPVERSIONP
         fi
+        if [ -z "$GPH8VERSION" ]; then
+            echo "! Cannot fetch latest version of Google photos" >>$logfile
+            GPH8VERSION=$GPH8VERSIONP
+        fi
         rm -rf $pix/nga.txt
         rm -rf $pix/pixel.txt
         rm -rf $pix/dp.txt
@@ -116,6 +127,7 @@ fetch_version() {
         echo "$OSRVERSION" >>$pix/osr.txt
         echo "$PLVERSION" >>$pix/pl-$API.txt
         echo "$WLPVERSION" >>$pix/wlp-$API.txt
+        echo "$GPH8VERSION" >>$pix/gph8.txt
         OSRSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/os-new.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
         LWSIZE="$($MODPATH/addon/curl -sI https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/pixel.tar.xz | grep -i Content-Length | cut -d':' -f2 | sed 's/ //g' | tr -d '\r' | online_mb) Mb"
     else
@@ -142,6 +154,16 @@ fetch_version() {
             echo "$WLPVERSIONP" >>$pix/wlp-$API.txt
         fi
     fi
+}
+
+set_version() {
+    OSRVERSION=$(cat $pix/osr.txt)
+    NGAVERSION=$(cat $pix/nga.txt)
+    LWVERSION=$(cat $pix/pixel.txt)
+    DPVERSION=$(cat $pix/dp.txt)
+    PCSVERSION=$(cat $pix/pcs.txt)
+    PLVERSION=$(cat $pix/pl-$API.txt)
+    WLPVERSION=$(cat $pix/wlp-$API.txt)
 }
 
 online() {
@@ -370,20 +392,30 @@ no_vksel() {
 
 db_edit() {
     sleep .05
-    type=$2
-    val=$3
     name=$1
-    shift
-    shift
-    shift
+    type=$2
+    if [ $type == "extensionVal" ]; then
+        val=$4
+        all_flags=$3
+    else
+        val=$3
+        shift
+        shift
+        shift
+        all_flags=$@
+    fi
     OFLAGS="$("$sqlite" "$gms" "SELECT * FROM FlagOverrides WHERE packageName='$name';")"
     if [ $type == "stringVal" ]; then
         val="'$val'"
     fi
+    echo "" >>$flaglogfile
+    echo "========================" >>$flaglogfile
     echo "- $name patching started" >>$flaglogfile
-    for i in $@; do
+    for i in $all_flags; do
         FF="$(echo \"$OFLAGS\" | grep $i | head -1)"
         UPDATEFLAGS=0
+        echo "" >>$flaglogfile
+        echo "Flag Name: $name" >>$flaglogfile
         if [ -z "$FF" ]; then
             UPDATEFLAGS=1
         elif [ "$(echo \"$FF\" | cut -d\| -f6)" != "$val" ]; then
@@ -393,6 +425,7 @@ db_edit() {
             touch $MODPATH/sql.txt
             $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'" &>$MODPATH/sql.txt
             echo "different value of $i present" >>$flaglogfile
+            echo "Patching Status: $(cat $MODPATH/sql.txt)" >>$flaglogfile
             if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
                 mkdir -p $MODPATH/flags_$type/$name
                 echo "$val" >>$MODPATH/flags_$type/$name/$i
@@ -407,8 +440,13 @@ db_edit() {
             #sleep .001
             rm -rf $MODPATH/sql.txt
             touch $MODPATH/sql.txt
-            $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
+            if [ $type == "extensionVal" ]; then
+                $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('$name', '', '$i', 0, x'$val', 0)" &>$MODPATH/sql.txt
+            else
+                $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
+            fi
             echo "patching $i" >>$flaglogfile
+            echo "Patching Status: $(cat $MODPATH/sql.txt)" >>$flaglogfile
             if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
                 mkdir -p $MODPATH/flags_$type/$name
                 echo "Error Patching $i adding it for next boot" >>$flaglogfile
@@ -422,7 +460,11 @@ db_edit() {
             for j in $gacc; do
                 rm -rf $MODPATH/sql.txt
                 touch $MODPATH/sql.txt
-                $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
+                if [ $type == "extensionVal" ]; then
+                    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, x'$val', 0)" &>$MODPATH/sql.txt
+                else
+                    $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
+                fi
                 if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
                     mkdir -p $MODPATH/flags_$type/$name
                     echo "$val" >>$MODPATH/flags_$type/$name/$i
@@ -434,6 +476,7 @@ db_edit() {
         fi
     done
     echo "- $name patching done" >>$flaglogfile
+    echo "========================" >>$flaglogfile
 }
 
 db_edit_bin() {
@@ -445,7 +488,8 @@ db_edit_bin() {
     if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
         mkdir -p $MODPATH/flags_bin/$1
         echo "$3" >>$MODPATH/flags_bin/$1/$2
-        echo "Error Patching $2 adding it for next boot" >>$flaglogfile
+        echo "Error removing $2 adding it for next boot" >>$flaglogfile
+        echo "$(cat $MODPATH/sql.txt)" >>$flaglogfile
         return
     fi
     rm -rf $MODPATH/sql.txt
@@ -455,6 +499,7 @@ db_edit_bin() {
         mkdir -p $MODPATH/flags_bin/$1
         echo "$3" >>$MODPATH/flags_bin/$1/$2
         echo "Error Patching $2 adding it for next boot" >>$flaglogfile
+        echo "$(cat $MODPATH/sql.txt)" >>$flaglogfile
         return
     fi
     #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('$1', '', '$2', 0, x'$3', 1)"
@@ -734,8 +779,13 @@ install_wallpaper_with_backup() {
                             print "- Downloading Styles and Wallpapers"
                             echo " - Downloading and installing Styles and Wallpapers" >>$logfile
                             cd $MODPATH/files
-                            $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                            mv wpg-$API wlp-$API
+                            if [ $REQ_NEW_WLP -eq 1 ]; then
+                                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
+                                mv wpg-new-$API.tar.xz wlp-$API.tar.xz
+                            else
+                                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &>/proc/self/fd/$OUTFD
+                                mv wpg-$API.tar.xz wlp-$API.tar.xz
+                            fi
                             cd /
                             rm -rf /sdcard/Pixelify/backup/wlp-$API.tar.xz
                             cp -f $MODPATH/files/wlp-$API.tar.xz /sdcard/Pixelify/backup/wlp-$API.tar.xz
@@ -749,7 +799,7 @@ install_wallpaper_with_backup() {
                 print ""
                 print " - Installing Styles and Wallpaper"
                 WREM=0
-                if [ $API -eq 34 ]; then
+                if [ $API -eq 34 ] || [ $REQ_NEW_WLP -eq 1 ]; then
                     tar -xf /sdcard/Pixelify/backup/wlp-$API.tar.xz -C $MODPATH/system$product
                 else
                     tar -xf /sdcard/Pixelify/backup/wlp-$API.tar.xz -C $MODPATH/system$product/priv-app
@@ -757,8 +807,13 @@ install_wallpaper_with_backup() {
                 if [ $API -ge 31 ]; then
                     mkdir -p $MODPATH/system/product/app/PixelThemesStub
                     rm -rf $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+                    [ $API -eq 34 ] && mv $MODPATH/files/PixelThemesStub_14.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
                     [ $API -eq 33 ] && mv $MODPATH/files/PixelThemesStub13.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
                     [ $API -le 32 ] && mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+                fi
+                if [ $API -eq 34 ]; then
+                    mkdir -p $MODPATH/system/product/app/PixelThemesStub2022_and_newer
+                    mv $MODPATH/files/PixelThemesStub2022_and_newer_14.apk $MODPATH/system/product/app/PixelThemesStub2022_and_newer/PixelThemesStub2022_and_newer.apk
                 fi
                 # pm install $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease/*.apk
                 #WREM=0
@@ -778,14 +833,19 @@ install_wallpaper_with_backup() {
                     print "- Downloading Styles and Wallpapers"
                     echo " - Downloading and installing Styles and Wallpapers" >>$logfile
                     cd $MODPATH/files
-                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &>/proc/self/fd/$OUTFD
-                    mv wpg-$API.tar.xz wlp-$API.tar.xz
+                    if [ $REQ_NEW_WLP -eq 1 ]; then
+                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-new-$API.tar.xz -O &>/proc/self/fd/$OUTFD
+                        mv wpg-new-$API.tar.xz wlp-$API.tar.xz
+                    else
+                        $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/wpg-$API.tar.xz -O &>/proc/self/fd/$OUTFD
+                        mv wpg-$API.tar.xz wlp-$API.tar.xz
+                    fi
                     cd /
                     rm -rf $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease
                     print ""
                     print "- Installing Styles and Wallpapers"
                     print ""
-                    if [ $API -eq 34 ]; then
+                    if [ $API -eq 34 ] || [ $REQ_NEW_WLP -eq 1 ]; then
                         tar -xf $MODPATH/files/wlp-$API.tar.xz -C $MODPATH/system$product
                     else
                         tar -xf $MODPATH/files/wlp-$API.tar.xz -C $MODPATH/system$product/priv-app
@@ -793,8 +853,13 @@ install_wallpaper_with_backup() {
                     if [ $API -ge 31 ]; then
                         mkdir -p $MODPATH/system/product/app/PixelThemesStub
                         rm -rf $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+                        [ $API -eq 34 ] && mv $MODPATH/files/PixelThemesStub_14.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
                         [ $API -eq 33 ] && mv $MODPATH/files/PixelThemesStub13.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
                         [ $API -le 32 ] && mv $MODPATH/files/PixelThemesStub.apk $MODPATH/system/product/app/PixelThemesStub/PixelThemesStub.apk
+                    fi
+                    if [ $API -eq 34 ]; then
+                        mkdir -p $MODPATH/system/product/app/PixelThemesStub2022_and_newer
+                        mv $MODPATH/files/PixelThemesStub2022_and_newer_14.apk $MODPATH/system/product/app/PixelThemesStub2022_and_newer/PixelThemesStub2022_and_newer.apk
                     fi
                     # pm install $MODPATH/system$product/priv-app/WallpaperPickerGoogleRelease/*.apk
                     WREM=0
@@ -833,7 +898,6 @@ install_wallpaper_with_backup() {
         echo " - Skipping Styles and Wallpaper" >>$logfile
         rm -rf $MODPATH/system/product/app/PixelThemesStub
     fi
-
 }
 
 install_wallpaper() {
@@ -993,6 +1057,105 @@ osr_ins() {
     fi
 }
 
+gphotos8() {
+    if [ -f /sdcard/Pixelify/backup/gphotos8.tar.xz ]; then
+        if [ "$(cat /sdcard/Pixelify/version/gphotos8.txt)" != "$GPH8VERSION" ]; then
+            echo " - New Version Detected for Google Photos" >>$logfile
+            echo " - Installed version: $(cat /sdcard/Pixelify/version/gphotos8.txt) , New Version: $GPH8VERSION " >>$logfile
+            print "  (Network Connection Needed)"
+            print "  New version of Google Photos detected."
+            print "  Do you Want to update or use Old Backup?"
+            print "  Version: $GPH8VERSION"
+            print "  Size: $GPH8SIZE"
+            print "   Vol Up += Update"
+            print "   Vol Down += Use old backup"
+            no_vk "UPDATE_GOOGLE_PHOTOS"
+            if $VKSEL; then
+                online
+                if [ $internet -eq 1 ]; then
+                    echo " - Downloading, Installing and creating backup Google offline speech recogonition" >>$logfile
+                    rm -rf /sdcard/Pixelify/backup/gphotos8.tar.xz
+                    rm -rf /sdcard/Pixelify/version/gphotos8.txt
+                    cd $MODPATH/files
+                    $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/gphotos8.tar.xz -O &>/proc/self/fd/$OUTFD
+                    cd /
+                    print ""
+                    print "- Creating Backup"
+                    print ""
+                    cp -Tf $MODPATH/files/gphotos8.tar.xz /sdcard/Pixelify/backup/gphotos8.tar.xz
+                    echo "$GPH8VERSION" >>/sdcard/Pixelify/version/gphotos8.txt
+                else
+                    print " ! No internet detected"
+                    print ""
+                    print " ! Using Old backup for now."
+                    print ""
+                    echo " ! using old backup for Google Photos due to no internet" >>$logfile
+                fi
+            else
+                echo " - using old backup for Google Photos" >>$logfile
+            fi
+        fi
+        print "- Installing Google Photos from backups"
+        print ""
+        mkdir $MODPATH/gphotos
+        tar -xf /sdcard/Pixelify/backup/gphotos8.tar.xz -C $MODPATH/gphotos
+        pm install $MODPATH/gphotos/*.apk
+        rm -rf $MODPATH/gphotos
+    else
+        print "  (NOTE: It requires for Pixel 8 Features)"
+        print ""
+        print "  (Network Connection Needed)"
+        print "  Do you want to install and Download Google Photos"
+        print "  Size: $GPH8SIZE"
+        print "   Vol Up += Yes"
+        print "   Vol Down += No"
+        no_vk "DOWNLOAD_GOOGLE_PHOTOS"
+        if $VKSEL; then
+            online
+            if [ $internet -eq 1 ]; then
+                echo " - Downloading and Installing Google Photos" >>$logfile
+                print "  Downloading Google Photos"
+                cd $MODPATH/files
+                $MODPATH/addon/curl https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/gphotos8.tar.xz -O &>/proc/self/fd/$OUTFD
+                cd /
+                print " "
+                print "  Extracting Google Photos"
+                mkdir $MODPATH/gphotos
+                tar -xf $MODPATH/files/gphotos8.tar.xz -C $MODPATH/gphotos
+                pm install $MODPATH/gphotos/*.apk
+                rm -rf $MODPATH/gphotos
+
+                print ""
+                print "  Do you want to create backup of Google Photos"
+                print "  so that you don't need redownload it everytime."
+                print "   Vol Up += Yes"
+                print "   Vol Down += No"
+                no_vk "BACKUP_GOOGLE_PHOTOS"
+                if $VKSEL; then
+                    echo " - Creating backup for Google Photos" >>$logfile
+                    print "- Creating Backup"
+                    mkdir -p /sdcard/Pixelify/backup
+                    rm -rf /sdcard/Pixelify/backup/gphotos8.tar.xz
+                    cp -f $MODPATH/files/gphotos8.tar.xz /sdcard/Pixelify/backup/gphotos8.tar.xz
+                    mkdir -p /sdcard/Pixelify/version
+                    echo "$GPH8VERSION" >>/sdcard/Pixelify/version/gphotos8.txt
+                    print ""
+                    print "- Google Photos installation complete"
+                    print ""
+                fi
+            else
+                print " ! No internet detected"
+                print ""
+                print " ! Skipping Google Photos."
+                print ""
+                echo " ! Skipping Google Photos due to no internet" >>$logfile
+            fi
+        else
+            echo " - Skipping Google Photos" >>$logfile
+        fi
+    fi
+}
+
 now_playing() {
     print ""
     print "  Note: If you are facing problem with audio then don't enable"
@@ -1046,20 +1209,34 @@ drop_sys() {
             fi
         done
     fi
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
-    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+    if [ $KEEP_PIXEL_2021 -eq 0 ]; then
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
+        echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
+        #touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2019_midyear.xml
+        echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2020.xml
+        echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2020_midyear.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+        echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+    elif [ $KEEP_PIXEL_2020 -eq 1 ]; then
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2021.xml
+        rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+        echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2021_midyear.xml
+    else
+        echo " - Not removing Pixel 2021 experience as roms already hide for gphotos" >>$logfile
+    fi
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
+    echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
     rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022.xml
-    touch $MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
+    echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2022_midyear.xml
+    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2023.xml
+    echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2023.xml
+    rm -rf $MODPATH/system$product/etc/sysconfig/pixel_experience_2023_midyear.xml
+    echo "$EMPTY_CONFIG" >>$MODPATH/system$product/etc/sysconfig/pixel_experience_2023_midyear.xml
 }
 
 ok_google_hotword() {
@@ -1127,48 +1304,72 @@ remove_samsung_dialer() {
 
 # Function to check the existence of a property
 check_prop() {
-    if [ -n "$(getprop $1)" ]; then
-        return 0
-    else
+    if [ -z "$(getprop $1)" ]; then
         return 1
+    else
+        return 0
     fi
 }
 
 check_rom_type() {
-    ONEUI_PROP="ro.build.version.sdl"
-    OXYGENOS_PROP="ro.oxygen.version"
-    MIUI_PROP="ro.miui.ui.version.name"
-    COLOROS_PROP="ro.build.version.opporom"
-    REALMEUI_PROP="ro.realm.version"
-    FUNTOUCHOS_PROP="ro.vivo.os.build.display.id"
-    EMUI_PROP="ro.build.version.emui"
-    ZENUI_PROP="ro.build.asus.version"
+    KEY_VERSION_MIUI="ro.miui.ui.version.name"
+    KEY_VERSION_EMUI="ro.build.version.emui"
+    KEY_VERSION_OPPO="ro.build.version.opporom"
+    KEY_VERSION_VIVO="ro.vivo.os.version"
+    KEY_VERSION_NUBIA="ro.build.nubia.rom.name"
+    KEY_VERSION_ONEPLUS="ro.build.ota.versionname"
+    KEY_VERSION_SAMSUNG="ro.channel.officehubrow"
+    KEY_VERSION_ONEUI="ro.build.version.oneui"
+    KEY_VERSION_BLACKSHARK="ro.blackshark.rom"
+    KEY_VERSION_ROG="ro.asus.rog"
+    KEY_VERSION_LENOVO="ro.zuk.product.market"
+    KEY_VERSION_REALME="ro.build.version.realmeui"
+    KEY_VERSION_COLOR="ro.build.version.oplusrom"
+    KEY_VERSION_FLYME="ro.flyme.published"
 
     # Check each Android skin
-    if check_prop $ONEUI_PROP; then
+    if check_prop $KEY_VERSION_SAMSUNG; then
         print "- Android OS: OneUI"
         ROM_TYPE="oneui"
-    elif check_prop $OXYGENOS_PROP; then
+    elif check_prop $KEY_VERSION_ONEUI; then
+        print "- Android OS: OneUI"
+        ROM_TYPE="oneui"
+    elif check_prop $KEY_VERSION_ONEPLUS; then
         print "- Android OS: OxygenOS"
         ROM_TYPE="oos"
-    elif check_prop $MIUI_PROP; then
+    elif check_prop $KEY_VERSION_MIUI; then
         print "- Android OS: MIUI"
         ROM_TYPE="miui"
-    elif check_prop $COLOROS_PROP; then
-        print "- Android OS: ColorOS"
+    elif check_prop $KEY_VERSION_OPPO; then
+        print "- Android OS: ColorOS (Oppo)"
         ROM_TYPE="coloros"
-    elif check_prop $REALMEUI_PROP; then
+    elif check_prop $KEY_VERSION_REALME; then
         print "- Android OS: realme UI"
         ROM_TYPE="realmeui"
-    elif check_prop $FUNTOUCHOS_PROP; then
+    elif check_prop $KEY_VERSION_VIVO; then
         print "- Android OS: Funtouch OS"
         ROM_TYPE="funtouch"
-    elif check_prop $EMUI_PROP; then
+    elif check_prop $KEY_VERSION_EMUI; then
         ROM_TYPE="emui"
         print "- Android OS: EMUI"
-    elif check_prop $ZENUI_PROP; then
-        ROM_TYPE="zenui"
-        print "- Android OS: ZenUI"
+    elif check_prop $KEY_VERSION_NUBIA; then
+        ROM_TYPE="nubia"
+        print "- Android OS: Nubia"
+    elif check_prop $KEY_VERSION_BLACKSHARK; then
+        ROM_TYPE="blackshark"
+        print "- Android OS: Blackshark"
+    elif check_prop $KEY_VERSION_ROG; then
+        ROM_TYPE="rog"
+        print "- Android OS: Asus Rog"
+    elif check_prop $KEY_VERSION_LENOVO; then
+        ROM_TYPE="lenovo"
+        print "- Android OS: Lenovo"
+    elif check_prop $KEY_VERSION_FLYME; then
+        ROM_TYPE="flyme"
+        print "- Android OS: Flyme OS"
+    elif check_prop $KEY_VERSION_COLOR; then
+        print "- Android OS: ColorOS (OnePlus)"
+        ROM_TYPE="oplus"
     else
         ROM_TYPE="custom"
         print "- Android OS: Custom ROM or stock experience"

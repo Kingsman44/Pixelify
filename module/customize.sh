@@ -32,42 +32,58 @@ else
 fi
 
 # Set Installation type: Normal, Zygsik, Riru
-if [ ! -z $riru_path ]; then
-    # Riru is installed.
-    # Check if Zygisk is enabled.
-    if [ "$zygisk_enabled" == "value=1" ]; then
-        # Set the module type to Zygsik
-        MODULE_TYPE=2
-        ui_print "! Riru Installed but disabled"
-        ui_print "- Switching to zygisk mode"
-        ui_print ""
-        ui_print "- Installation Type: Zygisk"
-    else
-        # Riru is disabled.
-        ui_print "- Load $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh"
-        # Load the Riru utility functions.
-        . $riru_path
-        # Check the installation type.
-        check_install_type
-    fi
-else
-    # Riru is not installed.
-    # Check if Magisk is at least version 24000.
-    if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
-        # Magisk is at least version 24000.
-        # Set the module type to 2.
+if [ "$KSU" == true ]; then
+    ui_print "- Root App: KSU"
+    if [ -d '/data/adb/modules/zygisksu' ]; then
+        # ZygiskSU is installed.
+        # Set the module type to ZygsikSU
         MODULE_TYPE=2
         ui_print "- Installation Type: Zygisk"
-        # Check if zygsik is enabled.
-        if [ "$zygisk_enabled" != "value=1" ]; then
-            # Riru is not enabled.
-            ui_print "! Please enable zygisk in magisk"
-        fi
     else
-        # Magisk is not at least version 24000.
-        # Set the module type normal installation
+        # ZygiskSU is not installed.
+        # Set the module type to normal installation
         MODULE_TYPE=1
         ui_print "- Installation Type: normal installation"
+    fi
+else
+    ui_print "- Root App: Magisk"
+    if [ ! -z $riru_path ]; then
+        # Riru is installed.
+        # Check if Zygisk is enabled.
+        if [ "$zygisk_enabled" == "value=1" ]; then
+            # Set the module type to Zygsik
+            MODULE_TYPE=2
+            ui_print "! Riru Installed but disabled"
+            ui_print "- Switching to zygisk mode"
+            ui_print ""
+            ui_print "- Installation Type: Zygisk"
+        else
+            # Riru is disabled.
+            ui_print "- Load $MAGISK_CURRENT_RIRU_MODULE_PATH/util_functions.sh"
+            # Load the Riru utility functions.
+            . $riru_path
+            # Check the installation type.
+            check_install_type
+        fi
+    else
+        # Riru is not installed.
+        # Check if Magisk is at least version 24000.
+        if [ "$MAGISK_VER_CODE" -ge 24000 ]; then
+            # Magisk is at least version 24000.
+            # Set the module type to 2.
+            MODULE_TYPE=2
+            ui_print "- Installation Type: Zygisk"
+            # Check if zygsik is enabled.
+            if [ "$zygisk_enabled" != "value=1" ]; then
+                # Riru is not enabled.
+                ui_print "! Please enable zygisk in magisk"
+            fi
+        else
+            # Magisk is not at least version 24000.
+            # Set the module type normal installation
+            MODULE_TYPE=1
+            ui_print "- Installation Type: normal installation"
+        fi
     fi
 fi
 
@@ -195,6 +211,8 @@ fi
 rm -rf $logfile
 rm -rf $flaglogfile
 
+am force-stop com.android.vending
+
 # Logs initial format
 echo "=============
    Pixelify $(cat $MODPATH/module.prop | grep version= | cut -d= -f2)
@@ -210,14 +228,14 @@ tar -xf $MODPATH/files/system.tar.xz -C $MODPATH
 chmod 0755 $MODPATH/addon/*
 
 # Check phones is a ONEPLUS device and requires crash fix
-if [ -d /system_ext/oplus ] || [ ! -z "$(getprop ro.oplus.image.system.version)" ]; then
+if [ -d /system_ext/oplus ] && [ $ROMTYPE == "oplus" ]; then
     REQ_FIX=1
 fi
 
 # Set variables indicating fixes for ROMS
 if [ $API -ge 31 ] && [ $REQ_FIX -eq 1 ]; then
     TARGET_DEVICE_OP12=1
-elif [ $API -ge 31 ] && [ ! -z "$(getprop ro.build.version.oneui)" ]; then
+elif [ $API -ge 31 ] && [ $ROMTYPE == "oneui" ]; then
     TARGET_DEVICE_ONEUI=1
 fi
 
@@ -228,6 +246,11 @@ fi
 
 # Check internet is present of not
 online
+if [ $internet -eq 1 ]; then
+    print "- Internet: Present"
+else
+    print "- Internet: Not Present"
+fi
 
 #Create Pixelify directory for saving backups and logs.
 mkdir -p /sdcard/Pixelify
@@ -275,12 +298,17 @@ elif [ $API -eq 32 ]; then
 elif [ $API -eq 33 ]; then
     if [ $sec_patch -ge $(date -d 2023-08-01 +%s) ] || [ $build_date -ge $(date -d 2023-08-01 +%s) ]; then
         PL_VERSION="aug_2023"
+        LOS_FIX=0
     elif [ $sec_patch -ge $(date -d 2023-07-01 +%s) ] || [ $build_date -ge $(date -d 2023-07-01 +%s) ]; then
         PL_VERSION="jul_2023"
+        LOS_FIX=0
     elif [ $sec_patch -ge $(date -d 2023-05-01 +%s) ] || [ $build_date -ge $(date -d 2023-05-01 +%s) ]; then
         PL_VERSION="may_2023"
     elif [ $sec_patch -ge $(date -d 2022-12-01 +%s) ] || [ $build_date -ge $(date -d 2022-12-01 +%s) ]; then
         PL_VERSION="dec_2022"
+    fi
+    if [ $sec_patch -ge $(date -d 2023-06-01 +%s) ] || [ $build_date -ge $(date -d 2023-06-01 +%s) ]; then
+        REQ_NEW_WLP=1
     fi
 fi
 
@@ -370,13 +398,7 @@ WLPSIZE="3 Mb"
 fetch_version
 
 # Finally set version of offline package
-OSRVERSION=$(cat $pix/osr.txt)
-NGAVERSION=$(cat $pix/nga.txt)
-LWVERSION=$(cat $pix/pixel.txt)
-DPVERSION=$(cat $pix/dp.txt)
-PCSVERSION=$(cat $pix/pcs.txt)
-PLVERSION=$(cat $pix/pl-$API.txt)
-WLPVERSION=$(cat $pix/wlp-$API.txt)
+set_version
 
 # Fixes for Pixel 4 devices, it gets hang when Android System intelligence gets spoofed to another pixel
 if [ "$(getprop ro.product.vendor.name)" == "coral" ] || [ "$(getprop ro.product.vendor.name)" == "flame" ]; then
@@ -509,9 +531,9 @@ print ""
 echo "- Extracting Files ..." >>$logfile
 
 # install Google Health services for Android Pie and Above
-if [ $API -ge 28 ]; then
-    tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
-fi
+# if [ $API -ge 28 ]; then
+#     tar -xf $MODPATH/files/tur.tar.xz -C $MODPATH/system$product/priv-app
+# fi
 
 # Allow users to use config with Volume key installation if config is placed
 if [ -f /sdcard/Pixelify/config.prop ] && [ $VOL_KEYS -eq 1 ]; then
@@ -768,6 +790,9 @@ else
     print ""
 fi
 
+# Google Photos App
+gphotos8
+
 # Google Dialer Feature installation
 
 # Check Google dialer is installed or not
@@ -948,19 +973,32 @@ if [ -d /data/data/$DIALER ]; then
         CSBIN=0a140a02${P1}120e0a0c0a05${P2}12030a0102
         #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer'"
         if [ $ISEN_US -eq 1 ]; then
-            db_edit com.google.android.dialer boolVal 1 $CALL_SCREEN_FLAGS $DIALERFLAGS $CS_REV
-            db_edit com.google.android.dialer.directboot#com.google.android.dialer boolVal 1 "45381881"
-            db_edit com.google.android.dialer.directboot#com.google.android.dialer intVal 1 "45409315"
-            db_edit com.google.android.dialer.directboot#com.google.android.dialer intVal 2 "45414559"
-            #db_edit com.google.android.dialer.directboot#com.google.android.dialer stringVal "SPAM_FILTER_DISCLOSURE_17" 45399401
-            #db_edit com.google.android.dialer.directboot#com.google.android.dialer stringVal "SPAM_FILTER_LEAVE_MESSAGE_DEFAULT_VARIANT" 45415110
-            db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45381883 $DOBBYCONFIG
+            print "  Do you want to enable automatic Call Screening"
+            print "   Vol Up += Yes"
+            print "   Vol Down += No"
+            no_vk "AUTO_CALL_SCREENING"
+            if $VKSEL; then
+                db_edit com.google.android.dialer.directboot#com.google.android.dialer boolVal 1 45381881 45402581 45402583 45402584 45403203 45407941 45409770 45411345 45411686 45413174 45413174 45414216 45417169 45417223 45418519 45418578 45419570 45420396 45420648
+                db_edit com.google.android.dialer.directboot#com.google.android.dialer boolVal 0 45411667
+                db_edit com.google.android.dialer.directboot#com.google.android.dialer intVal 1 "45409315"
+                db_edit com.google.android.dialer.directboot#com.google.android.dialer intVal 2 "45414559"
+                #db_edit com.google.android.dialer.directboot#com.google.android.dialer stringVal "SPAM_FILTER_DISCLOSURE_17" 45399401
+                #db_edit com.google.android.dialer.directboot#com.google.android.dialer stringVal "SPAM_FILTER_LEAVE_MESSAGE_DEFAULT_VARIANT" 45415110
+                db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45381883 $DOBBYCONFIG
+                db_edit com.google.android.dialer.directboot#com.google.android.dialer extensionVal $DOBBYCONFIG 45381883 
+                db_edit com.google.android.dialer boolVal 1 $CS_LANG
+            else
+                $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer.directboot#com.google.android.dialer'"
+            fi
+            db_edit com.google.android.dialer boolVal 1 $CS_REV
         else
-            db_edit com.google.android.dialer boolVal 1 $CALL_SCREEN_FLAGS $DIALERFLAGS $CS_LANG
+            db_edit com.google.android.dialer boolVal 1 $CS_LANG
         fi
         db_edit com.google.android.dialer floatVal "1.0" "G__call_screen_audio_stitching_downlink_volume_multiplier"
         db_edit com.google.android.dialer floatVal "0.6" "G__call_screen_audio_stitching_uplink_volume_multiplier"
         db_edit com.google.android.dialer intVal "1000" "G__embedding_generation_step_size"
+        db_edit com.google.android.dialer boolVal 1 $CALL_SCREEN_FLAGS
+        db_edit com.google.android.dialer boolVal 1 $DIALERFLAGS
 
         # $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer' AND name='G__atlas_mdd_ph_config'"
         # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.dialer', '', 'G__atlas_mdd_ph_config', 0, x'$ATLASBIN', 0)"
@@ -968,17 +1006,28 @@ if [ -d /data/data/$DIALER ]; then
         # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.dialer', '', 'Xatu__lp_preferences', 0, x'$XATUBIN', 0)"
         # $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.dialer' AND name='atlas_enabled_business_number_country_codes'"
         # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.dialer', '', 'atlas_enabled_business_number_country_codes', 0, x'$ATSBIN', 0)"
-        db_edit_bin com.google.android.dialer G__atlas_mdd_ph_config $ATLASBIN
-        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45413189 $ATLASBIN
-        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45402582 $TKBIN
-        db_edit_bin com.google.android.dialer Xatu__lp_preferences $XATUBIN
-        db_edit_bin com.google.android.dialer atlas_enabled_business_number_country_codes $ATSBIN
-        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45413213 $ATSBIN
-        db_edit_bin com.google.android.dialer Revelio__supported_voices $REVBIN
-        [ $ISEN_US -eq 0 ] && db_edit_bin com.google.android.dialer CallScreenI18n__call_screen_i18n_config $CSBIN
-        db_edit_bin com.google.android.dialer G__tk_mdd_ph_config $TKBIN
-        db_edit_bin com.google.android.dialer model_download_group_config $XATUCONFIGBIN
-        db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45417183 $XATUCONFIGBIN
+        # db_edit_bin com.google.android.dialer G__atlas_mdd_ph_config $ATLASBIN
+        # db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45413189 $ATLASBIN
+        # db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45402582 $TKBIN
+        # db_edit_bin com.google.android.dialer Xatu__lp_preferences $XATUBIN
+        # db_edit_bin com.google.android.dialer atlas_enabled_business_number_country_codes $ATSBIN
+        # db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45413213 $ATSBIN
+        # db_edit_bin com.google.android.dialer Revelio__supported_voices $REVBIN
+        # [ $ISEN_US -eq 0 ] && db_edit_bin com.google.android.dialer CallScreenI18n__call_screen_i18n_config $CSBIN
+        # db_edit_bin com.google.android.dialer G__tk_mdd_ph_config $TKBIN
+        # db_edit_bin com.google.android.dialer model_download_group_config $XATUCONFIGBIN
+        # db_edit_bin com.google.android.dialer.directboot#com.google.android.dialer 45417183 $XATUCONFIGBIN
+        db_edit com.google.android.dialer extensionVal G__atlas_mdd_ph_config $ATLASBIN
+        db_edit com.google.android.dialer.directboot#com.google.android.dialer extensionVal 45413189 $ATLASBIN
+        db_edit com.google.android.dialer.directboot#com.google.android.dialer extensionVal 45402582 $TKBIN
+        db_edit com.google.android.dialer extensionVal Xatu__lp_preferences $XATUBIN
+        db_edit com.google.android.dialer extensionVal atlas_enabled_business_number_country_codes $ATSBIN
+        db_edit com.google.android.dialer.directboot#com.google.android.dialer extensionVal 45413213 $ATSBIN
+        db_edit com.google.android.dialer extensionVal Revelio__supported_voices $REVBIN
+        [ $ISEN_US -eq 0 ] && db_edit com.google.android.dialer extensionVal CallScreenI18n__call_screen_i18n_config $CSBIN
+        db_edit com.google.android.dialer extensionVal G__tk_mdd_ph_config $TKBIN
+        db_edit com.google.android.dialer extensionVal model_download_group_config $XATUCONFIGBIN
+        db_edit com.google.android.dialer.directboot#com.google.android.dialer extensionVal 45417183 $XATUCONFIGBIN
         # Patching Ends
 
         # Install language pack
@@ -1248,7 +1297,7 @@ if [ -d /data/data/com.google.android.googlequicksearchbox ] && [ $API -ge 29 ] 
         #db_edit com.google.android.googlequicksearchbox boolVal 1  10579 11627 14759 15114 16197 16347 16464 45351462 45352335 45353388 45353425 45354090 45355242 45355425 45357281 45357460 45357462 45357463 45357466 45357467 45357468 45357469 45357470 45357471 45357508 45358425 45368123 45368150 45368483 45374247 45375269 45386105 8674 9449 10596 3174 45357539 45358426 45360742 45372547 45372935 45373820 45374858 45376106 45380073 45380867 45385075 45385287 45386702 7882 8932 9418
         [ $TENSOR -eq 0 ] && db_edit_bin com.google.android.googlequicksearchbox 5470 $GOOGLEBIN
         db_edit com.google.android.libraries.search.googleapp.device#com.google.android.googlequicksearchbox boolVal 1 45410632 45410315 45369077
-        db_edit_bin com.google.android.apps.search.assistant.device#com.google.android.googlequicksearchbox 45377874 $GSPOOF
+        db_edit com.google.android.apps.search.assistant.device#com.google.android.googlequicksearchbox extensionVal 45377874 $GSPOOF
         #sed -i -e 's/com.google.android.feature.PIXEL_2021_EXPERIENCE/com.google.android.feature.PIXEL_2019_EXPERIENCE/g' $VELVET_APK
         #am force-stop com.google.android.googlequicksearchbox
         #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.g10040oogle.android.googlequicksearchbox' AND name='5470'"
@@ -1666,22 +1715,22 @@ else
     rm -rf $MODPATH/system/product/overlay/Pixelifyroundshape.apk
 fi
 
-# Adding Google san font.
-# print ""
-# print "  (NOTE: Playstore or Google or GMS crashes then dont enable it)"
-# print "  Do you want add Google San Fonts?"
-# print "    Vol Up += Yes"
-# print "    Vol Down += No"
-# no_vk "GSAN_FONT"
-# if $VKSEL; then
-#     patch_font
-# else
-#     rm -rf $MODPATH/system/product/overlay/PixelifyGsan*.apk
-#     rm -rf $MODPATH/system/product/overlay/GInterOverlay.apk
-# fi
-rm -rf $MODPATH/system/product/overlay/PixelifyGsan*.apk
-rm -rf $MODPATH/system/product/overlay/GInterOverlay.apk
-rm -rf $MODPATH/system/fonts
+#Adding Google san font.
+print ""
+#print "  (NOTE: Playstore or Google or GMS crashes then dont enable it)"
+print "  Do you want add Google San Fonts?"
+print "    Vol Up += Yes"
+print "    Vol Down += No"
+no_vk "GSAN_FONT"
+if $VKSEL; then
+    patch_font
+else
+    rm -rf $MODPATH/system/product/overlay/PixelifyGsan*.apk
+    rm -rf $MODPATH/system/product/overlay/GInterOverlay.apk
+fi
+# rm -rf $MODPATH/system/product/overlay/PixelifyGsan*.apk
+# rm -rf $MODPATH/system/product/overlay/GInterOverlay.apk
+# rm -rf $MODPATH/system/fonts
 
 # Google Settings service
 if [ $API -ge 28 ] && [ $TARGET_DEVICE_OP12 -eq 0 ]; then
@@ -1760,6 +1809,7 @@ if [ ! -z "$(pm list packages | grep com.google.android.inputmethod.latin)" ]; t
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "en" "enable_emojify_language_tags"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 2 "nga_backspace_behavior"
         db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin intVal 301153970 "nga_min_version_code_for_streaming_rpc"
+        db_edit com.google.android.inputmethod.latin#com.google.android.inputmethod.latin stringVal "en" "enabled_ocr_language_tags"
         # G Logo
         print ""
         print "  Do you want enable G logo in google keyboard?"
@@ -1821,21 +1871,23 @@ ui_print " - This may take a minute or two"
 # Android System Intelligence
 $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name LIKE 'Echo__search_%'"
 db_edit com.google.android.platform.device_personalization_services boolVal 1 $ASI_FLAGS
-db_edit com.google.android.platform.launcher boolVal 1 "enable_quick_launch_v2" "ENABLE_QUICK_LAUNCH_V2" "GBOARD_UPDATE_ENTER_KEY" "ENABLE_SMARTSPACE_ENHANCED" "ENABLE_WIDGETS_PICKER_AIAI_SEARCH" "enable_one_search"
+db_edit com.google.android.platform.launcher boolVal 1 "enable_quick_launch_v2" "ENABLE_QUICK_LAUNCH_V2" "GBOARD_UPDATE_ENTER_KEY" "ENABLE_SMARTSPACE_ENHANCED"
 #db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR "Translate__enable_opmv4_service" "VisualCortex__enable_control_system"
 if [ $TENSOR -eq 0 ]; then
-    db_edit_bin com.google.android.platform.device_personalization_services SpeechPack__downloadable_language_packs_raw $ASIBIN
+    db_edit com.google.android.platform.device_personalization_services extensionVal SpeechPack__downloadable_language_packs_raw $ASIBIN
+
 # $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.device_personalization_services' AND name='SpeechPack__downloadable_language_packs_raw'"
 # $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, extensionVal, committed) VALUES('com.google.android.platform.device_personalization_services', '', 'SpeechPack__downloadable_language_packs_raw', 0, x'$ASIBIN', 0)"
 fi
-db_edit_bin com.google.android.platform.device_personalization_services WallpaperEffects__cinematic_models_mdd_manifest_config $WLPEFFECTCONFIG
+#db_edit_bin com.google.android.platform.device_personalization_services WallpaperEffects__cinematic_models_mdd_manifest_config $WLPEFFECTCONFIG
+db_edit com.google.android.platform.device_personalization_services extensionVal WallpaperEffects__cinematic_models_mdd_manifest_config $WLPEFFECTCONFIG
 #Translate
 db_edit com.google.android.platform.device_personalization_services stringVal "com.google.android.talk" "Translate__app_blocklist"
-db_edit com.google.android.platform.device_personalization_services stringVal "en,fr,it,de,ja,es" Translate__audio_to_text_language_list
+#db_edit com.google.android.platform.device_personalization_services stringVal "en,fr,it,de,ja,es" Translate__audio_to_text_language_list
 db_edit com.google.android.platform.device_personalization_services stringVal "ja" "Translate__beta_audio_to_text_languages_in_live_caption"
 db_edit com.google.android.platform.device_personalization_services boolVal 1 "Translate__blue_chip_translate_enabled"
-db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__characterset_lang_detection_enabled
-db_edit com.google.android.platform.device_personalization_services stringVal "de,en,es,fr,it,ja,hi,zh,ru,pl,pt,ko,th,tr,nl,zh_Hant,sv,da,vi,ar,fa" Translate__chat_translate_languages
+db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__characterset_lang_detection_enabled
+#db_edit com.google.android.platform.device_personalization_services stringVal "de,en,es,fr,it,ja,hi,zh,ru,pl,pt,ko,th,tr,nl,zh_Hant,sv,da,vi,ar,fa" Translate__chat_translate_languages
 db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__copy_to_translate_enabled
 db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__differentiate_simplified_and_traditional_chinese
 db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__disable_session_state
@@ -1845,34 +1897,69 @@ db_edit com.google.android.platform.device_personalization_services boolVal 0 Tr
 db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_dictionary_langid_detection
 db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_language_profile_quick_update
 db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_nextdoor
-db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__enable_opmv4_service
+db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR Translate__enable_opmv4_service
 db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__enable_spa_setting
-db_edit com.google.android.platform.device_personalization_services stringVal "af,ar,be,bg,bn,ca,cs,cy,da,de,el,eo,es,et,fa,fi,fr,ga,gl,hi,hr,ht,hu,id,is,it,ja,ko,lt,lv,mk,mr,ms,mt,nl,no,pl,pt,ro,ru,sk,sl,sq,sv,sw,ta,te,th,tl,tr,uk,ur,vi,zh,en" Translate__image_to_text_language_list
-db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" Translate__interpreter_source_languages
-db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" Translate__interpreter_target_languages
-db_edit com.google.android.platform.device_personalization_services stringVal "de,en,fr,it,ja,es" Translate__live_captions_translate_languages
-db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__replace_auto_translate_copied_text_enabled SimpleStorage__disable_live_translate_dao_provider
-db_edit com.google.android.platform.device_personalization_services stringVal "vi,ja,fa,ro,nl,mr,mt,ar,ms,it,eo,is,et,es,iw,zh,uk,af,id,ur,mk,cy,hi,el,be,pt,lt,hr,lv,hu,ht,te,de,bg,th,bn,tl,pl,tr,kn,sv,gl,ko,sw,cs,da,ta,gu,ka,sl,ca,sk,ga,sq,no,fi,ru,fr,en,zh_Hant,fil" Translate__text_to_text_language_list
+#db_edit com.google.android.platform.device_personalization_services stringVal "af,ar,be,bg,bn,ca,cs,cy,da,de,el,eo,es,et,fa,fi,fr,ga,gl,hi,hr,ht,hu,id,is,it,ja,ko,lt,lv,mk,mr,ms,mt,nl,no,pl,pt,ro,ru,sk,sl,sq,sv,sw,ta,te,th,tl,tr,uk,ur,vi,zh,en" Translate__image_to_text_language_list
+#db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" Translate__interpreter_source_languages
+#db_edit com.google.android.platform.device_personalization_services stringVal "de,en,ja,es,fr,it" Translate__interpreter_target_languages
+#db_edit com.google.android.platform.device_personalization_services stringVal "de,en,fr,it,ja,es" Translate__live_captions_translate_languages
+#db_edit com.google.android.platform.device_personalization_services boolVal 0 Translate__replace_auto_translate_copied_text_enabled SimpleStorage__disable_live_translate_dao_provider
+#db_edit com.google.android.platform.device_personalization_services stringVal "vi,ja,fa,ro,nl,mr,mt,ar,ms,it,eo,is,et,es,iw,zh,uk,af,id,ur,mk,cy,hi,el,be,pt,lt,hr,lv,hu,ht,te,de,bg,th,bn,tl,pl,tr,kn,sv,gl,ko,sw,cs,da,ta,gu,ka,sl,ca,sk,ga,sq,no,fi,ru,fr,en,zh_Hant,fil" Translate__text_to_text_language_list
 db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__translation_service_enabled
 db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__translator_expiration_enabled
-db_edit com.google.android.platform.device_personalization_services boolVal 1 Translate__use_translate_kit_streaming_api
+db_edit com.google.android.platform.device_personalization_services boolVal $TENSOR Translate__use_translate_kit_streaming_api
 db_edit com.google.android.platform.device_personalization_services stringVal "https://www.gstatic.com/safecomms/superpacks/manifests/phishing-5.json" Safecomms__hades_config_url
-db_edit com.google.android.platform.device_personalization_services stringVal "en-US;en-GB;en-CA;en-IE;en-AU;en-SG;en-IN;fr-FR;fr-CA;fr-BE;fr-CH;it-IT;it-CH;de-DE;de-AT;de-BE;de-CH;ja-JP;es-ES;es-US" Captions__available_for_download Captions__supported_languages
+#db_edit com.google.android.platform.device_personalization_services stringVal "en-US;en-GB;en-CA;en-IE;en-AU;en-SG;en-IN;fr-FR;fr-CA;fr-BE;fr-CH;it-IT;it-CH;de-DE;de-AT;de-BE;de-CH;ja-JP;es-ES;es-US" Captions__supported_languages
 db_edit com.google.android.platform.device_personalization_services intVal 20221227 Captions__new_model_version_advanced
 db_edit com.google.android.platform.device_personalization_services intVal 20210623 Captions__new_model_version
 db_edit com.google.android.platform.device_personalization_services intVal 20200112 Captions__model_version_v1_2
 db_edit com.google.android.platform.device_personalization_services intVal 20190613 Captions__model_version_v1
 db_edit com.google.android.platform.device_personalization_services stringVal "https://storage.googleapis.com/captions/%{NAMESPACE}_%{VERSION}_manifest.json" Captions__manifest_url_template
 
+# Google Photos
+#db_edit_bin com.google.android.apps.photos 45415301 $AUDIO_ERASER
+#db_edit_bin com.google.android.apps.photos 45420912 $MAGIC_EDITOR
+#db_edit_bin com.google.android.apps.photos 45422509 $ME3
+#db_edit_bin com.google.android.apps.photos 45416982 $BESTTAKE
+#db_edit_bin com.google.android.apps.photos 3015 $GPHOTOS
+#db_edit com.google.android.apps.photos boolVal 1 45351624 45376295 45379559 45389076 45407001 45417606 45418019 45418318 45420670 45421194 45421373 45426271 45427054 45427088 45427578 45427613 45427667 45428201 45429413 45429414 45429500 45430376
+#db_edit com.google.android.apps.photos boolVal 1 "45387434" "45351624" "45376295" "45379559" "45389076" "45407001" "45418318" "45420670" "45421194" "45421373" "45426271" "45427054" "45427088" "45427578" "45427613" "45427667" "45428201" "45429413" "45429414" "45429500" "45430376"
+#Audio Eraser, Magic Editor, best take, unblur (requires PIXEL_EXPER)
+#db_edit com.google.android.apps.photos boolVal 1 "45417606" "45421373" "45418019" "45376295"
+# Fix for tools not installed, new magic eraser
+#db_edit com.google.android.apps.photos boolVal 0 "45425404" "45398451" "45422612"
+
+# Google Photos
+db_edit com.google.android.apps.photos boolVal 1 "45389969" "45429858" "45377931" "45430953" "45417067" "45413465"
+#Audio Eraser, Magic Editor
+db_edit com.google.android.apps.photos boolVal 1 "45417606" "45421373"
+# Fix for tools not installed, new magic eraser
+db_edit com.google.android.apps.photos boolVal 0 "45425404" "45398451" "45422612"
+# db_edit_bin com.google.android.apps.photos "45415301" "$AUDIO_ERASER"
+# db_edit_bin com.google.android.apps.photos "45420912" "$MAGIC_EDITOR"
+# db_edit_bin com.google.android.apps.photos "45422509" "$ME3"
+# db_edit_bin com.google.android.apps.photos "45416982" "$BESTTAKE"
+# db_edit_bin com.google.android.apps.photos "3015" "$GPHOTOS"
+# db_edit_bin com.google.android.apps.photos "45378073" "$ERASER"
+db_edit com.google.android.apps.photos extensionVal "45415301" "$AUDIO_ERASER"
+db_edit com.google.android.apps.photos extensionVal "45420912" "$MAGIC_EDITOR"
+db_edit com.google.android.apps.photos extensionVal "45422509" "$ME3"
+db_edit com.google.android.apps.photos extensionVal "45416982" "$BESTTAKE"
+db_edit com.google.android.apps.photos extensionVal "3015" "$GPHOTOS"
+db_edit com.google.android.apps.photos extensionVal "45378073" "$ERASER"
+
 # Digital Wellbeing
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing'"
 db_edit com.google.android.apps.wellbeing.device#com.google.android.apps.wellbeing boolVal 1 "ScreenTimeWidget__enable_pin_screen_time_widget_intent" "ScreenTimeWidget__enable_screen_time_widget" "HatsSurveys__enable_testing_mode" "WindDown__enable_wallpaper_dimming" "WalkingDetection__enable_outdoor_detection_v2" "Clockshine__enable_sleep_detection" "Clockshine__show_sleep_insights_screen" "Clockshine__show_manage_data_screen" "WebsiteUsage__display_website_usage"
 
 # Google messages
-db_edit com.google.android.apps.messaging#com.google.android.apps.messaging boolVal 1 "bugle_phenotype__enable_additional_functionalities_for_magic_compose" "bugle_phenotype__enable_combined_magic_compose" "bugle_phenotype__enable_magic_compose_view" "bugle_phenotype__magic_compose_enabled_in_xms" "45414981" "bugle_phenotype__enable_home_screen_redesign"
+db_edit com.google.android.apps.messaging#com.google.android.apps.messaging boolVal 1 "bugle_phenotype__enable_additional_functionalities_for_magic_compose" "bugle_phenotype__enable_combined_magic_compose" "bugle_phenotype__enable_magic_compose_view" "bugle_phenotype__magic_compose_enabled_in_xms" "45414981" "bugle_phenotype__enable_home_screen_redesign" "bugle_phenotype__untangle_otp_auto_delete_from_super_sort"
 
 # Google Contacts
 db_edit com.google.android.contacts#com.google.android.contacts boolVal 1 "45402053"
+
+# Google Clock
+db_edit com.google.android.deskclock#com.google.android.deskclock boolVal 1 "45408428" "45410158"
 
 # Google translate
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.translate'"
@@ -1880,18 +1967,18 @@ db_edit com.google.android.apps.translate boolVal 1 "Widgets__enable_quick_actio
 
 # Google settings Services
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.settings.intelligence'"
-db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__enable_wifi_driven_bootstrap" "RoutinesPrototype__is_action_notifications_enabled" "RoutinesPrototype__is_activities_enabled" "RoutinesPrototype__is_module_enabled" "RoutinesPrototype__is_manual_location_rule_adding_enabled" "RoutinesPrototype__is_routine_inference_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"
+db_edit com.google.android.settings.intelligence boolVal 1 "RoutinesPrototype__is_activities_enabled" "RoutinesPrototype__is_module_enabled" "RoutinesPrototype__is_manual_location_rule_adding_enabled" "RoutinesPrototype__is_routine_inference_enabled" "BatteryWidget__is_widget_enabled" "BatteryWidget__is_enabled"
 
 # Fix Precise Location
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.platform.privacy'"
-db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle"
+db_edit com.google.android.platform.privacy boolVal 1 "location_accuracy_enabled" "permissions_hub_enabled" "privacy_dashboard_7_day_toggle" "safety_protection_enabled"
 
 # Live Wallpapers
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.pixel.livewallpaper'"
 db_edit com.google.pixel.livewallpaper stringVal "" DownloadableWallpaper__blocking_module_list
 
 #turbo
-db_edit com.google.android.apps.turbo boolVal 1 $TURBO_FLAGS
+#db_edit com.google.android.apps.turbo boolVal 1 $TURBO_FLAGS
 
 # Google Recorder
 #$sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='com.google.android.apps.recorder#com.google.android.apps.recorder'"
@@ -1929,7 +2016,7 @@ db_edit com.google.android.gms.multideice#com.google.android.gms boolVal 1 Multi
 db_edit com.google.android.platform.systemui boolVal 1 "clipboard_overlay_show_actions"
 
 #Google TTS
-[ $TENSOR -eq 0 ] && db_edit_bin com.google.android.apps.search.transcription.device#com.google.android.tts 11 $TTSBIN
+[ $TENSOR -eq 0 ] && db_edit com.google.android.apps.search.transcription.device#com.google.android.tts extensionVal 11 $TTSBIN
 
 # Permissions for apps
 for j in $MODPATH/system/*/priv-app/*/*.apk; do
@@ -1971,6 +2058,11 @@ fi
 
 # OOS 12+ Fix
 oos_fix
+
+# Fix Permission controller
+if [ $ROM_TYPE != "custom" ]; then
+    rm -rf $MODPATH/system/product/overlay/Pixelify.apk
+fi
 
 # Setting permisions
 set_perm_recursive $MODPATH 0 0 0755 0644

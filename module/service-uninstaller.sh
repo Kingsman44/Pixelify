@@ -25,6 +25,8 @@ update="com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.slee
 com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.sleepinsights.ui.dailyinsights.SleepInsightsDailyCardsActivity
 com.google.android.apps.wellbeing/com.google.android.apps.wellbeing.coughandsnore.consent.ui.CoughAndSnoreConsentActivity"
 
+flaglogfile=$MODDIR/flag_log.txt
+
 set_device_config() {
     while read p; do
         if [ ! -z "$(echo $p)" ]; then
@@ -41,7 +43,7 @@ set_device_config() {
 }
 
 update_sql() {
-    for folder in "flag_boolVal" "flag_stringVal" "flag_intVal" "flag_floatVal"; do
+    for folder in "flag_boolVal" "flag_stringVal" "flag_intVal" "flag_floatVal" "flag_bin"; do
         if [ -d $MODPATH/$folder ]; then
             type="$(echo $folder | cut -d_ -f2)"
             names=$(ls $MODPATH/$folder)
@@ -61,23 +63,6 @@ update_sql() {
             fi
         fi
     done
-    if [ -d $MODPATH/flag_bin ]; then
-        names=$(ls $MODPATH/flag_bin)
-        for name in $names; do
-            flags=$(ls $MODPATH/flag_bin/$name)
-            for flag in $flags; do
-                value="$(cat $MODPATH/flag_bin/$name/$flag)"
-                rm -rf $MODPATH/flag_bin/$name/$flag
-                db_edit_bin "$name" "$flag" "$value"
-            done
-            if [ -z "$(ls $MODPATH/flag_bin/$name)" ]; then
-                rm -rf $MODPATH/flag_bin/$name
-            fi
-        done
-        if [ -z "$(ls $MODPATH/flag_bin)" ]; then
-            rm -rf $MODPATH/flag_bin
-        fi
-    fi
 }
 
 log() {
@@ -264,10 +249,6 @@ else
     am broadcast -a grpc.io.action.BIND -n com.google.android.googlequicksearchbox/com.google.android.apps.search.assistant.surfaces.dictation.service.endpoint.AssistantDictationService
     am force-stop com.google.android.settings.intelligence
 
-    $sqlite /data/data/com.google.android.as/databases/superpacks.db "UPDATE pending_downloads SET requires_idle='0'"
-    $sqlite /data/data/com.google.android.as/databases/superpacks.db "UPDATE pending_downloads SET requires_charging='0'"
-    $sqlite /data/data/com.google.android.as/databases/superpacks.db "UPDATE pending_downloads SET requires_unmetered_network='0'"
-
     settings put global settings_enable_clear_calling true
     settings put secure show_qr_code_scanner_setting true
     set_device_config
@@ -277,12 +258,40 @@ else
     patch_gboard
     am force-stop com.google.android.dialer com.google.android.inputmethod.latin
 
-    pref_patch 45353596 true boolean $PHOTOS_PREF
-    pref_patch 45363145 true boolean $PHOTOS_PREF
-    pref_patch 45357512 true boolean $PHOTOS_PREF
-    pref_patch 45361445 true boolean $PHOTOS_PREF
-    pref_patch 45357511 true boolean $PHOTOS_PREF
-    pref_patch photos.backup.throttled_state false boolean $PHOTOS_PREF
+    # Google Photos
+    db_edit com.google.android.apps.photos boolVal 1 "45389969" "45429858" "45377931" "45430953" "45417067" "45413465"
+    #Audio Eraser, Magic Editor
+    db_edit com.google.android.apps.photos boolVal 1 "45417606" "45421373"
+    # Fix for tools not installed, new magic eraser
+    db_edit com.google.android.apps.photos boolVal 0 "45425404" "45398451" "45422612"
+    db_edit com.google.android.apps.photos extensionVal "45415301" "$AUDIO_ERASER"
+    db_edit com.google.android.apps.photos extensionVal "45420912" "$MAGIC_EDITOR"
+    db_edit com.google.android.apps.photos extensionVal "45422509" "$ME3"
+    db_edit com.google.android.apps.photos extensionVal "45416982" "$BESTTAKE"
+    db_edit com.google.android.apps.photos extensionVal "3015" "$GPHOTOS"
+    db_edit com.google.android.apps.photos extensionVal "45378073" "$ERASER"
+
+    loop_count=0
+
+    # Wait for the boot
+    while true; do
+        if [ -f $PHOTOS_PREF ]; then
+            sleep 5
+            pref_patch 45417606 true boolean $PHOTOS_PREF
+            pref_patch 45421373 true boolean $PHOTOS_PREF
+            pref_patch 45425404 false boolean $PHOTOS_PREF
+            pref_patch 45398451 false boolean $PHOTOS_PREF
+            pref_patch 45422612 false boolean $PHOTOS_PREF
+            break
+        fi
+        if [ $loop_count -gt 5 ]; then
+            log " ! Boot time exceeded"
+            break
+        fi
+        sleep 5
+        loop_count=$((loop_count + 1))
+    done
+
     LOS_FIX=0
     if [ $API -eq 33 ]; then
         for i in "ro.lineage.device" "ro.crdroid.version" "ro.rice.version" "ro.miui.ui.version.code"; do
@@ -298,9 +307,6 @@ else
             pl_fix
         fi
         rm -rf $MODDIR/first
-    fi
-    if [ -f $MODDIR/photos_patch ]; then
-        sed -i -e 's/com.google.android.feature.PIXEL_2021_EXPERIENCE/com.google.android.feature.PIXEL_2024_EXPERIENCE/g' $PHOTOS_APK
     fi
 fi
 

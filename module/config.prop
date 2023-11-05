@@ -9,6 +9,15 @@ DISABLE_INTERNAL_SPOOFING=0
 # Google Photos Original Unlimited Backup
 ENABLE_PHOTOS_UNLIMITED=1
 
+# Update Google Photos App for Magic Editor, Voice Eraser
+UPDATE_GOOGLE_PHOTOS=1
+
+# Download Google Photos App for Magic Editor, Voice Eraser
+DOWNLOAD_GOOGLE_PHOTOS=1
+
+# Backup Google Photos App for Magic Editor, Voice Eraser
+BACKUP_GOOGLE_PHOTOS=1
+
 # Pixel 5/6 Spoofing
 ENABLE_PIXEL_SPOOFING=0
 
@@ -44,7 +53,10 @@ CALL_SCREENING_LANG=1
 # 4 Britain (GB)
 ENGLISH_COUNTRY_ACCENT=1
 
-# Donwload lang Specific files for Call Screenining in DE,JP,IT,FR..
+# Automatic Call Screening
+AUTO_CALL_SCREENING=1
+
+# Download lang Specific files for Call Screenining in DE,JP,IT,FR..
 ADD_CALL_SCREENING_FILES=1
 
 # BAckup Lang Specific files for Call Screenining in DE,JP,IT,FR..
@@ -65,15 +77,6 @@ DOWNLOAD_NGA_RES=1
 # Backup NGA Resources
 BACKUP_NGA=1
 
-# Download Google offline speech recogonition
-DOWNLOAD_OSR=0
-
-# Update Google offline speech recogonition
-UPDATE_OSR=1
-
-# Backup Google offline speech recogonition
-BACKUP_OSR=1
-
 # Download Styles and Wallpapers
 DOWN_WGA=0
 
@@ -86,6 +89,9 @@ DOWNLOAD_WLP=0
 # Backup Styles and Wallpapers
 BACKUP_WLP=0
 
+# Update Styles and Wallpapers
+UPDATE_WLP=1
+
 # Install/ Download Google LiveWallpapers
 ENABLE_LIVE_WALLPAPERS=1
 
@@ -94,6 +100,9 @@ DOWNLOAD_LIVE_WALLPAPERS=1
 
 # Backup Live Wallpapers
 BACKUP_LIVE_WALLPAPERS=1
+
+# Google San fonts
+GSAN_FONT=0
 
 # Enable Google Bootanimation
 ENABLE_BOOTANIMATION=0
@@ -120,9 +129,16 @@ ENABLE_EXTREME_BATTERY_SAVER=0
 G_LOGO=0
 
 # Depreciated features
+# As per the Pixelify v3
 
-# Google San fonts
-GSAN_FONT=0
+# Download Google offline speech recogonition
+DOWNLOAD_OSR=0
+
+# Update Google offline speech recogonition
+UPDATE_OSR=1
+
+# Backup Google offline speech recogonition
+BACKUP_OSR=1
 
 # Pixel camera services
 ENABLE_PCS=0
