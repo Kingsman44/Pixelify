@@ -2,6 +2,7 @@
 A Magisk Module which enables Pixel UI and some exclusive features.<br>
 
 <a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v3.0-brown.svg" width="150"></a>
+<a href="https://store.kde.org/p/1794976"><img src="https://img.shields.io/badge/Alternative-Link-brown.svg" width="150"></a>
 <a href="https://www.pling.com/p/2004615/"><img src="https://img.shields.io/badge/Download-Submodules-brown.svg" width="200" height="30"></a>
 <br><br>
 <a href="https://forum.xda-developers.com/t/magisk-pixelify.4415387/"><img src="https://img.shields.io/badge/XDA_Thread-brown.svg"></a>
