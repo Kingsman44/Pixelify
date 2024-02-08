@@ -125,7 +125,7 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 -   Magic Eraser
 -   Magic Editor
 -   Audio Eraser
--   ProofHead
+-   ProofRead
 -   Google Dialer Direct Call (12+)
 -   New At a Glance feature (12+ & Dec+ Patch) 
 -   Google Quick Pharse*
