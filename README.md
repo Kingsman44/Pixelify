@@ -11,7 +11,7 @@ A Magisk Module which enables Pixel UI and some exclusive features.<br>
 <a href="https://paypal.me/shivan999?country.x=IN&locale.x=en_GB"><img src="https://img.shields.io/badge/PayPal-donation-blue.svg"></a>
 
 ## ⭐ Requirements
-- **Supported Android Versions: Android 7.0 to Android 13**
+- **Supported Android Versions: Android 7.0 to Android 14**
 - **ARM64 device**
 - **Volume Keys (optional)**
 - **Internet for downloading NGA Resources, Pixel Livewallpaper, Device Personalization Services & Pixel Launcher**
