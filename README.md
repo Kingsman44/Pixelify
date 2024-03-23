@@ -2,6 +2,7 @@
 A Magisk Module which enables Pixel UI and some exclusive features.<br>
 
 <a href="https://www.pling.com/p/1794976"><img src="https://img.shields.io/badge/Download-v3.0-brown.svg" width="150"></a>
+<a href="https://store.kde.org/p/1794976"><img src="https://img.shields.io/badge/Alternative-Link-brown.svg" width="150"></a>
 <a href="https://www.pling.com/p/2004615/"><img src="https://img.shields.io/badge/Download-Submodules-brown.svg" width="200" height="30"></a>
 <br><br>
 <a href="https://forum.xda-developers.com/t/magisk-pixelify.4415387/"><img src="https://img.shields.io/badge/XDA_Thread-brown.svg"></a>
@@ -32,7 +33,7 @@ A Magisk Module which enables Pixel UI and some exclusive features.<br>
 ### Pixelify Sub Modules <br>
 If the main Pixelify module is not functioning properly, or is too big for your phone, Pixelify module also provides some sub-modules for standalone features:
 - Call Screening 
-- Now Playing (Android System Inteligence required)
+- Now Playing (Android System Intelligence required)
 - Google Hotword
 - Google Photos Unlimited Backup
 - Google Bootanimation
@@ -42,7 +43,7 @@ If the main Pixelify module is not functioning properly, or is too big for your 
 -  Magisk is Recommend
 - If using KSU, install KSU zygisk module first
 - Add Google Play Services and inside com.google.android.gms.unstable in DenyList.
-- On installation, If see error when installing Google Photos, then unistalling updates of google apps
+- On installation, If see error when installing Google Photos, then uninstalling updates of google apps
 
 ### After Installations (For First Time Pixelify Installation):-
 1) Playstore
@@ -98,7 +99,7 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 - Pixel XL:- Google Photos
 - Pixel 8 Pro:- Google app, Google one, Breel Wallpaper, Snapchat, Adobe Light Room
 - Pixel 6 Pro:- Rest Google apps except (all Google camera package)
-<br><br>**Note** :- Zygisk spoofing can't overide PixelProp Utils.
+<br><br>**Note** :- Zygisk spoofing can't override PixelProp Utils.
 
 ### Features of Pixelify module
 - Initial Size of module is low
@@ -124,12 +125,12 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 -   Magic Eraser
 -   Magic Editor
 -   Audio Eraser
--   ProofHead
+-   ProofRead
 -   Google Dialer Direct Call (12+)
 -   New At a Glance feature (12+ & Dec+ Patch) 
--   Google Quick Pharse*
+-   Google Quick Phrase*
 -   Google Next Generation Assistant Typing (Next Generation Assistant Required)*
--   Personalised Speech Recognition
+-   Personalized Speech Recognition
 -   Call Caption Typing (12+)
 -   Live Captions different language
 
@@ -204,12 +205,12 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 
 ## ⭐ ChangeLogs
 ### Version 3.0
-- Added Proofhead
+- Added Proofread
 - Added New automatic Call Screening (en-US)
 - Added Audio Eraser
 - Added Magic Editor
 - Fixed Call Recording
-- Added option for Auto switching Assitant typing
+- Added option for Auto switching Assistant typing
 - Fixed Google dialer lag on some phones.
 - Readded Google Fonts
 - Removed Battery Health Services from Pixelify
@@ -328,8 +329,8 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 ### Version 2.02
 - Fixes for Quick phrase
 - Option to disable internal spoofing for some rom ( might break ota | please read FAQ)
-- Added optional fix for Rboard
-- Fixed monet themeing of notification of google dialer
+- Added optional fix for Gboard
+- Fixed monet theming of notification of google dialer
 - Support for monet bootanimation ( only supported rom only )
 - Fixes for Pixel live wallpaper crashing
 - made Google Settings service as an optional
@@ -339,7 +340,7 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 - Fixed Select in Pixel launcher recent on some roms
 - Fixes for offline translation in Gboard
 - Enabled Emoji Stickers and Emojify in Gboard
-- Completly removed cts dependency on Pixelify module
+- Completely removed cts dependency on Pixelify module
 - Enabled At a Store, and Doorbell extras in at a Glance.
 - Improved Pixel Launcher search
 - Updated Android system intelligence to pixel6.s18
@@ -373,7 +374,7 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 - Spoofing via Zygisk (Magisk v24 or v24+ is required)
 - Call screening support for Italian (IT), Japanese (JP), Spain (ES), France (FR)
 - Fixes for Android System Intelligence installation.
-- Rename Device Personalisation services to Android System Intelligence
+- Rename Device Personalization services to Android System Intelligence
 - Module will auto detect and install Bootanimation according your resolution.
 <br>  Supported are:- 720p, 1080p, 1440p
 <br>  Other resolution will use 1080p
@@ -437,7 +438,7 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 - Added Unlimited Photos backup (Storage Saver)
 - Enabled Direct Call in Google Dialer (<a href="https://gitlab.com/Kingsman-z/pixelify-files/-/raw/master/GoogleDialer.apk">USE THIS APK</a>)
 - Enabled Live Transcript (Not working on my device)
-- Enabled Google Quick Pharse
+- Enabled Google Quick Phrase
 - Enabled Pixel 6 Live Wallpapers (Update APK from playstore)
 
 ### Version 1.7
@@ -456,16 +457,16 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 - Fixed Android S dimension problem and Accent colors problem
 - Fingerprint - September Security patch
 - Fixed bootloop on some devices due to Extreme battery Saver
-- Added Pixel Photos Unlimted storage backup
+- Added Pixel Photos Unlimited storage backup
 - Minor bug fixes 
 - Extreme Battery Saver now optional.
 
 ### Version 1.5
 - Fixed No Internet Connection problem on some roms.
 - Fingerprint - August Security patch
-- Fixes Camera Crash for some deivces
+- Fixes Camera Crash for some devices
 - Device Personalisation is Optional
-- Size of Module Reduze to 25Mb
+- Size of Module Reduce to 25Mb
 - Android S Minimal Support
 - Added Extreme Battery Saver (Android 11 Only | S will be supported on afterwards) [ On Settings > Battery ]
 - Enabled Google Dialer Video Calling Preference, Bussiness Search, Android S Ui (For all Android Version), Prefix (May Not Work)
@@ -539,7 +540,7 @@ if you find Status: Error xxxxx on some flags, then you may need to reinstall pi
 - Fixed NGA on Roms using PropUtils
 
 ### Version Beta 1.1
-- Add Next gen Assitant
+- Add Next gen Assistant
 - Fixed crash of GoogleDialer
 - Removed Google Framework
 - Added Option to backup NGA Resources
