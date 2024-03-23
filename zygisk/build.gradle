@@ -10,6 +10,7 @@ plugins {
 apply from: file(rootProject.file('module.gradle'))
 
 android {
+    namespace "org.pixelify.zygisk"
     compileSdk target_sdk
     defaultConfig {
         minSdk min_sdk
@@ -37,16 +38,17 @@ afterEvaluate {
     android.libraryVariants.forEach { variant ->
         def variantCapped = variant.name.capitalize()
         def variantLowered = variant.name.toLowerCase()
-
         def zipName = "${magiskModuleId.replace('_', '-')}-${moduleVersion}.zip"
         def zipNamenovk = "${magiskModuleId.replace('_', '-')}-${moduleVersion}-no-VK.zip"
         def magiskDir = file("$outDir/magisk_module_$variantLowered")
         def templatePath = "$rootDir/module"
         def types = [Instance1: 'arm64-v8a', Instance2: 'armeabi-v7a',Instance3: 'x86',Instance4: 'x86_64']
+        def riruDir = file("$rootDir/riru/build")
 
         task("prepareMagiskFiles${variantCapped}", type: Sync) {
             dependsOn("assemble$variantCapped")
-            def nativeOutDir = file("$rootDir/riru/build/intermediates/cmake/$variant.name/obj")
+            dependsOn(":riru:stripReleaseDebugSymbols")
+            dependsOn(":app:mergeDexRelease")
 
             into magiskDir
             from(templatePath) {
@@ -67,12 +69,12 @@ afterEvaluate {
                         eol: FixCrLfFilter.CrLf.newInstance("lf"))
             }
             types.each { instance, resourceDir ->
-                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib/$resourceDir") {
                     into 'lib/zygisk'
                     exclude "**/libpixelify-tensor.so"
                     rename 'libpixelify.so', "${resourceDir}.so"
                 }
-                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib/$resourceDir") {
                     into 'lib/zygisk_tensor'
                     exclude "**/libpixelify.so"
                     rename 'libpixelify-tensor.so', "${resourceDir}.so"
@@ -80,23 +82,28 @@ afterEvaluate {
             }
             doLast {
                 copy {
-                    from "$nativeOutDir"
+                    from "$riruDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib"
                     into "$magiskDir/lib/riru"
-                    exclude "**/*.txt" , "**/libpixelify-tensor.so"
+                    exclude "**/libpixelify-tensor.so"                    
                 }
                 copy {
-                    from "$nativeOutDir"
+                    from "$riruDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib"
                     into "$magiskDir/lib/riru_tensor"
-                    exclude "**/*.txt" , "**/libpixelify.so"
-                    rename "libpixelify-tensor.so" , "$variant.name"
+                    exclude "**/libpixelify.so"
+                    rename 'libpixelify-tensor.so', "libpixelify.so"               
+                }
+                copy {
+                    from "$rootDir/app/build/intermediates/dex/release/mergeDexRelease"
+                    into "$magiskDir"
+                    include "classes.dex"
                 }
             }
 
         }
-
         task("novk${variantCapped}", type: Sync) {
             dependsOn("assemble$variantCapped")
-            def nativeOutDir = file("$rootDir/riru/build/intermediates/cmake/$variant.name/obj")
+            dependsOn(":riru:stripReleaseDebugSymbols")
+            dependsOn(":app:mergeDexRelease")
 
             into magiskDir
             from(templatePath) {
@@ -117,12 +124,12 @@ afterEvaluate {
                         eol: FixCrLfFilter.CrLf.newInstance("lf"))
             }
             types.each { instance, resourceDir ->
-                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib/$resourceDir") {
                     into 'lib/zygisk'
                     exclude "**/libpixelify-tensor.so"
                     rename 'libpixelify.so', "${resourceDir}.so"
                 }
-                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/out/lib/$resourceDir") {
+                from("$buildDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib/$resourceDir") {
                     into 'lib/zygisk_tensor'
                     exclude "**/libpixelify.so"
                     rename 'libpixelify-tensor.so', "${resourceDir}.so"
@@ -130,15 +137,20 @@ afterEvaluate {
             }
             doLast {
                 copy {
-                    from "$nativeOutDir"
+                    from "$riruDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib"
                     into "$magiskDir/lib/riru"
-                    exclude "**/*.txt" , "**/libpixelify-tensor.so"
+                    exclude "**/libpixelify-tensor.so"                    
                 }
                 copy {
-                    from "$nativeOutDir"
+                    from "$riruDir/intermediates/stripped_native_libs/$variantLowered/stripReleaseDebugSymbols/out/lib"
                     into "$magiskDir/lib/riru_tensor"
-                    exclude "**/*.txt" , "**/libpixelify.so"
-                    rename "libpixelify-tensor.so" , "libpixelify.so"
+                    exclude "**/libpixelify.so"
+                    rename 'libpixelify-tensor.so', "libpixelify.so"               
+                }
+                copy {
+                    from "$rootDir/app/build/intermediates/dex/release/mergeDexRelease"
+                    into "$magiskDir"
+                    include "classes.dex"
                 }
             }
         }
@@ -146,8 +158,8 @@ afterEvaluate {
         task("zip${variantCapped}", type: Zip) {
             dependsOn("prepareMagiskFiles${variantCapped}")
             from magiskDir
-            archiveName zipName
-            destinationDir outDir
+            archiveFileName.set(zipName)
+            destinationDirectory.set(outDir)
         }
 
         task("novkzip${variantCapped}", type: Zip) {
@@ -155,8 +167,8 @@ afterEvaluate {
             dependsOn("novk${variantCapped}")
             tasks.findByName("novk${variantCapped}").mustRunAfter "zip${variantCapped}"
             from magiskDir
-            archiveName zipNamenovk
-            destinationDir outDir
+            archiveFileName.set(zipNamenovk)
+            destinationDirectory.set(outDir)
             doLast {
                 delete {
                     from "$outDir"

@@ -9,3 +9,4 @@ ro.url.legal.android_privacy=http://www.google.com/intl/%s/mobile/android/basic/
 ro.url.legal=http://www.google.com/intl/%s/mobile/android/basic/phone-legal.html
 ro.product.needs_model_edit=false
 ro.support_one_handed_mode=true
+ro.com.google.clientidbase=android-google

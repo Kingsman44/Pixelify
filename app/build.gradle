@@ -1,0 +1,37 @@
+plugins {
+    id("com.android.application")
+}
+
+android {
+    namespace = "org.pixelify.spoof"
+    compileSdkVersion = rootProject.ext.targetSdkVersion
+
+    defaultConfig {
+        applicationId = "org.pixelify.spoof"
+        minSdkVersion = rootProject.ext.minSdkVersion
+        targetSdkVersion = rootProject.ext.targetSdkVersion
+        versionCode = 15960
+        versionName = "v15.9.6"
+        multiDexEnabled = false
+
+        buildFeatures {
+            prefab = true
+        }
+    }
+
+    buildTypes {
+        release {
+            multiDexEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+afterEvaluate {
+  tasks["assembleRelease"]
+}

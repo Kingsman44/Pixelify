@@ -213,9 +213,6 @@ else
 
     # Call Screening
     #cp -Tf $MAINDIR/com.google.android.dialer /data/data/com.google.android.dialer/files/phenotype/com.google.android.dialer
-    # copy bootlogs to Pixelify folder if bootloop happened.
-    [ -f /data/adb/modules/Pixelify/boot_logs.txt ] && rm -rf /sdcard/Pixelify/boot_logs.txt && mv /data/adb/modules/Pixelify/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
-
     for i in $disable; do
         pm disable $i
     done
@@ -271,27 +268,8 @@ else
     db_edit com.google.android.apps.photos extensionVal "3015" "$GPHOTOS"
     db_edit com.google.android.apps.photos extensionVal "45378073" "$ERASER"
 
-    loop_count=0
-
-    # Wait for the boot
-    while true; do
-        if [ -f $PHOTOS_PREF ]; then
-            sleep 5
-            pref_patch 45417606 true boolean $PHOTOS_PREF
-            pref_patch 45421373 true boolean $PHOTOS_PREF
-            pref_patch 45425404 false boolean $PHOTOS_PREF
-            pref_patch 45398451 false boolean $PHOTOS_PREF
-            pref_patch 45422612 false boolean $PHOTOS_PREF
-            break
-        fi
-        if [ $loop_count -gt 5 ]; then
-            log " ! Boot time exceeded"
-            break
-        fi
-        sleep 5
-        loop_count=$((loop_count + 1))
-    done
-
+    photos_patch
+    
     LOS_FIX=0
     if [ $API -eq 33 ]; then
         for i in "ro.lineage.device" "ro.crdroid.version" "ro.rice.version" "ro.miui.ui.version.code"; do
@@ -307,6 +285,11 @@ else
             pl_fix
         fi
         rm -rf $MODDIR/first
+    fi
+    # copy bootlogs to Pixelify folder if bootloop happened.
+    if [ -f $MAINDIR/boot_logs.txt ]; then
+        rm -rf /sdcard/Pixelify/boot_logs.txt
+        cp /data/adb/modules/Pixelify/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
     fi
 fi
 

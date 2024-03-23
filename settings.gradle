@@ -1,6 +1,22 @@
 import org.apache.tools.ant.DirectoryScanner
 
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
 DirectoryScanner.removeDefaultExclude('**/.gitattributes')
 
 include ':zygisk'
 include ':riru'
+include ':app'

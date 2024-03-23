@@ -228,7 +228,7 @@ pref_patch() {
                 fi
             fi
         else
-            if [ $type != "string" ]; then
+            if [ "$type" != "string" ]; then
                 sed -i -e "/<\/map>/i\
 <$type name=\"$name\" value=\"$value\" \/>" $file
             else
@@ -392,46 +392,62 @@ no_vksel() {
 
 db_edit() {
     sleep .05
+    pidofper=$(pidof com.google.android.gms.persistent)
+    kill -9 $pidofper
     name=$1
     type=$2
-    if [ $type == "extensionVal" ]; then
+    all_flags=""
+    if [ "$type" == "extensionVal" ]; then
         val=$4
         all_flags=$3
+        OFLAGS="$("$sqlite" "$gms" "SELECT DISTINCT name,hex($type) FROM FlagOverrides WHERE packageName='$name';")"
     else
         val=$3
         shift
         shift
         shift
         all_flags=$@
+        OFLAGS="$("$sqlite" "$gms" "SELECT name,$type FROM FlagOverrides WHERE packageName='$name';")"
     fi
-    OFLAGS="$("$sqlite" "$gms" "SELECT * FROM FlagOverrides WHERE packageName='$name';")"
-    if [ $type == "stringVal" ]; then
+    if [ "$type" == "stringVal" ]; then
         val="'$val'"
     fi
     echo "" >>$flaglogfile
     echo "========================" >>$flaglogfile
     echo "- $name patching started" >>$flaglogfile
+    flock -x $gms
     for i in $all_flags; do
         FF="$(echo \"$OFLAGS\" | grep $i | head -1)"
         UPDATEFLAGS=0
         echo "" >>$flaglogfile
-        echo "Flag Name: $name" >>$flaglogfile
+        echo "Flag Name: $i" >>$flaglogfile
+        curval=$(echo "$FF" | cut -d\| -f2)
+        if [ "$type" == "stringVal" ]; then
+            curval="'$curval'"
+        elif [ "$type" == "extensionVal" ]; then
+            curval=$(echo "$curval" | tr '[:upper:]' '[:lower:]')
+        fi
         if [ -z "$FF" ]; then
             UPDATEFLAGS=1
-        elif [ "$(echo \"$FF\" | cut -d\| -f6)" != "$val" ]; then
+        elif [ "$curval" != "$val" ]; then
             UPDATEFLAGS=1
             mkdir -p $MODPATH/flags
             rm -rf $MODPATH/sql.txt
             touch $MODPATH/sql.txt
             $sqlite $gms "DELETE FROM FlagOverrides WHERE packageName='$name' AND name='$i'" &>$MODPATH/sql.txt
             echo "different value of $i present" >>$flaglogfile
-            echo "Patching Status: $(cat $MODPATH/sql.txt)" >>$flaglogfile
-            if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
+            echo "Current value: $(echo \"$FF\" | cut -d\| -f6)" >>$flaglogfile
+            echo "Patched value: $val" >>$flaglogfile
+            if [ -z "$(cat $MODPATH/sql.txt)" ]; then
+                echo "Removing Status: Success" >>$flaglogfile
+            else
+                echo "Removing Status: $(cat $MODPATH/sql.txt)" >>$flaglogfile
                 mkdir -p $MODPATH/flags_$type/$name
                 echo "$val" >>$MODPATH/flags_$type/$name/$i
                 UPDATEFLAGS=0
                 echo "Error removing different value of $i" >>$flaglogfile
             fi
+            rm -rf $MODPATH/sql.txt
         else
             echo "Flag $i already present" >>$flaglogfile
         fi
@@ -446,21 +462,24 @@ db_edit() {
                 $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
             fi
             echo "patching $i" >>$flaglogfile
-            echo "Patching Status: $(cat $MODPATH/sql.txt)" >>$flaglogfile
-            if [ ! -z "$(cat $MODPATH/sql.txt | grep 'Error:')" ]; then
+            if [ -z "$(cat $MODPATH/sql.txt)" ]; then
+                echo "Patching Status: Success" >>$flaglogfile
+            else
+                echo "Removing Status: $(cat $MODPATH/sql.txt)" >>$flaglogfile
                 mkdir -p $MODPATH/flags_$type/$name
                 echo "Error Patching $i adding it for next boot" >>$flaglogfile
                 echo "$val" >>$MODPATH/flags_$type/$name/$i
-                return
+                continue
             fi
             sleep .001
             #$sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '', '$i', 0, $val, 1)"
             #sleep .001
             #$sqlite $gms "UPDATE Flags SET $type='$val' WHERE packageName='$name' AND name='$i'"
             for j in $gacc; do
+                j=${j/.db*/}
                 rm -rf $MODPATH/sql.txt
                 touch $MODPATH/sql.txt
-                if [ $type == "extensionVal" ]; then
+                if [ "$type" == "extensionVal" ]; then
                     $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, x'$val', 0)" &>$MODPATH/sql.txt
                 else
                     $sqlite $gms "INSERT INTO FlagOverrides(packageName, user, name, flagType, $type, committed) VALUES('$name', '$j', '$i', 0, $val, 0)" &>$MODPATH/sql.txt
@@ -469,7 +488,7 @@ db_edit() {
                     mkdir -p $MODPATH/flags_$type/$name
                     echo "$val" >>$MODPATH/flags_$type/$name/$i
                     echo "Error Patching $i adding it for next boot" >>$flaglogfile
-                    return
+                    continue
                 fi
                 sleep .001
             done
@@ -477,6 +496,7 @@ db_edit() {
     done
     echo "- $name patching done" >>$flaglogfile
     echo "========================" >>$flaglogfile
+    flock -u $gms
 }
 
 db_edit_bin() {
@@ -1374,5 +1394,19 @@ check_rom_type() {
     else
         ROM_TYPE="custom"
         print "- Android OS: Custom ROM or stock experience"
+        FORCE_PL_DEFAULT=1
     fi
+}
+
+photos_patch() {
+    pref_patch 45417606 true boolean $PHOTOS_PREF
+    pref_patch 45421373 true boolean $PHOTOS_PREF
+    pref_patch 45425404 false boolean $PHOTOS_PREF
+    pref_patch 45398451 false boolean $PHOTOS_PREF
+    pref_patch 45422612 false boolean $PHOTOS_PREF
+    pref_patch 45415301 "$(echo $AUDIO_ERASER_1 | xxd -r -p | base64 | tr -d '\n' | tr -d '=' | tr '/+' '_-')" string $PHOTOS_PREF
+    pref_patch 45420912 "$(echo $MAGIC_EDITOR_1 | xxd -r -p | base64 | tr -d '\n' | tr -d '=' | tr '/+' '_-')" string $PHOTOS_PREF
+    pref_patch 45422509 "$(echo $ME3_1 | xxd -r -p | base64 | tr -d '\n' | tr -d '=' | tr '/+' '_-')" string $PHOTOS_PREF
+    pref_patch 45416982 "$(echo $BEST_TAKE_1 | xxd -r -p | base64 | tr -d '\n' | tr -d '=' | tr '/+' '_-')" string $PHOTOS_PREF
+    pref_patch 3015 "$(echo $GPHOTOS_1 | xxd -r -p | base64 | tr -d '\n' | tr -d '=' | tr '/+' '_-')" string $PHOTOS_PREF
 }

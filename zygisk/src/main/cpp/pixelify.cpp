@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <android/log.h>
-
+// #include <chrono>
 #include "module.h"
 #include "zygisk.hpp"
 
@@ -12,27 +12,30 @@ using zygisk::Api;
 using zygisk::AppSpecializeArgs;
 using zygisk::ServerSpecializeArgs;
 
+#define CLASSES_DEX "/data/adb/modules/Pixelify/classes.dex"
+
 // Spoofing apps
 static std::vector<std::string> P1 = {"com.google.android.apps.photos"};
-static std::vector<std::string> P5 = {"com.google.android.gms","com.google.ar.core", "com.google.vr.apps.ornament","com.google.android.tts", "com.google.android.apps.wearables.maestro.companion", "com.nothing.smartcenter","com.netflix.mediaclient"};
-static std::vector<std::string> P6 = {"com.google"};
+static std::vector<std::string> P5 = {"com.google", "com.google.android.dialer", "com.google.android.tts", "com.google.android.apps.wearables.maestro.companion", "com.nothing.smartcenter", "com.netflix.mediaclient", "com.google.process.gapps", "com.google.process.gservices"};
+static std::vector<std::string> P6 = {};
 static std::vector<std::string> P7 = {};
-static std::vector<std::string> P8 = {"com.google.pixel.livewallpaper", "com.google.android.apps.subscriptions.red", "com.breel.wallpaper", "com.snapchat.android", "com.google.android.gms", "com.google.process.gapps", "com.google.process.gservices","com.google.android.googlequicksearchbox","com.adobe.lrmobile"};
+static std::vector<std::string> P8 = {"com.google.android.gms","com.android.vending", "com.google.android.aicore", "com.google.pixel.livewallpaper", "com.google.android.apps.subscriptions.red", "com.snapchat.android", "com.google.android.googlequicksearchbox", "com.adobe.lrmobile", "com.google.android.apps.recorder", "com.google.android.wallpaper.effects", "com.google.android.apps.customization.pixel"};
 static std::vector<std::string> PFold = {"com.google.android.apps.subscriptions.red"};
-static std::vector<std::string> keep = {"com.google.android.apps.recorder", "com.google.android.GoogleCamera", "com.google.android.apps.motionsense.bridge", "com.google.android.gms.chimera", "com.google.android.gms.update", "com.android.camera", "com.google.android.xx", "com.google.android.googlequicksearchbox:HotwordDetectionService", "com.google.android.apps.mesagging:rcs", "com.google.android.googlequicksearchbox:trusted:com.google.android.apps.gsa.hotword.hotworddetectionservice.GsaHotwordDetectionService"};
+static std::vector<std::string> S23U = {"com.samsung."};
+static std::vector<std::string> keep = {"com.google.vr.apps.ornament", "com.google.android.apps.nexuslauncher", "com.google.android.apps.pixelmigrate", "com.google.android.apps.restore", "com.google.android.apps.tachyon", "com.google.android.apps.tycho", "com.google.android.euicc", "com.google.oslo", "com.google.ar.core", "com.google.android.apps.recorder", "com.google.android.GoogleCamera", "com.google.android.apps.motionsense.bridge", "com.google.android.gms.chimera", "com.google.android.gms.update", "com.android.camera", "com.google.android.xx", "com.google.android.googlequicksearchbox:HotwordDetectionService", "com.google.android.apps.mesagging:rcs", "com.google.android.googlequicksearchbox:trusted:com.google.android.apps.gsa.hotword.hotworddetectionservice.GsaHotwordDetectionService", "com.google.android.gms.unstable"};
 
 // Fingerprint
 const char P1_FP[256] = "google/marlin/marlin:10/QP1A.191005.007.A3/5972272:user/release-keys";
 const char P5_FP[256] = "google/redfin/redfin:13/TQ2A.230305.008.C1/9619669:user/release-keys";
 const char P6_FP[256] = "google/raven/raven:13/TQ1A.230105.002/9325679:user/release-keys";
-const char P7_FP[256] = "google/cheetah/cheetah:13/TQ2A.230305.008.C1/9619669:user/release-keys";
+const char P7_FP[256] = "google/husky/husky:14/UD1A.230803.022.A3/10714844:user/release-keys";
 const char P2_FP[256] = "google/walleye/walleye:8.1.0/OPM1.171019.011/4448085:user/release-keys";
 const char PF_FP[256] = "google/felix/felix:13/TD3A.230203.070.A1/10075871:user/release-keys";
-const char P8_FP[256] = "google/husky/husky:14/UD1A.230803.041/10808477:user/release-keys";
+const char P8_FP[256] = "google/husky/husky:14/AP1A.240305.019.A1/11445699:user/release-keys";
+const char S23U_FP[256] = "samsung/dm3qxxx/qssi:14/UP1A.231005.007/S918BXXS3BXBD:user/release-keys";
 
-bool DEBUG = true;
-char package_name[256];
-static int spoof_type;
+// Classes.dex Inject packages
+static std::vector<std::string> InjectPackages = {"com.google.android.gms", "com.google.android.apps.photos", "com.google.android.googlequicksearchbox", "com.android.vending"};
 
 class pixelify : public zygisk::ModuleBase
 {
@@ -46,146 +49,189 @@ public:
     {
         const char *process = env->GetStringUTFChars(args->nice_name, nullptr);
         spoof_type = getSpoof(process);
-        strcpy(package_name, process);
-        env->ReleaseStringUTFChars(args->nice_name, process);
+        package_name = process;
+        shouldinjectdex = false;
+        if (RequiresInject(package_name))
+        {
+            long dexSize = 0;
+            int fd = api->connectCompanion();
+            read(fd, &dexSize, sizeof(long));
+            LOGI("Dex file size: %ld", dexSize);
+            if (dexSize > 0)
+            {
+                dexVector.resize(dexSize);
+                read(fd, dexVector.data(), dexSize);
+                shouldinjectdex = true;
+            }
+        }
     }
     void postAppSpecialize(const AppSpecializeArgs *) override
     {
+        jclass build_class = env->FindClass("android/os/Build");
+        if (!spoof_type)
+        {
+            api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+            return;
+        }
+        std::string BRAND = "";
+        std::string MANUFACTURER = "";
+        std::string PRODUCT = "";
+        std::string DEVICE = "";
+        std::string MODEL = "";
+        std::string TAGS = "";
+        std::string TYPE = "";
+        std::string FINGERPRINT = "";
         switch (spoof_type)
         {
         case 1:
-            injectBuild("Pixel XL", "marlin", P1_FP);
-            injectversion(34);
+            BRAND = "google";
+            MANUFACTURER = "Google";
+            PRODUCT = "marlin";
+            DEVICE = "marlin";
+            MODEL = "Pixel XL";
+            FINGERPRINT = P1_FP;
             break;
         case 2:
-            injectBuild("Pixel 2", "walleye", P2_FP);
-            // 8.1.0 SDK Version is 27
-            injectversion(27);
+            BRAND = "google";
+            MANUFACTURER = "Google";
+            PRODUCT = "walleye";
+            DEVICE = "walleye";
+            MODEL = "Pixel 2";
+            FINGERPRINT = P2_FP;
             break;
         case 3:
-            injectBuild("Pixel 5", "redfin", P5_FP);
+            BRAND = "google";
+            MANUFACTURER = "Google";
+            PRODUCT = "redfin";
+            DEVICE = "redfin";
+            MODEL = "Pixel 5";
+            FINGERPRINT = P5_FP;
             break;
         case 4:
-            injectBuild("Pixel 6 Pro", "raven", P6_FP);
+            BRAND = "google";
+            MANUFACTURER = "Google";
+            PRODUCT = "raven";
+            DEVICE = "raven";
+            MODEL = "Pixel 6 Pro";
+            FINGERPRINT = P6_FP;
             break;
         case 5:
-            injectBuild("Pixel 7 Pro", "cheetah", P7_FP);
+            BRAND = "google";
+            MANUFACTURER = "Google";
+            PRODUCT = "cheetah";
+            DEVICE = "cheetah";
+            MODEL = "Pixel 7 Pro";
+            FINGERPRINT = P7_FP;
             break;
         case 6:
-            injectBuild("Pixel Fold", "felix", PF_FP);
-            injecthardware("felix");
+            BRAND = "google";
+            MANUFACTURER = "Google";
+            PRODUCT = "felix";
+            DEVICE = "felix";
+            MODEL = "Pixel Fold";
+            FINGERPRINT = PF_FP;
             break;
         case 7:
-            injectBuild("Pixel 8 Pro", "husky", P8_FP);
+            BRAND = "google";
+            MANUFACTURER = "Google";
+            PRODUCT = "husky";
+            DEVICE = "husky";
+            MODEL = "Pixel 8 Pro";
+            FINGERPRINT = P8_FP;
+            break;
+        case 8:
+            BRAND = "samsung";
+            MANUFACTURER = "samsung";
+            PRODUCT = "dm3qxxx";
+            DEVICE = "qssi";
+            MODEL = "SM-S918B";
+            FINGERPRINT = S23U_FP;
             break;
         default:
+            api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+            return;
             break;
         }
+        injectValue(build_class, "BRAND", BRAND);
+        injectValue(build_class, "MANUFACTURER", MANUFACTURER);
+        injectValue(build_class, "PRODUCT", PRODUCT);
+        injectValue(build_class, "DEVICE", DEVICE);
+        injectValue(build_class, "MODEL", MODEL);
+        injectValue(build_class, "TAGS", "release-keys");
+        injectValue(build_class, "TYPE", "user");
+        injectValue(build_class, "FINGERPRINT", FINGERPRINT);
+        if (shouldinjectdex)
+        {
+            // From PlayIntregrity fix
+            LOGI("Injecting Dex in package %s",package_name.c_str());
+            if(dexVector.empty()) {
+                LOGE("Couldn't load Dex file to inject spoof");
+            }
+            LOGI("get system classloader for package %s",package_name.c_str());
+            auto clClass = env->FindClass("java/lang/ClassLoader");
+            auto getSystemClassLoader = env->GetStaticMethodID(clClass, "getSystemClassLoader",
+                                                               "()Ljava/lang/ClassLoader;");
+            auto systemClassLoader = env->CallStaticObjectMethod(clClass, getSystemClassLoader);
+
+            LOGI("create class loader");
+            auto dexClClass = env->FindClass("dalvik/system/InMemoryDexClassLoader");
+            auto dexClInit = env->GetMethodID(dexClClass, "<init>",
+                                              "(Ljava/nio/ByteBuffer;Ljava/lang/ClassLoader;)V");
+            auto buffer = env->NewDirectByteBuffer(dexVector.data(), dexVector.size());
+            auto dexCl = env->NewObject(dexClClass, dexClInit, buffer, systemClassLoader);
+
+            LOGI("load class");
+            auto loadClass = env->GetMethodID(clClass, "loadClass",
+                                              "(Ljava/lang/String;)Ljava/lang/Class;");
+            auto entryClassName = env->NewStringUTF("org.pixelify.spoof.EntryPoint");
+            auto entryClassObj = env->CallObjectMethod(dexCl, loadClass, entryClassName);
+
+            auto entryPointClass = (jclass)entryClassObj;
+
+            LOGI("call init");
+            auto entryInit = env->GetStaticMethodID(entryPointClass, "init", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+            auto str1 = env->NewStringUTF(BRAND.c_str());
+            auto str2 = env->NewStringUTF(MANUFACTURER.c_str());
+            auto str3 = env->NewStringUTF(PRODUCT.c_str());
+            auto str4 = env->NewStringUTF(DEVICE.c_str());
+            auto str5 = env->NewStringUTF(MODEL.c_str());
+            auto str6 = env->NewStringUTF(FINGERPRINT.c_str());
+            env->CallStaticVoidMethod(entryPointClass, entryInit, str1, str2, str3, str4, str5, str6);
+            return;
+        }
+        api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
+    }
+    void preServerSpecialize(zygisk::ServerSpecializeArgs *args) override
+    {
+        api->setOption(zygisk::DLCLOSE_MODULE_LIBRARY);
     }
 
 private:
     Api *api;
     JNIEnv *env;
+    std::vector<uint8_t> dexVector;
+    bool shouldinjectdex = false;
+    std::string package_name;
+    int spoof_type;
 
-    void injectBuild(const char *model1, const char *product1, const char *finger1)
+    void injectValue(jclass build_class, const char *field, std::string value)
     {
         if (env == nullptr)
         {
-            LOGW("failed to inject android.os.Build for %s due to env is null", package_name);
+            LOGW("failed to inject %s for %s due to env is null", field, package_name.c_str());
             return;
         }
 
-        jclass build_class = env->FindClass("android/os/Build");
         if (build_class == nullptr)
         {
-            LOGW("failed to inject android.os.Build for %s due to build is null", package_name);
+            LOGW("failed to inject %s for %s due to build is null", field, package_name.c_str());
             return;
         }
-        else if (DEBUG)
-        {
-            LOGI("inject android.os.Build for %s with \nPRODUCT:%s \nMODEL:%s \nFINGERPRINT:%s", package_name, product1, model1, finger1);
-        }
+        LOGI("process=%s %s -> %s", package_name.c_str(), field, value.c_str());
 
-        jstring product = env->NewStringUTF(product1);
-        jstring model = env->NewStringUTF(model1);
-        jstring brand = env->NewStringUTF("google");
-        jstring manufacturer = env->NewStringUTF("Google");
-        jstring finger = env->NewStringUTF(finger1);
-        jstring tag = env->NewStringUTF("release-keys");
-        jstring type = env->NewStringUTF("user");
+        jstring inc = env->NewStringUTF(value.c_str());
 
-        jfieldID brand_id = env->GetStaticFieldID(build_class, "BRAND", "Ljava/lang/String;");
-        if (brand_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, brand_id, brand);
-        }
-        jfieldID manufacturer_id = env->GetStaticFieldID(build_class, "MANUFACTURER", "Ljava/lang/String;");
-        if (manufacturer_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, manufacturer_id, manufacturer);
-        }
-        jfieldID product_id = env->GetStaticFieldID(build_class, "PRODUCT", "Ljava/lang/String;");
-        if (product_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, product_id, product);
-        }
-        jfieldID device_id = env->GetStaticFieldID(build_class, "DEVICE", "Ljava/lang/String;");
-        if (device_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, device_id, product);
-        }
-        jfieldID model_id = env->GetStaticFieldID(build_class, "MODEL", "Ljava/lang/String;");
-        if (model_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, model_id, model);
-        }
-        jfieldID tag_id = env->GetStaticFieldID(build_class, "TAGS", "Ljava/lang/String;");
-        if (tag_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, tag_id, tag);
-        }
-        jfieldID type_id = env->GetStaticFieldID(build_class, "TYPE", "Ljava/lang/String;");
-        if (type_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, type_id, type);
-        }
-        jfieldID finger_id = env->GetStaticFieldID(build_class, "FINGERPRINT", "Ljava/lang/String;");
-        if (finger_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, finger_id, finger);
-        }
-
-        if (env->ExceptionCheck())
-        {
-            env->ExceptionClear();
-        }
-
-        env->DeleteLocalRef(brand);
-        env->DeleteLocalRef(manufacturer);
-        env->DeleteLocalRef(product);
-        env->DeleteLocalRef(model);
-        env->DeleteLocalRef(type);
-        env->DeleteLocalRef(tag);
-        env->DeleteLocalRef(finger);
-    }
-    void injectsoc(const char *soc)
-    {
-        if (env == nullptr)
-        {
-            LOGW("failed to inject android.os.Build for %s due to env is null", package_name);
-            return;
-        }
-
-        jclass build_class = env->FindClass("android/os/Build");
-        if (build_class == nullptr)
-        {
-            LOGW("failed to inject android.os.Build for %s due to build is null", package_name);
-            return;
-        }
-
-        jstring inc = env->NewStringUTF(soc);
-
-        jfieldID inc_id = env->GetStaticFieldID(build_class, "SOC_MODEL", "Ljava/lang/String;");
+        jfieldID inc_id = env->GetStaticFieldID(build_class, field, "Ljava/lang/String;");
         if (inc_id != nullptr)
         {
             env->SetStaticObjectField(build_class, inc_id, inc);
@@ -195,53 +241,24 @@ private:
         {
             env->ExceptionClear();
         }
+        env->DeleteLocalRef(inc);
     }
-    void injecthardware(const char *hd)
+    void injectValue(jclass build_class, const char *field, const int value)
     {
         if (env == nullptr)
         {
-            LOGW("failed to inject android.os.Build for %s due to env is null", package_name);
+            LOGW("failed to inject %s for %s due to env is null", field, package_name.c_str());
             return;
         }
-
-        jclass build_class = env->FindClass("android/os/Build");
         if (build_class == nullptr)
         {
-            LOGW("failed to inject android.os.Build for %s due to build is null", package_name);
+            LOGW("failed to inject %s for %s due to build is null", field, package_name.c_str());
             return;
         }
+        LOGI("process=%s %s -> %d", package_name.c_str(), field, value);
+        jint inc = (jint)value;
 
-        jstring inc = env->NewStringUTF(hd);
-
-        jfieldID inc_id = env->GetStaticFieldID(build_class, "HARDWARE", "Ljava/lang/String;");
-        if (inc_id != nullptr)
-        {
-            env->SetStaticObjectField(build_class, inc_id, inc);
-        }
-
-        if (env->ExceptionCheck())
-        {
-            env->ExceptionClear();
-        }
-    }
-    void injectversion(const int inc_c)
-    {
-        if (env == nullptr)
-        {
-            LOGW("failed to inject android.os.Build for %s due to env is null", package_name);
-            return;
-        }
-
-        jclass build_class = env->FindClass("android/os/Build$VERSION");
-        if (build_class == nullptr)
-        {
-            LOGW("failed to inject android.os.Build.VERSION for %s due to build is null", package_name);
-            return;
-        }
-
-        jint inc = (jint)inc_c;
-
-        jfieldID inc_id = env->GetStaticFieldID(build_class, "DEVICE_INITIAL_SDK_INT", "I");
+        jfieldID inc_id = env->GetStaticFieldID(build_class, field, "I");
         if (inc_id != nullptr)
         {
             env->SetStaticIntField(build_class, inc_id, inc);
@@ -251,12 +268,37 @@ private:
         {
             env->ExceptionClear();
         }
-    }    
-    int getSpoof(const char *process)
+    }
+    void injectValue(jclass build_class, const char *field, const long value)
     {
-        std::string package = process;
-        if (strcmp(process, "com.google.android.gms.unstable") == 0)
-            return 2;
+        if (env == nullptr)
+        {
+            LOGW("failed to inject android.os.Build for %s due to env is null", package_name.c_str());
+            return;
+        }
+        if (build_class == nullptr)
+        {
+            LOGW("failed to inject %s for %s due to build is null", field, package_name.c_str());
+            return;
+        }
+        LOGI("process=%s %s -> %ld", package_name.c_str(), field, value);
+        jlong inc = (jlong)value;
+
+        jfieldID inc_id = env->GetStaticFieldID(build_class, field, "J");
+        if (inc_id != nullptr)
+        {
+            env->SetStaticIntField(build_class, inc_id, inc);
+        }
+
+        if (env->ExceptionCheck())
+        {
+            env->ExceptionClear();
+        }
+    }
+    int getSpoof(std::string package)
+    {
+        if (package == "com.google.android.gms.unstable")
+            return 0;
 
         for (auto &s : keep)
         {
@@ -273,11 +315,6 @@ private:
             if (package.find(s) != std::string::npos)
                 return 7;
         }
-        for (auto &s : P5)
-        {
-            if (package.find(s) != std::string::npos)
-                return 3;
-        }
         for (auto &s : P7)
         {
             if (package.find(s) != std::string::npos)
@@ -293,8 +330,63 @@ private:
             if (package.find(s) != std::string::npos)
                 return 4;
         }
+        for (auto &s : S23U)
+        {
+            if (package.find(s) != std::string::npos)
+                return 8;
+        }
+        for (auto &s : P5)
+        {
+            if (package.find(s) != std::string::npos)
+                return 3;
+        }
         return 0;
+    }
+    bool RequiresInject(std::string package)
+    {
+        for (auto &s : InjectPackages)
+        {
+            if (package.find(s) != std::string::npos)
+                return true;
+        }
+        return false;
     }
 };
 
+// Taken from PlayIntregrity Fix
+static std::vector<uint8_t> readFile(const char *path)
+{
+
+    std::vector<uint8_t> vector;
+
+    FILE *file = fopen(path, "rb");
+
+    if (file)
+    {
+        fseek(file, 0, SEEK_END);
+        long size = ftell(file);
+        fseek(file, 0, SEEK_SET);
+
+        vector.resize(size);
+        fread(vector.data(), 1, size, file);
+        fclose(file);
+    }
+    else
+    {
+        LOGI("Couldn't read %s file!", path);
+    }
+
+    return vector;
+}
+
+static void companion(int fd)
+{
+    std::vector<uint8_t> dexVector;
+    dexVector = readFile(CLASSES_DEX);
+    long dexSize = dexVector.size();
+    write(fd, &dexSize, sizeof(long));
+    write(fd, dexVector.data(), dexSize);
+}
+
 REGISTER_ZYGISK_MODULE(pixelify)
+REGISTER_ZYGISK_COMPANION(companion)

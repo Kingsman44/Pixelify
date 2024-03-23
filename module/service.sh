@@ -32,63 +32,35 @@ pm_enable() {
 
 bootlooped() {
     echo -n >>$MODDIR/disable
-    log "- Bootloop detected"
-    #echo "$temp" >> /sdcard/Pixelify/logs.txt
-    #logcat -d >> /sdcard/Pixelify/boot_logs.txt
-    rip="$(logcat -d)"
-    rm -rf $MODDIR/boot_logs.txt
-    echo "$(getprop)" >>MODDIR/boot_logs.txt
-    echo "$rip" >>$MODDIR/boot_logs.txt
-    cp -Tf $MODDIR/boot_logs.txt /sdcard/Pixelify/boot_logs.txt
-    #echo "$rip" >> /sdcard/Pixelify/boot_logs.txt
+    logcat -d >> $MODDIR/boot_logs.txt
+    rm -rf /cache/.system_booting /data/unencrypted/.system_booting /metadata/.system_booting /persist/.system_booting /mnt/vendor/persist/.system_booting
     sleep .5
     reboot
-}
-
-check() {
-    TEXT1="$1"
-    TEXT2="$2"
-    result=false
-    for i in $TEXT1; do
-        for j in $TEXT2; do
-            [ "$i" == "$j" ] && result=true
-        done
-    done
-    $result
 }
 
 #HuskyDG@github's bootloop preventer
 
 # Wait for zygote starts
 sleep 5
+ZYGOTE_PID1=$(getprop init.svc_debug_pid.zygote)
 
-MAIN_ZYGOTE_NICENAME=zygote
-CPU_ABI=$(getprop ro.product.cpu.api)
-[ "$CPU_ABI" = "arm64-v8a" -o "$CPU_ABI" = "x86_64" ] && MAIN_ZYGOTE_NICENAME=zygote64
-
-ZYGOTE_PID1=$(pidof "$MAIN_ZYGOTE_NICENAME")
 sleep 15
-ZYGOTE_PID2=$(pidof "$MAIN_ZYGOTE_NICENAME")
+ZYGOTE_PID2=$(getprop init.svc_debug_pid.zygote)
+
 sleep 15
-ZYGOTE_PID3=$(pidof "$MAIN_ZYGOTE_NICENAME")
+ZYGOTE_PID3=$(getprop init.svc_debug_pid.zygote)
 
-PIDS=0
+# Check for BootLoop
+log "Checking..."
 
-if check "$ZYGOTE_PID1" "$ZYGOTE_PID2" && check "$ZYGOTE_PID2" "$ZYGOTE_PID3"; then
-    if [ -z "$ZYGOTE_PID1" ] && [ "$(getprop init.svc.bootanim)" != "stopped" ]; then
-        bootlooped
-    else
-        PIDS=1
-    fi
+if [ -z "$ZYGOTE_PID1" ]; then
+   bootlooped
 fi
 
-if [ $PIDS -eq 0 ]; then
-    sleep 15
-    ZYGOTE_PID4=$(pidof "$MAIN_ZYGOTE_NICENAME")
-    if check "$ZYGOTE_PID3" "$ZYGOTE_PID4"; then
-        # Set device config
-        set_device_config
-    elif [ "$(getprop init.svc.bootanim)" != "stopped" ]; then
-        bootlooped
-    fi
+if [ "$ZYGOTE_PID1" != "$ZYGOTE_PID2" -o "$ZYGOTE_PID2" != "$ZYGOTE_PID3" ]; then
+   sleep 15
+   ZYGOTE_PID4=$(getprop init.svc_debug_pid.zygote)
+   if [ "$ZYGOTE_PID3" != "$ZYGOTE_PID4" ]; then
+      bootlooped
+   fi
 fi

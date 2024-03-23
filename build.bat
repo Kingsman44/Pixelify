@@ -1,1 +1,1 @@
-gradlew :riru:assembleRelease :zygisk:assembleRelease
+gradlew :app:assembleRelease :riru:assembleRelease :zygisk:assembleRelease 

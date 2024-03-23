@@ -1,0 +1,1 @@
+-keep class org.pixelify.spoof.EntryPoint {public <methods>;}
