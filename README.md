@@ -19,6 +19,10 @@ A Magisk Module which enables Pixel UI and some exclusive features.<br>
 - **Zygisk or Riru (Recommended but not mandatory)**
 - **NOTE: Flash the module zip file in the Magisk Manager app only; flashing the module in TWRP or any other recovery won't work.**
 
+
+### Unsupported Roms
+- Realme Ui (Android 14), Oxygen Os (Android 14) will not work. It will bootloop rom after reboot. only way is to fix it by factory reset. Don't Flash Pixelify on it. Pixelify sub modules will work on them.
+
 ### Supported Roms
 - OneUI
 - AOSP Based Roms
